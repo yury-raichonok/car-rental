@@ -14,5 +14,5 @@ public interface FaqTranslationService {
 
   void update(UpdateFaqRequest updateFaqRequest, List<FaqTranslation> translations);
 
-  void setTranslations(Faq faq, String language);
+  void setTranslation(Faq faq, String language);
 }

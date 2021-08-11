@@ -12,6 +12,7 @@ import com.example.carrental.repository.CarBrandRepository;
 import com.example.carrental.service.CarBrandService;
 import com.example.carrental.service.FileStoreService;
 import com.example.carrental.service.exceptions.EntityAlreadyExistsException;
+import com.example.carrental.service.exceptions.NoContentException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -47,10 +48,41 @@ public class CarBrandServiceImpl implements CarBrandService {
   private String brandImagesBucket;
 
   @Override
-  public List<CarBrandResponse> findAll() {
+  public String create(CreateCarBrandRequest createCarBrandRequest)
+      throws EntityAlreadyExistsException {
+    if (carBrandRepository.findByName(createCarBrandRequest.getName()).isPresent()) {
+      log.error("Car brand {} already exists", createCarBrandRequest.getName());
+      throw new EntityAlreadyExistsException(String.format("Car brand %s already exists",
+          createCarBrandRequest.getName()));
+    }
+
+    carBrandRepository.save(CarBrand
+        .builder()
+        .name(createCarBrandRequest.getName())
+        .createdAt(LocalDateTime.now())
+        .build());
+    return "Success";
+  }
+
+  @Override
+  public List<CarBrandResponse> findAll() throws NoContentException {
     List<CarBrand> carBrands = carBrandRepository.findAll();
     List<CarBrandResponse> carBrandResponses = new ArrayList<>();
     carBrands.forEach(b -> carBrandResponses.add(carBrandMapper.carBrandToCarBrandResponse(b)));
+    if (carBrandResponses.isEmpty()) {
+      throw new NoContentException("No content");
+    }
+    return carBrandResponses;
+  }
+
+  @Override
+  public List<CarBrandResponse> findAllBrandsWithRentalOffers() throws NoContentException {
+    List<CarBrand> carBrands = carBrandRepository.findAllWithRentalOffers();
+    List<CarBrandResponse> carBrandResponses = new ArrayList<>();
+    carBrands.forEach(b -> carBrandResponses.add(carBrandMapper.carBrandToCarBrandResponse(b)));
+    if (carBrandResponses.isEmpty()) {
+      throw new NoContentException("No content");
+    }
     return carBrandResponses;
   }
 
@@ -61,14 +93,6 @@ public class CarBrandServiceImpl implements CarBrandService {
     carBrandsPage.forEach(b -> carBrandResponses.add(carBrandMapper.carBrandToCarBrandResponse(b)));
     return new PageImpl<>(carBrandResponses, carBrandsPage.getPageable(),
         carBrandsPage.getTotalElements());
-  }
-
-  @Override
-  public List<CarBrandResponse> findAllBrandsWithRentalOffers() {
-    List<CarBrand> carBrands = carBrandRepository.findAllWithRentalOffers();
-    List<CarBrandResponse> carBrandResponses = new ArrayList<>();
-    carBrands.forEach(b -> carBrandResponses.add(carBrandMapper.carBrandToCarBrandResponse(b)));
-    return carBrandResponses;
   }
 
   @Override
@@ -93,19 +117,21 @@ public class CarBrandServiceImpl implements CarBrandService {
   }
 
   @Override
-  public String create(CreateCarBrandRequest createCarBrandRequest)
+  @Transactional
+  public String update(Long id, CreateCarBrandRequest createCarBrandRequest)
       throws EntityAlreadyExistsException {
+
     if (carBrandRepository.findByName(createCarBrandRequest.getName()).isPresent()) {
       log.error("Car brand {} already exists", createCarBrandRequest.getName());
       throw new EntityAlreadyExistsException(String.format("Car brand %s already exists",
           createCarBrandRequest.getName()));
     }
 
-    carBrandRepository.save(CarBrand
-        .builder()
-        .name(createCarBrandRequest.getName())
-        .createdAt(LocalDateTime.now())
-        .build());
+    var carBrand = findById(id);
+
+    carBrand.setName(createCarBrandRequest.getName());
+    carBrand.setChangedAt(LocalDateTime.now());
+    carBrandRepository.save(carBrand);
     return "Success";
   }
 
@@ -150,25 +176,6 @@ public class CarBrandServiceImpl implements CarBrandService {
     carBrand.setChangedAt(LocalDateTime.now());
     carBrandRepository.save(carBrand);
 
-    return "Success";
-  }
-
-  @Override
-  @Transactional
-  public String update(Long id, CreateCarBrandRequest createCarBrandRequest)
-      throws EntityAlreadyExistsException {
-
-    if (carBrandRepository.findByName(createCarBrandRequest.getName()).isPresent()) {
-      log.error("Car brand {} already exists", createCarBrandRequest.getName());
-      throw new EntityAlreadyExistsException(String.format("Car brand %s already exists",
-          createCarBrandRequest.getName()));
-    }
-
-    var carBrand = findById(id);
-
-    carBrand.setName(createCarBrandRequest.getName());
-    carBrand.setChangedAt(LocalDateTime.now());
-    carBrandRepository.save(carBrand);
     return "Success";
   }
 }

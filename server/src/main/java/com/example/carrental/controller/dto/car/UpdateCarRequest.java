@@ -41,10 +41,10 @@ public class UpdateCarRequest {
   private String vin;
   @NotNull
   @Positive
-  private Long location;
+  private long location;
   @NotNull
   @Positive
-  private Long carClass;
+  private long carClass;
   @NotNull
   @PastOrPresent
   private LocalDate dateOfIssue;

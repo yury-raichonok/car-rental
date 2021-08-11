@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 @Service
 public interface UserRoleService {
 
-  UserRole getById(Long id);
+  UserRole findById(Long id);
 
-  UserRole getByRole(String role);
+  UserRole findByRole(String role);
 }

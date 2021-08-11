@@ -222,9 +222,9 @@ const ProfileNotificationsHistoryComponent = () => {
       width: 200,
       render: (_, record) => 
         <div>
-          {record.notificationType == "Info" && "Info"}
-          {record.notificationType == "Accept" && "Accept"}
-          {record.notificationType == "Deny" && "Deny"}
+          {record.notificationType == "Info" && `${t('info')}`}
+          {record.notificationType == "Accept" && `${t('accept')}`}
+          {record.notificationType == "Deny" && `${t('deny')}`}
         </div>
     },
     { 

@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PDFServiceImpl implements PDFService {
 
-  public ByteArrayResource exportOrderPDF(Order order, RentalDetails rentalDetails)
+  public ByteArrayResource exportOrderToPDF(Order order, RentalDetails rentalDetails)
       throws FontNotFoundException {
     var document = new Document();
     var baos = new ByteArrayOutputStream();

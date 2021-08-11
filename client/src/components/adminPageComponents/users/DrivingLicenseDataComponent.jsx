@@ -140,9 +140,15 @@ const Column = styled.div`
 const DrivingLicenseDataComponent = (props) => {
 
   const { t } = useTranslation();
+  const FileDownload = require('js-file-download');
 
   const [loading, setLoading] = useState(false);
   const [drivingLicense, setDrivingLicense] = useState();
+  const [documentsLoading, setDocumentsLoading] = useState(false);
+
+  const [directory, setDirectory] = useState({
+    directory: null,
+  })
 
   const fetchDrivingLicense = async () => {
     setLoading(true);
@@ -159,7 +165,27 @@ const DrivingLicenseDataComponent = (props) => {
 
     if (res) {
       setDrivingLicense(res.data);
+      directory.directory = res.data.documentsFileLink;
       setLoading(false);
+    }
+  }
+
+  const downloadDocuments = async () => {
+
+    setDocumentsLoading(true);
+
+    const resp = await DrivingLicenseDataService.downloadFiles(directory).catch(
+      err => {
+        notification.error({
+          message: `${t('error_when_downloading_documents')}`,
+        });
+        setDocumentsLoading(false);
+      }
+    )
+
+    if (resp) {
+      FileDownload(resp.data, `${directory.directory + ".zip"}`);
+      setDocumentsLoading(false);
     }
   }
 
@@ -189,7 +215,15 @@ const DrivingLicenseDataComponent = (props) => {
             <Marginer direction="vertical" margin={8} />
             <Row>
               <RowTitle>{t('documents_link')}:</RowTitle>
-              <RowData>{drivingLicense.documentsFileLink? (drivingLicense.documentsFileLink) : `${t('not_specified')}`}</RowData>
+              {drivingLicense.documentsFileLink ? (
+                <RowData>
+                  <Spin spinning={documentsLoading}>
+                    <button type="button" className="btn gray" onClick={downloadDocuments}>{t('download_documents')}</button>
+                  </Spin>
+                </RowData>
+              ) : (
+                <RowData>{t('not_specified')}</RowData>
+              )}
             </Row>
           </>
         )}

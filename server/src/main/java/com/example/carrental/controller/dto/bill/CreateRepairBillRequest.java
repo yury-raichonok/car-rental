@@ -27,5 +27,5 @@ public class CreateRepairBillRequest {
   private BigDecimal totalCost;
   @NotNull
   @Positive
-  private Long orderId;
+  private long orderId;
 }

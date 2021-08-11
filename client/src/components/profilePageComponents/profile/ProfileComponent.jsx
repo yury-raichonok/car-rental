@@ -1013,7 +1013,6 @@ const ProfileComponent = (props) => {
               </ButtonContainer>
             )}
             
-
             {editPassword ? (
               <Form ref={formRef} name="validate_other" validateMessages={passwordChangeValidateMessages} onFinish={onPasswordChangingFinish}>
                 <RowWithTopAlign>
@@ -1582,7 +1581,7 @@ const ProfileComponent = (props) => {
               }
               {!isDataEmpty && !isLoading && data.drivingLicenseStatus == "NOT_CONFIRMED" && 
                 <>
-                  {t('is_not_confirmed')}&ensp;
+                  {t('license_is_not_confirmed')}&ensp;
                   <Tooltip title={t('to_send_order_you_need_to_confirm_your_driving_license')} color="#000000c2">
                     <CloseCircleOutlined />
                   </Tooltip>

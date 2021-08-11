@@ -17,7 +17,7 @@ public class CreateCarModelRequest {
 
   @NotNull
   @Positive
-  private Long brandId;
+  private long brandId;
   @NotBlank
   @Size(
       min = 1,

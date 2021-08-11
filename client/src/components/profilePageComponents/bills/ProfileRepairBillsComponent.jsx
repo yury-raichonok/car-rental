@@ -5,6 +5,7 @@ import RepairBillDataService from '../../../services/bill/RepairBillDataService'
 import Reload from "@kiwicom/orbit-components/lib/icons/Reload";
 import { useTranslation } from 'react-i18next';
 import PaymentComponent from './PaymentComponent';
+import cookies from 'js-cookie';
 
 const FunctionsContainer = styled.div`
   width: 100%;
@@ -124,7 +125,28 @@ const TableButton = styled.button`
   }
 `;
 
+const languages = [
+  {
+    code: 'be',
+    name: 'BY',
+    country_code: 'by',
+  },
+  {
+    code: 'ru',
+    name: 'RU',
+    country_code: 'ru',
+  },
+  {
+    code: 'en',
+    name: 'EN',
+    country_code: 'gb',
+  }
+]
+
 const ProfileRepairBillsComponent = () => {
+
+  const currentLanguageCode = cookies.get('i18next') || 'en';
+  const currentLanguage = languages.find((l) => l.code === currentLanguageCode);
 
   const { t } = useTranslation();
 
@@ -171,7 +193,7 @@ const ProfileRepairBillsComponent = () => {
 
   useEffect(() => {
     fetchBills();
-  }, []);
+  }, [currentLanguage]);
 
   const payBill = async (id) => {
     setPaymentLoading(true);

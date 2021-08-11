@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,16 +30,18 @@ public class PaymentBillController {
   private final PaymentBillService paymentBillService;
 
   @PostMapping
-  public ResponseEntity<Page<PaymentBillResponse>> findAll(@Valid @RequestBody
-      PaymentBillSearchRequest paymentBillSearchRequest) {
-    var paymentBills = paymentBillService.findAll(paymentBillSearchRequest);
+  public ResponseEntity<Page<PaymentBillResponse>> findAll(
+      @Valid @RequestBody PaymentBillSearchRequest paymentBillSearchRequest,
+      @NotNull @CookieValue(name = "i18next") String language) {
+    var paymentBills = paymentBillService.findAll(paymentBillSearchRequest, language);
     return new ResponseEntity<>(paymentBills, HttpStatus.OK);
   }
 
   @GetMapping(path = "/user")
-  public ResponseEntity<?> findUserBillsHistory(Pageable pageable) {
+  public ResponseEntity<?> findAllUserBillsHistory(Pageable pageable,
+      @NotNull @CookieValue(name = "i18next") String language) {
     try {
-      var paymentBills = paymentBillService.findUserBillsHistory(pageable);
+      var paymentBills = paymentBillService.findAllUserBillsHistory(pageable, language);
       return new ResponseEntity<>(paymentBills, HttpStatus.OK);
     } catch (IllegalStateException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -47,9 +49,10 @@ public class PaymentBillController {
   }
 
   @GetMapping(path = "/user/new")
-  public ResponseEntity<?> findNewUserBills(Pageable pageable) {
+  public ResponseEntity<?> findAllNewUserBills(Pageable pageable,
+      @NotNull @CookieValue(name = "i18next") String language) {
     try {
-      var paymentBills = paymentBillService.findNewUserBills(pageable);
+      var paymentBills = paymentBillService.findAllNewUserBills(pageable, language);
       return new ResponseEntity<>(paymentBills, HttpStatus.OK);
     } catch (IllegalStateException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

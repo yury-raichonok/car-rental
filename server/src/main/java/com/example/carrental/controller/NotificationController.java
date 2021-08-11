@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,9 +34,9 @@ public class NotificationController {
   }
 
   @GetMapping(path = "/history")
-  public ResponseEntity<?> findNotificationsHistory(Pageable pageable) {
+  public ResponseEntity<?> findAllNotificationsHistory(Pageable pageable) {
     try {
-      var response = notificationService.findNotificationsHistory(pageable);
+      var response = notificationService.findAllNotificationsHistory(pageable);
       return new ResponseEntity<>(response, HttpStatus.OK);
     } catch (IllegalStateException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

@@ -4,6 +4,7 @@ import com.example.carrental.controller.dto.car.CarBrandResponse;
 import com.example.carrental.controller.dto.car.CreateCarBrandRequest;
 import com.example.carrental.service.CarBrandService;
 import com.example.carrental.service.exceptions.EntityAlreadyExistsException;
+import com.example.carrental.service.exceptions.NoContentException;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -15,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,21 +34,24 @@ public class CarBrandsController {
 
   private final CarBrandService carBrandService;
 
-  @GetMapping
-  public ResponseEntity<List<CarBrandResponse>> findAllBrandsWithRentalOffers() {
-    var brands = carBrandService.findAllBrandsWithRentalOffers();
-    if (brands.isEmpty()) {
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-    return new ResponseEntity<>(brands, HttpStatus.OK);
+  @PostMapping
+  public ResponseEntity<String> create(
+      @Valid @RequestBody CreateCarBrandRequest createCarBrandRequest)
+      throws EntityAlreadyExistsException {
+    var response = carBrandService.create(createCarBrandRequest);
+    return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
 
   @GetMapping(path = "/all")
-  public ResponseEntity<List<CarBrandResponse>> findAll() {
+  public ResponseEntity<List<CarBrandResponse>> findAll() throws NoContentException {
     var brands = carBrandService.findAll();
-    if (brands.isEmpty()) {
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
+    return new ResponseEntity<>(brands, HttpStatus.OK);
+  }
+
+  @GetMapping
+  public ResponseEntity<List<CarBrandResponse>> findAllBrandsWithRentalOffers()
+      throws NoContentException {
+    var brands = carBrandService.findAllBrandsWithRentalOffers();
     return new ResponseEntity<>(brands, HttpStatus.OK);
   }
 
@@ -58,17 +61,12 @@ public class CarBrandsController {
     return new ResponseEntity<>(brands, HttpStatus.OK);
   }
 
-  @PostMapping
-  public ResponseEntity<String> create(
-      @Valid @RequestBody CreateCarBrandRequest createCarBrandRequest) {
-    try {
-      var response = carBrandService.create(createCarBrandRequest);
-      return new ResponseEntity<>(response, HttpStatus.CREATED);
-    } catch (EntityAlreadyExistsException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+  @PutMapping(path = "/{id}")
+  public ResponseEntity<String> update(@NotNull @Positive @PathVariable Long id,
+      @Valid @RequestBody CreateCarBrandRequest createCarBrandRequest)
+      throws EntityAlreadyExistsException {
+    var response = carBrandService.update(id, createCarBrandRequest);
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
   @PostMapping(
@@ -78,24 +76,7 @@ public class CarBrandsController {
   )
   public ResponseEntity<String> uploadBrandImage(@NotNull @Positive @PathVariable Long id,
       @NotNull @RequestParam MultipartFile brandFile) {
-    try {
-      var response = carBrandService.uploadBrandImage(id, brandFile);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @PutMapping(path = "/{id}")
-  public ResponseEntity<String> update(@NotNull @Positive @PathVariable Long id,
-      @Valid @RequestBody CreateCarBrandRequest createCarBrandRequest) {
-    try {
-      var response = carBrandService.update(id, createCarBrandRequest);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (EntityAlreadyExistsException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+    var response = carBrandService.uploadBrandImage(id, brandFile);
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 }

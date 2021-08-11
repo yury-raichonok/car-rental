@@ -5,6 +5,7 @@ import com.example.carrental.controller.dto.car.CarClassNameWithTranslationsResp
 import com.example.carrental.controller.dto.car.CreateCarClassRequest;
 import com.example.carrental.entity.car.CarClass;
 import com.example.carrental.service.exceptions.EntityAlreadyExistsException;
+import com.example.carrental.service.exceptions.NoContentException;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,15 +14,13 @@ import org.springframework.stereotype.Service;
 @Service
 public interface CarClassService {
 
-  List<CarClassNameResponse> findAll(String language);
+  String create(CreateCarClassRequest createCarClassRequest) throws EntityAlreadyExistsException;
+
+  List<CarClassNameResponse> findAll(String language) throws NoContentException;
 
   Page<CarClassNameWithTranslationsResponse> findAllPaged(Pageable pageable);
 
   CarClass findById(Long id);
 
-  String create(CreateCarClassRequest createCarClassRequest) throws EntityAlreadyExistsException;
-
   String update(Long id, CreateCarClassRequest createCarClassRequest);
-
-  CarClass findNyName(String carClass);
 }

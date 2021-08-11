@@ -135,9 +135,15 @@ const RowData = styled.div`
 const PassportDataComponent = (props) => {
 
   const { t } = useTranslation();
+  const FileDownload = require('js-file-download');
 
   const [loading, setLoading] = useState(false);
   const [passport, setPassport] = useState();
+  const [documentsLoading, setDocumentsLoading] = useState(false);
+
+  const [directory, setDirectory] = useState({
+    directory: null,
+  })
 
   const fetchPassportData = async () => {
     setLoading(true);
@@ -154,7 +160,27 @@ const PassportDataComponent = (props) => {
 
     if (res) {
       setPassport(res.data);
+      directory.directory = res.data.documentsFileLink;
       setLoading(false);
+    }
+  }
+
+  const downloadDocuments = async () => {
+
+    setDocumentsLoading(true);
+
+    const resp = await PassportDataService.downloadFiles(directory).catch(
+      err => {
+        notification.error({
+          message: `${t('error_when_downloading_documents')}`,
+        });
+        setDocumentsLoading(false);
+      }
+    )
+
+    if (resp) {
+      FileDownload(resp.data, `${passport.firstName + passport.lastName + ".zip"}`);
+      setDocumentsLoading(false);
     }
   }
 
@@ -214,7 +240,15 @@ const PassportDataComponent = (props) => {
             <Marginer direction="vertical" margin={8} />
             <Row>
               <RowTitle>{t('documents_link')}:</RowTitle>
-              <RowData>{passport.documentsFileLink? (passport.documentsFileLink) : (`${t('not_specified')}`)}</RowData>
+              {passport.documentsFileLink ? (
+                <RowData>
+                  <Spin spinning={documentsLoading}>
+                    <button type="button" className="btn gray" onClick={downloadDocuments}>{t('download_documents')}</button>
+                  </Spin>
+                </RowData>
+              ) : (
+                <RowData>{t('not_specified')}</RowData>
+              )}
             </Row>
           </>
         )}

@@ -37,7 +37,7 @@ public class MessageServiceImpl implements MessageService {
   }
 
   @Override
-  public Page<MessageResponse> findNewMessages(Pageable pageable) {
+  public Page<MessageResponse> findAllNewMessages(Pageable pageable) {
     var messagesPage = messageRepository.findAllByReadedFalse(pageable);
     List<MessageResponse> messageResponses = new ArrayList<>();
     messagesPage.forEach(m -> messageResponses.add(messageMapper.messageToMessageResponse(m)));

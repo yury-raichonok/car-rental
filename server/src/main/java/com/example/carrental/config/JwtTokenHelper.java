@@ -26,7 +26,7 @@ public class JwtTokenHelper {
   private Claims getAllClaimsFromToken(String token) {
     Claims claims;
     try {
-      claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+       claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
     } catch (Exception e) {
       claims = null;
     }
@@ -35,8 +35,8 @@ public class JwtTokenHelper {
 
   public String getEmailFromToken(String token) {
     String email;
+    var claims = getAllClaimsFromToken(token);
     try {
-      final Claims claims = this.getAllClaimsFromToken(token);
       email = claims.getSubject();
     } catch (Exception e) {
       email = null;
@@ -63,30 +63,19 @@ public class JwtTokenHelper {
   }
 
   public boolean isTokenExpired(String token) {
-    Date expireDate=getExpirationDate(token);
+    Date expireDate = getExpirationDate(token);
     return expireDate.before(new Date());
   }
 
   private Date getExpirationDate(String token) {
     Date expireDate;
     try {
-      final Claims claims = this.getAllClaimsFromToken(token);
+      final Claims claims = getAllClaimsFromToken(token);
       expireDate = claims.getExpiration();
     } catch (Exception e) {
       expireDate = null;
     }
     return expireDate;
-  }
-
-  public Date getIssuedAtDateFromToken(String token) {
-    Date issueAt;
-    try {
-      final Claims claims = this.getAllClaimsFromToken(token);
-      issueAt = claims.getIssuedAt();
-    } catch (Exception e) {
-      issueAt = null;
-    }
-    return issueAt;
   }
 
   public String getToken( HttpServletRequest request ) {

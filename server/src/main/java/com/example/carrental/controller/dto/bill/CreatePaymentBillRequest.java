@@ -15,5 +15,5 @@ public class CreatePaymentBillRequest {
 
   @NotNull
   @Positive
-  private Long orderId;
+  private long orderId;
 }

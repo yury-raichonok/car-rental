@@ -6,6 +6,7 @@ import Reload from "@kiwicom/orbit-components/lib/icons/Reload";
 import Marginer from '../../marginer/Marginer';
 import CancelOrderComponent from './CancelOderComponent';
 import { useTranslation } from 'react-i18next';
+import cookies from 'js-cookie';
 
 const FunctionsContainer = styled.div`
   width: 100%;
@@ -126,7 +127,28 @@ const ButtonsContainer = styled.div`
   }
 `;
 
+const languages = [
+  {
+    code: 'be',
+    name: 'BY',
+    country_code: 'by',
+  },
+  {
+    code: 'ru',
+    name: 'RU',
+    country_code: 'ru',
+  },
+  {
+    code: 'en',
+    name: 'EN',
+    country_code: 'gb',
+  }
+]
+
 const AdminFutureOrdersComponent = () => {
+
+  const currentLanguageCode = cookies.get('i18next') || 'en';
+  const currentLanguage = languages.find((l) => l.code === currentLanguageCode);
 
   const { t } = useTranslation();
 
@@ -173,7 +195,7 @@ const AdminFutureOrdersComponent = () => {
 
   useEffect(() => {
     fetchFutureOrders();
-  }, []);
+  }, [currentLanguage]);
   
   const handleStartOrder = async (data) => {
     setLoading(true);

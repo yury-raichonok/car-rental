@@ -4,7 +4,6 @@ import com.example.carrental.controller.dto.faq.CreateFaqRequest;
 import com.example.carrental.controller.dto.faq.FaqResponse;
 import com.example.carrental.controller.dto.faq.FaqWithTranslationsResponse;
 import com.example.carrental.controller.dto.faq.UpdateFaqRequest;
-import com.example.carrental.entity.faq.Faq;
 import com.example.carrental.service.FaqService;
 import com.example.carrental.service.exceptions.EntityAlreadyExistsException;
 import java.util.List;

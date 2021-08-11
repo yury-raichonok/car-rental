@@ -37,7 +37,7 @@ public class FaqServiceImpl implements FaqService {
     List<FaqResponse> faqResponses = new ArrayList<>();
     faqs.forEach(faq -> {
       if (!"en".equals(language)) {
-        faqTranslationService.setTranslations(faq, language);
+        faqTranslationService.setTranslation(faq, language);
       }
       faqResponses.add(faqMapper.faqToFaqResponse(faq));
     });

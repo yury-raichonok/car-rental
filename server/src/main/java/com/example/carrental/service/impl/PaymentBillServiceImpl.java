@@ -12,6 +12,7 @@ import com.example.carrental.entity.user.User;
 import com.example.carrental.mapper.PaymentBillMapper;
 import com.example.carrental.repository.PaymentBillCriteriaRepository;
 import com.example.carrental.repository.PaymentBillRepository;
+import com.example.carrental.service.LocationTranslationService;
 import com.example.carrental.service.OrderService;
 import com.example.carrental.service.PaymentBillService;
 import com.example.carrental.service.RentalDetailsService;
@@ -37,6 +38,7 @@ public class PaymentBillServiceImpl implements PaymentBillService {
   private final PaymentBillRepository paymentBillRepository;
   private final PaymentBillCriteriaRepository paymentBillCriteriaRepository;
   private final PaymentBillMapper paymentBillMapper;
+  private final LocationTranslationService locationTranslationService;
 
   private OrderService orderService;
   private RentalDetailsService rentalDetailsService;
@@ -52,16 +54,21 @@ public class PaymentBillServiceImpl implements PaymentBillService {
   }
 
   @Override
-  public Page<PaymentBillResponse> findAll(PaymentBillSearchRequest paymentBillSearchRequest) {
+  public Page<PaymentBillResponse> findAll(PaymentBillSearchRequest paymentBillSearchRequest,
+      String language) {
     var billsPage = paymentBillCriteriaRepository.findAll(paymentBillSearchRequest);
     List<PaymentBillResponse> paymentBills = new ArrayList<>();
-    billsPage.forEach(
-        bill -> paymentBills.add(paymentBillMapper.paymentBillToPaymentBillResponse(bill)));
+    billsPage.forEach(bill -> {
+      if (!"en".equals(language)) {
+        locationTranslationService.setTranslation(bill.getOrder().getLocation(), language);
+      }
+      paymentBills.add(paymentBillMapper.paymentBillToPaymentBillResponse(bill));
+    });
     return new PageImpl<>(paymentBills, billsPage.getPageable(), billsPage.getTotalElements());
   }
 
   @Override
-  public Page<UserPaymentBillsResponse> findUserBillsHistory(Pageable pageable) {
+  public Page<UserPaymentBillsResponse> findAllUserBillsHistory(Pageable pageable, String language) {
     var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     if (Optional.ofNullable(user).isEmpty()) {
       log.error("User not authenticated!");
@@ -71,13 +78,17 @@ public class PaymentBillServiceImpl implements PaymentBillService {
     var paymentBills = paymentBillRepository
         .findAllByOrder_UserEmailAndPaymentDateNotNull(user.getEmail(), pageable);
     List<UserPaymentBillsResponse> responses = new ArrayList<>();
-    paymentBills.forEach(
-        bill -> responses.add(paymentBillMapper.paymentBillToUserPaymentBillsResponse(bill)));
+    paymentBills.forEach(bill -> {
+      if (!"en".equals(language)) {
+        locationTranslationService.setTranslation(bill.getOrder().getLocation(), language);
+      }
+      responses.add(paymentBillMapper.paymentBillToUserPaymentBillsResponse(bill));
+    });
     return new PageImpl<>(responses, paymentBills.getPageable(), paymentBills.getTotalElements());
   }
 
   @Override
-  public Page<UserNewPaymentBillsResponse> findNewUserBills(Pageable pageable) {
+  public Page<UserNewPaymentBillsResponse> findAllNewUserBills(Pageable pageable, String language) {
     var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     if (Optional.ofNullable(user).isEmpty()) {
       log.error("User not authenticated!");
@@ -88,8 +99,12 @@ public class PaymentBillServiceImpl implements PaymentBillService {
         .findAllByExpirationTimeIsAfterAndOrder_UserEmailAndOrder_PaymentStatus(LocalDateTime.now(),
             user.getEmail(), OrderPaymentStatus.NOT_PAID, pageable);
     List<UserNewPaymentBillsResponse> responses = new ArrayList<>();
-    paymentBills.forEach(
-        bill -> responses.add(paymentBillMapper.paymentBillToUserNewPaymentBillsResponse(bill)));
+    paymentBills.forEach(bill -> {
+      if (!"en".equals(language)) {
+        locationTranslationService.setTranslation(bill.getOrder().getLocation(), language);
+      }
+      responses.add(paymentBillMapper.paymentBillToUserNewPaymentBillsResponse(bill));
+    });
     return new PageImpl<>(responses, paymentBills.getPageable(), paymentBills.getTotalElements());
   }
 

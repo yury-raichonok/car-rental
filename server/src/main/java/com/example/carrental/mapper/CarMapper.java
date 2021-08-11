@@ -2,7 +2,7 @@ package com.example.carrental.mapper;
 
 import com.example.carrental.controller.dto.car.CarAdminSearchResponse;
 import com.example.carrental.controller.dto.car.CarByIdResponse;
-import com.example.carrental.controller.dto.car.CarChipOfferResponse;
+import com.example.carrental.controller.dto.car.CarProfitableOfferResponse;
 import com.example.carrental.controller.dto.car.CarSearchResponse;
 import com.example.carrental.entity.car.Car;
 import java.math.BigDecimal;
@@ -62,7 +62,7 @@ public interface CarMapper {
   @Mapping(target = "airConditioner", source = "car.hasConditioner")
   @Mapping(target = "carImageLink", source = "car.carImageLink")
   @Mapping(target = "costPerHour", source = "car.costPerHour")
-  CarChipOfferResponse carToCarChipOfferResponse(Car car);
+  CarProfitableOfferResponse carToCarChipOfferResponse(Car car);
 
   @Mapping(target = "id", source = "car.id")
   @Mapping(target = "vin", source = "car.vin")

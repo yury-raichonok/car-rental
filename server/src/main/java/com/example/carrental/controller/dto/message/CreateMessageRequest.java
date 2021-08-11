@@ -20,6 +20,7 @@ public class CreateMessageRequest {
       max = 255
   )
   private String name;
+  @NotNull
   @Email
   @Size(
       min = 1,
@@ -27,7 +28,6 @@ public class CreateMessageRequest {
   )
   private String email;
   @NotNull
-//  @Pattern(regexp = "^+\\d{14}$")
   private String phone;
   @NotNull
   @Size(

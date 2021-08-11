@@ -60,7 +60,7 @@ public class FaqTranslationServiceImpl implements FaqTranslationService {
   }
 
   @Override
-  public void setTranslations(Faq faq, String language) {
+  public void setTranslation(Faq faq, String language) {
     faq.getFaqTranslations()
         .stream()
         .filter(translation -> language.equals(translation.getLanguage()))

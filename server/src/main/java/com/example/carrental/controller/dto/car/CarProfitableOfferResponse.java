@@ -1,6 +1,5 @@
 package com.example.carrental.controller.dto.car;
 
-import java.math.BigDecimal;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -15,11 +14,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CarSearchResponse {
+public class CarProfitableOfferResponse {
 
   @NotNull
   @Positive
-  private long id;
+  private Long id;
   @NotNull
   @Size(
       min = 1,
@@ -39,49 +38,18 @@ public class CarSearchResponse {
   )
   private String carClass;
   @NotNull
-  @Size(
-      min = 4,
-      max = 4
-  )
-  private String yearOfIssue;
-  @NotNull
-  @Size(
-      min = 1,
-      max = 10
-  )
-  private String bodyType;
-  @NotNull
-  private boolean isAutomaticTransmission;
-  @NotNull
-  @Size(
-      min = 1,
-      max = 20
-  )
-  private String color;
-  @NotNull
-  @Size(
-      min = 1,
-      max = 15
-  )
-  private String engineType;
+  @Positive
+  private int amountOfSeats;
   @NotNull
   @Positive
   @Max(10)
-  private int passengersAmt;
+  private int amountOfBaggage;
   @NotNull
-  @Positive
-  @Max(10)
-  private int baggageAmt;
+  private boolean autoTransmission;
   @NotNull
-  private boolean hasConditioner;
+  private boolean airConditioner;
+  private String carImageLink;
   @NotNull
   @Min(0)
-  private BigDecimal costPerHour;
-  @NotNull
-  @Size(
-      min = 1,
-      max = 255
-  )
-  private String locationName;
-  private String carImageLink;
+  private String costPerHour;
 }

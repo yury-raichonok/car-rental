@@ -1,5 +1,6 @@
 package com.example.carrental.controller.dto.user;
 
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,5 +17,6 @@ public class UserPhoneConfirmationRequest {
       regexp = "^[0-9]{4}$"
   )
   private String token;
+  @NotNull
   private String phoneNumber;
 }

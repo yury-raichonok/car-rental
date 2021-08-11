@@ -5,6 +5,7 @@ import com.example.carrental.controller.dto.car.CarClassNameWithTranslationsResp
 import com.example.carrental.controller.dto.car.CreateCarClassRequest;
 import com.example.carrental.service.CarClassService;
 import com.example.carrental.service.exceptions.EntityAlreadyExistsException;
+import com.example.carrental.service.exceptions.NoContentException;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -32,43 +33,32 @@ public class CarClassController {
 
   private final CarClassService carClassService;
 
+  @PostMapping
+  public ResponseEntity<String> create(
+      @Valid @RequestBody CreateCarClassRequest createCarClassRequest)
+      throws EntityAlreadyExistsException {
+    var response = carClassService.create(createCarClassRequest);
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
   @GetMapping
   public ResponseEntity<List<CarClassNameResponse>> findAll(
-      @NotNull @CookieValue(name = "i18next") String language) {
+      @NotNull @CookieValue(name = "i18next") String language) throws NoContentException {
     var carClasses = carClassService.findAll(language);
-    if (carClasses.isEmpty()) {
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
     return new ResponseEntity<>(carClasses, HttpStatus.OK);
   }
 
   @GetMapping(path = "/paged")
-  public ResponseEntity<Page<CarClassNameWithTranslationsResponse>> findAllPaged(Pageable pageable) {
+  public ResponseEntity<Page<CarClassNameWithTranslationsResponse>> findAllPaged(
+      Pageable pageable) {
     var carClasses = carClassService.findAllPaged(pageable);
     return new ResponseEntity<>(carClasses, HttpStatus.OK);
-  }
-
-  @PostMapping
-  public ResponseEntity<String> create(
-      @Valid @RequestBody CreateCarClassRequest createCarClassRequest) {
-    try {
-      var response = carClassService.create(createCarClassRequest);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (EntityAlreadyExistsException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
   }
 
   @PutMapping(path = "/{id}")
   public ResponseEntity<String> update(@NotNull @Positive @PathVariable Long id,
       @Valid @RequestBody CreateCarClassRequest createCarClassRequest) {
-    try {
-      var response = carClassService.update(id, createCarClassRequest);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+    var response = carClassService.update(id, createCarClassRequest);
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 }

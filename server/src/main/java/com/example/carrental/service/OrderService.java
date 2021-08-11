@@ -25,15 +25,15 @@ import org.springframework.stereotype.Service;
 @Service
 public interface OrderService {
 
-  Page<OrderResponse> findAll(OrderSearchRequest orderSearchRequest);
+  Page<OrderResponse> findAll(OrderSearchRequest orderSearchRequest, String language);
 
-  Page<OrderNewResponse> findAllNew(Pageable pageable);
+  Page<OrderNewResponse> findAllNew(Pageable pageable, String language);
 
   int findNewOrdersAmount();
 
-  Page<OrderInformationResponse> findAllCurrent(Pageable pageable);
+  Page<OrderInformationResponse> findAllCurrent(Pageable pageable, String language);
 
-  Page<OrderInformationResponse> findAllFuture(Pageable pageable);
+  Page<OrderInformationResponse> findAllFuture(Pageable pageable, String language);
 
   Order findById(Long id);
 
@@ -63,9 +63,9 @@ public interface OrderService {
 
   int findNewUserOrdersAmount(String email);
 
-  Page<UserOrderResponse> findNewUserOrders(Pageable pageable);
+  Page<UserOrderResponse> findAllNewUserOrders(Pageable pageable, String language);
 
-  Page<UserOrderResponse> findUserOrdersHistory(Pageable pageable);
+  Page<UserOrderResponse> findAllUserOrdersHistory(Pageable pageable, String language);
 
   ByteArrayResource exportOrderToPDF(Long id) throws FontNotFoundException;
 }

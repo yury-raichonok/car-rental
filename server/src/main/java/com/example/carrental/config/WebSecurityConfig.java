@@ -11,17 +11,16 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+  public static final String ADMIN = "ADMIN";
 
   private final UserSecurityService userSecurityService;
   private final AuthenticationEntryPoint authenticationEntryPoint;
@@ -52,21 +51,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .authenticationEntryPoint(authenticationEntryPoint)
         .and()
         .authorizeRequests()
-        .antMatchers("/paymentbills", "/repairbills").hasAuthority("ADMIN")
+        .antMatchers("/paymentbills", "/repairbills").hasAuthority(ADMIN)
         .antMatchers(HttpMethod.POST, "/brands/**", "/carclasses", "/cars", "/models/**", "/faqs",
-            "/locations", "/orders/search").hasAuthority("ADMIN")
+            "/locations", "/orders/search").hasAuthority(ADMIN)
         .antMatchers(HttpMethod.PUT, "/users/status/**", "/brands/**", "/carclasses/**", "/cars/**",
-            "/models/**", "/passports/download", "/drivinglicenses/download",
-            "/faqs/**", "/locations/**", "/messages/**").hasAuthority("ADMIN")
+            "/models/**", "/passports/download", "/drivinglicenses/download", "/faqs/**",
+            "/locations/**", "/messages/**").hasAuthority(ADMIN)
         .antMatchers(HttpMethod.GET, "/details", "/messages/**", "/users", "/requests/**",
-            "/requests/new/**", "/details/admin").hasAuthority("ADMIN")
+            "/requests/new/**", "/details/admin").hasAuthority(ADMIN)
         .antMatchers("/brands/all", "/cars/profitable", "/cars/search/**", "users/email/confirm/**")
         .permitAll()
         .antMatchers(HttpMethod.GET, "/brands", "/carclasses", "/cars", "/models", "/models/list",
             "/models/brand/**", "/faqs", "/locations/**", "/details/contact").permitAll()
         .antMatchers(HttpMethod.POST, "/cars/search", "/messages", "/users/auth/registration",
             "/users/auth/login", "/users/auth/forgot/**").permitAll()
-
         .antMatchers(HttpMethod.POST, "/orders/**", "/requests").authenticated()
         .antMatchers(HttpMethod.PUT, "/users/**").authenticated()
         .antMatchers(HttpMethod.GET, "/users/profile", "/users/auth/userinfo", "/notifications/**",

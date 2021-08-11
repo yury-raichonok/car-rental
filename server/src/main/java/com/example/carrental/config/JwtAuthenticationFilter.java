@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -26,15 +25,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   protected void doFilterInternal(@NotNull HttpServletRequest request,
       @NotNull HttpServletResponse response, @NotNull FilterChain filterChain)
       throws ServletException, IOException {
-    String authToken = jwtTokenHelper.getToken(request);
+    var authToken = jwtTokenHelper.getToken(request);
     if (null != authToken) {
-      String email = jwtTokenHelper.getEmailFromToken(authToken);
+      var email = jwtTokenHelper.getEmailFromToken(authToken);
 
       if (null != email) {
-        UserDetails userDetails = userSecurityService.loadUserByUsername(email);
+        var userDetails = userSecurityService.loadUserByUsername(email);
 
         if (jwtTokenHelper.validateToken(authToken, userDetails)) {
-          UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+          var authentication = new UsernamePasswordAuthenticationToken(
               userDetails, null, userDetails.getAuthorities());
           authentication.setDetails(new WebAuthenticationDetails(request));
           SecurityContextHolder.getContext().setAuthentication(authentication);

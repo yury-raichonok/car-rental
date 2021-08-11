@@ -13,7 +13,8 @@ class RepairBillDataService {
         "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
         "Access-Control-Allow-Credentials": "true",
         'Authorization':'Bearer '+ localStorage.getItem('token')
-      }
+      },
+      withCredentials: true,
     })
   }
 
@@ -28,7 +29,8 @@ class RepairBillDataService {
         "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
         "Access-Control-Allow-Credentials": "true",
         'Authorization':'Bearer '+ localStorage.getItem('token')
-      }
+      },
+      withCredentials: true,
     })
   }
 
@@ -43,7 +45,8 @@ class RepairBillDataService {
         "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
         "Access-Control-Allow-Credentials": "true",
         'Authorization':'Bearer '+ localStorage.getItem('token')
-      }
+      },
+      withCredentials: true,
     })
   }
 

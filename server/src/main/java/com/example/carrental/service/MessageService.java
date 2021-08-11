@@ -12,7 +12,7 @@ public interface MessageService {
 
   Page<MessageResponse> findAll(Pageable pageable);
 
-  Page<MessageResponse> findNewMessages(Pageable pageable);
+  Page<MessageResponse> findAllNewMessages(Pageable pageable);
 
   Message findById(Long id);
 

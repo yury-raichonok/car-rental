@@ -10,6 +10,7 @@ import com.example.carrental.entity.user.User;
 import com.example.carrental.mapper.RepairBillMapper;
 import com.example.carrental.repository.RepairBillCriteriaRepository;
 import com.example.carrental.repository.RepairBillRepository;
+import com.example.carrental.service.LocationTranslationService;
 import com.example.carrental.service.OrderService;
 import com.example.carrental.service.RepairBillService;
 import java.time.LocalDateTime;
@@ -34,6 +35,7 @@ public class RepairBillServiceImpl implements RepairBillService {
   private final RepairBillRepository repairBillRepository;
   private final RepairBillCriteriaRepository repairBillCriteriaRepository;
   private final RepairBillMapper repairBillMapper;
+  private final LocationTranslationService locationTranslationService;
 
   private OrderService orderService;
 
@@ -43,11 +45,16 @@ public class RepairBillServiceImpl implements RepairBillService {
   }
 
   @Override
-  public Page<RepairBillResponse> findAll(RepairBillSearchRequest repairBillSearchRequest) {
+  public Page<RepairBillResponse> findAll(RepairBillSearchRequest repairBillSearchRequest,
+      String language) {
     var billsPage = repairBillCriteriaRepository.findAll(repairBillSearchRequest);
     List<RepairBillResponse> repairBills = new ArrayList<>();
-    billsPage
-        .forEach(bill -> repairBills.add(repairBillMapper.repairBillToRepairBillResponse(bill)));
+    billsPage.forEach(bill -> {
+      if (!"en".equals(language)) {
+        locationTranslationService.setTranslation(bill.getOrder().getLocation(), language);
+      }
+      repairBills.add(repairBillMapper.repairBillToRepairBillResponse(bill));
+    });
     return new PageImpl<>(repairBills, billsPage.getPageable(), billsPage.getTotalElements());
   }
 
@@ -66,7 +73,7 @@ public class RepairBillServiceImpl implements RepairBillService {
   }
 
   @Override
-  public Page<RepairBillHistoryResponse> findUserBillsHistory(Pageable pageable) {
+  public Page<RepairBillHistoryResponse> findAllUserBillsHistory(Pageable pageable, String language) {
     var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     if (Optional.ofNullable(user).isEmpty()) {
       log.error("User not authenticated!");
@@ -76,14 +83,18 @@ public class RepairBillServiceImpl implements RepairBillService {
     var repairBills = repairBillRepository
         .findAllByOrder_UserEmailAndPaymentDateNotNull(user.getEmail(), pageable);
     List<RepairBillHistoryResponse> responses = new ArrayList<>();
-    repairBills.forEach(
-        bill -> responses.add(repairBillMapper.repairBillToRepairBillHistoryResponse(bill)));
+    repairBills.forEach(bill -> {
+      if (!"en".equals(language)) {
+        locationTranslationService.setTranslation(bill.getOrder().getLocation(), language);
+      }
+      responses.add(repairBillMapper.repairBillToRepairBillHistoryResponse(bill));
+    });
     return new PageImpl<>(responses, repairBills.getPageable(),
         repairBills.getTotalElements());
   }
 
   @Override
-  public Page<RepairBillNewResponse> findNewUserBills(Pageable pageable) {
+  public Page<RepairBillNewResponse> findAllNewUserBills(Pageable pageable, String language) {
     var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     if (Optional.ofNullable(user).isEmpty()) {
       log.error("User not authenticated!");
@@ -92,8 +103,12 @@ public class RepairBillServiceImpl implements RepairBillService {
     var repairBills = repairBillRepository
         .findAllByOrder_UserEmailAndPaymentDateNull(user.getEmail(), pageable);
     List<RepairBillNewResponse> responses = new ArrayList<>();
-    repairBills
-        .forEach(bill -> responses.add(repairBillMapper.repairBillToRepairBillNewResponse(bill)));
+    repairBills.forEach(bill -> {
+      if (!"en".equals(language)) {
+        locationTranslationService.setTranslation(bill.getOrder().getLocation(), language);
+      }
+      responses.add(repairBillMapper.repairBillToRepairBillNewResponse(bill));
+    });
     return new PageImpl<>(responses, repairBills.getPageable(),
         repairBills.getTotalElements());
   }

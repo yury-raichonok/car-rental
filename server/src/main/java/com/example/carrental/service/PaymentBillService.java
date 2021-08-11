@@ -13,7 +13,8 @@ import org.springframework.stereotype.Service;
 @Service
 public interface PaymentBillService {
 
-  Page<PaymentBillResponse> findAll(PaymentBillSearchRequest paymentBillSearchRequest);
+  Page<PaymentBillResponse> findAll(PaymentBillSearchRequest paymentBillSearchRequest,
+      String language);
 
   PaymentBill findById(long id);
 
@@ -21,9 +22,9 @@ public interface PaymentBillService {
 
   String approveWithoutPayment(Long id);
 
-  Page<UserPaymentBillsResponse> findUserBillsHistory(Pageable pageable);
+  Page<UserPaymentBillsResponse> findAllUserBillsHistory(Pageable pageable, String language);
 
-  Page<UserNewPaymentBillsResponse> findNewUserBills(Pageable pageable);
+  Page<UserNewPaymentBillsResponse> findAllNewUserBills(Pageable pageable, String language);
 
   String payBill(Long id);
 

@@ -44,4 +44,13 @@ public class Faq implements Serializable {
       mappedBy = "faq"
   )
   private List<FaqTranslation> faqTranslations;
+
+  @Override
+  public String toString() {
+    return "Faq{" +
+        "id=" + id +
+        ", question='" + question + '\'' +
+        ", answer='" + answer + '\'' +
+        '}';
+  }
 }

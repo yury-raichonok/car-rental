@@ -4,6 +4,7 @@ import OrderDataService from '../../../services/order/OrderDataService';
 import { notification, Table } from 'antd';
 import Reload from "@kiwicom/orbit-components/lib/icons/Reload";
 import { useTranslation } from 'react-i18next';
+import cookies from 'js-cookie';
 
 const FunctionsContainer = styled.div`
   width: 100%;
@@ -124,7 +125,28 @@ const ButtonsContainer = styled.div`
   }
 `;
 
+const languages = [
+  {
+    code: 'be',
+    name: 'BY',
+    country_code: 'by',
+  },
+  {
+    code: 'ru',
+    name: 'RU',
+    country_code: 'ru',
+  },
+  {
+    code: 'en',
+    name: 'EN',
+    country_code: 'gb',
+  }
+]
+
 const ProfileOrdersComponent = () => {
+
+  const currentLanguageCode = cookies.get('i18next') || 'en';
+  const currentLanguage = languages.find((l) => l.code === currentLanguageCode);
 
   const { t } = useTranslation();
 
@@ -185,7 +207,7 @@ const ProfileOrdersComponent = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [currentLanguage]);
 
   function handleTableChange(pagination, filter, sorter) {
     state.sortBy = sorter.field;

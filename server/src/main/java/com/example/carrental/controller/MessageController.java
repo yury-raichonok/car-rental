@@ -12,7 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,8 +35,8 @@ public class MessageController {
   }
 
   @GetMapping(path = "/new")
-  public ResponseEntity<Page<MessageResponse>> findNewMessages(Pageable pageable) {
-    var messages = messageService.findNewMessages(pageable);
+  public ResponseEntity<Page<MessageResponse>> findAllNewMessages(Pageable pageable) {
+    var messages = messageService.findAllNewMessages(pageable);
     return new ResponseEntity<>(messages, HttpStatus.OK);
   }
 

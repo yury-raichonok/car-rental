@@ -51,7 +51,7 @@ public class NotificationServiceImpl implements NotificationService {
   }
 
   @Override
-  public Page<NotificationResponse> findNotificationsHistory(Pageable pageable) {
+  public Page<NotificationResponse> findAllNotificationsHistory(Pageable pageable) {
     var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     if (Optional.ofNullable(user).isEmpty()) {
       log.error("User not authenticated!");

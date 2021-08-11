@@ -184,7 +184,7 @@ const SearchCarComponent = (props) => {
     returnDateTime: props.location.state.returnDateTime,
     brandName: props.location.state.brand,
     modelName: null,
-    carClassName: null,
+    carClass: null,
     costFrom: null,
     costTo: null,
     yearFrom: null,
@@ -204,7 +204,7 @@ const SearchCarComponent = (props) => {
     returnDateTime: null,
     brandName: null,
     modelName: null,
-    carClassName: null,
+    carClass: null,
     costFrom: null,
     costTo: null,
     yearFrom: null,
@@ -279,12 +279,12 @@ const fetchModels = async (value) => {
     if (value == 0) {
       setState(prevState => ({
         ...prevState,
-        carClassName: null
+        carClass: null
       }))
     } else (
       setState(prevState => ({
         ...prevState,
-        carClassName: value
+        carClass: value
       }))
     ) 
   }

@@ -16,7 +16,7 @@ public class UpdateCarBrandRequest {
 
   @NotNull
   @Positive
-  private Long id;
+  private long id;
   @NotNull
   @Size(
       min = 1,

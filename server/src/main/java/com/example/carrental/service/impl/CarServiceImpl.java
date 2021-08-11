@@ -6,7 +6,7 @@ import static org.apache.http.entity.ContentType.IMAGE_PNG;
 
 import com.example.carrental.controller.dto.car.CarAdminSearchResponse;
 import com.example.carrental.controller.dto.car.CarByIdResponse;
-import com.example.carrental.controller.dto.car.CarChipOfferResponse;
+import com.example.carrental.controller.dto.car.CarProfitableOfferResponse;
 import com.example.carrental.controller.dto.car.CarSearchRequest;
 import com.example.carrental.controller.dto.car.CarSearchResponse;
 import com.example.carrental.controller.dto.car.CreateCarRequest;
@@ -24,6 +24,7 @@ import com.example.carrental.service.LocationService;
 import com.example.carrental.service.LocationTranslationService;
 import com.example.carrental.service.RentalDetailsService;
 import com.example.carrental.service.exceptions.EntityAlreadyExistsException;
+import com.example.carrental.service.exceptions.NoContentException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -75,22 +76,60 @@ public class CarServiceImpl implements CarService {
   }
 
   @Override
-  public Page<CarSearchResponse> searchCars(CarSearchRequest carSearchRequest, String language) {
-    var carsPage = carCriteriaRepository.findCars(carSearchRequest);
-    List<CarSearchResponse> cars = new ArrayList<>();
-    carsPage.getContent().forEach(car -> {
+  @Transactional
+  public String create(CreateCarRequest createCarRequest) throws EntityAlreadyExistsException {
+    var optionalCar = carRepository.findByVin(createCarRequest.getVin());
+    if (optionalCar.isPresent()) {
+      log.error("Car with vin {} already exists", createCarRequest.getVin());
+      throw new EntityAlreadyExistsException(String.format("Car with vin %s already exists",
+          createCarRequest.getVin()));
+    }
+
+    var carModel = carModelService.findById(createCarRequest.getModelId());
+    var carClass = carClassService.findById(createCarRequest.getCarClassId());
+    var location = locationService.findById(createCarRequest.getLocationId());
+
+    var car = Car
+        .builder()
+        .model(carModel)
+        .carClass(carClass)
+        .location(location)
+        .vin(createCarRequest.getVin())
+        .dateOfIssue(createCarRequest.getDateOfIssue())
+        .color(createCarRequest.getColor())
+        .bodyType(createCarRequest.getBodyType())
+        .isAutomaticTransmission(createCarRequest.isAutoTransmission())
+        .engineType(createCarRequest.getEngineType())
+        .passengersAmt(createCarRequest.getPassengersAmt())
+        .baggageAmt(createCarRequest.getBaggageAmt())
+        .hasConditioner(createCarRequest.isHasConditioner())
+        .inRental(true)
+        .costPerHour(createCarRequest.getCostPerHour())
+        .createdAt(LocalDateTime.now())
+        .build();
+
+    carRepository.save(car);
+    return "success";
+  }
+
+  @Override
+  public List<CarProfitableOfferResponse> findAllProfitableOffers(String language)
+      throws NoContentException {
+    Pageable pageable = PageRequest.of(0, 3, Sort.by(Direction.ASC, "costPerHour"));
+    var cars = carRepository.findAllByInRentalIsTrue(pageable);
+    List<CarProfitableOfferResponse> profitableOffersResponse = new ArrayList<>();
+    cars.getContent().forEach(car -> {
       if (!"en".equals(language)) {
         var carClass = car.getCarClass();
         carClassTranslationService.setTranslation(carClass, language);
         car.setCarClass(carClass);
-
-        var location = car.getLocation();
-        locationTranslationService.setTranslation(location, language);
-        car.setLocation(location);
       }
-      cars.add(carMapper.carToCarSearchResponse(car));
+      profitableOffersResponse.add(carMapper.carToCarChipOfferResponse(car));
     });
-    return new PageImpl<>(cars, carsPage.getPageable(), carsPage.getTotalElements());
+    if (profitableOffersResponse.isEmpty()) {
+      throw new NoContentException("No content");
+    }
+    return profitableOffersResponse;
   }
 
   @Override
@@ -140,40 +179,89 @@ public class CarServiceImpl implements CarService {
   }
 
   @Override
+  public Page<CarSearchResponse> searchCars(CarSearchRequest carSearchRequest, String language) {
+    var carsPage = carCriteriaRepository.findCars(carSearchRequest);
+    List<CarSearchResponse> cars = new ArrayList<>();
+    carsPage.getContent().forEach(car -> {
+      if (!"en".equals(language)) {
+        var carClass = car.getCarClass();
+        carClassTranslationService.setTranslation(carClass, language);
+        car.setCarClass(carClass);
+
+        var location = car.getLocation();
+        locationTranslationService.setTranslation(location, language);
+        car.setLocation(location);
+      }
+      cars.add(carMapper.carToCarSearchResponse(car));
+    });
+    return new PageImpl<>(cars, carsPage.getPageable(), carsPage.getTotalElements());
+  }
+
+  @Override
+  public Page<CarAdminSearchResponse> searchCarsByAdmin(
+      CarSearchRequest carSearchRequest, String language) {
+    var carsPage = carCriteriaRepository.findCars(carSearchRequest);
+    List<CarAdminSearchResponse> cars = new ArrayList<>();
+    carsPage.getContent().forEach(car -> {
+      if (!"en".equals(language)) {
+        var carClass = car.getCarClass();
+        carClassTranslationService.setTranslation(carClass, language);
+        car.setCarClass(carClass);
+
+        var location = car.getLocation();
+        locationTranslationService.setTranslation(location, language);
+        car.setLocation(location);
+      }
+      cars.add(carMapper.carToCarCarAdminSearchResponse(car));
+    });
+    return new PageImpl<>(cars, carsPage.getPageable(), carsPage.getTotalElements());
+  }
+
+  @Override
   @Transactional
-  public String create(CreateCarRequest createCarRequest) throws EntityAlreadyExistsException {
-    var optionalCar = carRepository.findByVin(createCarRequest.getVin());
-    if (optionalCar.isPresent()) {
-      log.error("Car with vin {} already exists", createCarRequest.getVin());
+  public String update(Long id, UpdateCarRequest updateCarRequest)
+      throws EntityAlreadyExistsException {
+    var optionalCar = carRepository.findByVin(updateCarRequest.getVin());
+
+    if (optionalCar.isPresent() && !optionalCar.get().getId().equals(id)) {
+      log.error("Car with vin {} already exists", updateCarRequest.getVin());
       throw new EntityAlreadyExistsException(String.format("Car with vin %s already exists",
-          createCarRequest.getVin()));
+          updateCarRequest.getVin()));
     }
 
-    var carModel = carModelService.getById(createCarRequest.getModelId());
-    var carClass = carClassService.findById(createCarRequest.getCarClassId());
-    var location = locationService.findById(createCarRequest.getLocationId());
+    Car car = findById(id);
+    var carModel = carModelService.findModelByNameAndBrandName(updateCarRequest.getModel(),
+        updateCarRequest.getBrand());
+    var location = locationService.findById(updateCarRequest.getLocation());
+    var carClass = carClassService.findById(updateCarRequest.getCarClass());
 
-    var car = Car
-        .builder()
-        .model(carModel)
-        .carClass(carClass)
-        .location(location)
-        .vin(createCarRequest.getVin())
-        .dateOfIssue(createCarRequest.getDateOfIssue())
-        .color(createCarRequest.getColor())
-        .bodyType(createCarRequest.getBodyType())
-        .isAutomaticTransmission(createCarRequest.isAutoTransmission())
-        .engineType(createCarRequest.getEngineType())
-        .passengersAmt(createCarRequest.getPassengersAmt())
-        .baggageAmt(createCarRequest.getBaggageAmt())
-        .hasConditioner(createCarRequest.isHasConditioner())
-        .inRental(true)
-        .costPerHour(createCarRequest.getCostPerHour())
-        .createdAt(LocalDateTime.now())
-        .build();
-
+    car.setModel(carModel);
+    car.setCarClass(carClass);
+    car.setVin(updateCarRequest.getVin());
+    car.setLocation(location);
+    car.setDateOfIssue(updateCarRequest.getDateOfIssue());
+    car.setColor(updateCarRequest.getColor());
+    car.setBodyType(updateCarRequest.getBodyType());
+    car.setEngineType(updateCarRequest.getEngineType());
+    car.setPassengersAmt(updateCarRequest.getPassengersAmt());
+    car.setBaggageAmt(updateCarRequest.getBaggageAmt());
+    car.setAutomaticTransmission(updateCarRequest.isAutoTransmission());
+    car.setHasConditioner(updateCarRequest.isHasConditioner());
+    car.setCostPerHour(updateCarRequest.getCostPerHour());
+    car.setChangedAt(LocalDateTime.now());
     carRepository.save(car);
-    return "success";
+    return "Success";
+  }
+
+  @Override
+  @Transactional
+  public String updateRentalStatus(Long id) {
+    var car = findById(id);
+    var inRental = car.isInRental();
+
+    car.setInRental(!inRental);
+    carRepository.save(car);
+    return "Success";
   }
 
   @Override
@@ -215,89 +303,6 @@ public class CarServiceImpl implements CarService {
 
     car.setCarImageLink(imageLink);
     car.setChangedAt(LocalDateTime.now());
-    carRepository.save(car);
-    return "Success";
-  }
-
-  @Override
-  @Transactional
-  public String update(Long id, UpdateCarRequest updateCarRequest)
-      throws EntityAlreadyExistsException {
-    var optionalCar = carRepository.findByVin(updateCarRequest.getVin());
-
-    if (optionalCar.isPresent() && !optionalCar.get().getId().equals(id)) {
-      log.error("Car with vin {} already exists", updateCarRequest.getVin());
-      throw new EntityAlreadyExistsException(String.format("Car with vin %s already exists",
-          updateCarRequest.getVin()));
-    }
-
-    Car car = findById(id);
-    var carModel = carModelService.findModelByNameAndBrandName(updateCarRequest.getModel(),
-        updateCarRequest.getBrand());
-    var location = locationService.findById(updateCarRequest.getLocation());
-    var carClass = carClassService.findById(updateCarRequest.getCarClass());
-
-    car.setModel(carModel);
-    car.setCarClass(carClass);
-    car.setVin(updateCarRequest.getVin());
-    car.setLocation(location);
-    car.setDateOfIssue(updateCarRequest.getDateOfIssue());
-    car.setColor(updateCarRequest.getColor());
-    car.setBodyType(updateCarRequest.getBodyType());
-    car.setEngineType(updateCarRequest.getEngineType());
-    car.setPassengersAmt(updateCarRequest.getPassengersAmt());
-    car.setBaggageAmt(updateCarRequest.getBaggageAmt());
-    car.setAutomaticTransmission(updateCarRequest.isAutoTransmission());
-    car.setHasConditioner(updateCarRequest.isHasConditioner());
-    car.setCostPerHour(updateCarRequest.getCostPerHour());
-    car.setChangedAt(LocalDateTime.now());
-    carRepository.save(car);
-    return "Success";
-  }
-
-  @Override
-  public List<CarChipOfferResponse> findProfitableCarOffers(String language) {
-    Pageable pageable = PageRequest.of(0, 3, Sort.by(Direction.ASC, "costPerHour"));
-    var cars = carRepository.findAllByInRentalIsTrue(pageable);
-    List<CarChipOfferResponse> carChipOfferResponses = new ArrayList<>();
-    cars.getContent().forEach(car -> {
-      if (!"en".equals(language)) {
-        var carClass = car.getCarClass();
-        carClassTranslationService.setTranslation(carClass, language);
-        car.setCarClass(carClass);
-      }
-      carChipOfferResponses.add(carMapper.carToCarChipOfferResponse(car));
-    });
-    return carChipOfferResponses;
-  }
-
-  @Override
-  public Page<CarAdminSearchResponse> searchCarsByAdmin(
-      CarSearchRequest carSearchRequest, String language) {
-    var carsPage = carCriteriaRepository.findCars(carSearchRequest);
-    List<CarAdminSearchResponse> cars = new ArrayList<>();
-    carsPage.getContent().forEach(car -> {
-      if (!"en".equals(language)) {
-        var carClass = car.getCarClass();
-        carClassTranslationService.setTranslation(carClass, language);
-        car.setCarClass(carClass);
-
-        var location = car.getLocation();
-        locationTranslationService.setTranslation(location, language);
-        car.setLocation(location);
-      }
-      cars.add(carMapper.carToCarCarAdminSearchResponse(car));
-    });
-    return new PageImpl<>(cars, carsPage.getPageable(), carsPage.getTotalElements());
-  }
-
-  @Override
-  @Transactional
-  public String updateRentalStatus(Long id) {
-    var car = findById(id);
-    var inRental = car.isInRental();
-
-    car.setInRental(!inRental);
     carRepository.save(car);
     return "Success";
   }

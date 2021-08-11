@@ -31,6 +31,7 @@ import com.example.carrental.mapper.OrderMapper;
 import com.example.carrental.repository.OrderCriteriaRepository;
 import com.example.carrental.repository.OrderRepository;
 import com.example.carrental.service.CarService;
+import com.example.carrental.service.LocationTranslationService;
 import com.example.carrental.service.NotificationService;
 import com.example.carrental.service.OrderService;
 import com.example.carrental.service.PDFService;
@@ -67,8 +68,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
-  private final static int DAY_HOURS = 24;
-  private final static int WEEK_HOURS = 24 * 7;
   private final OrderRepository orderRepository;
   private final NotificationService notificationService;
   private final UserService userService;
@@ -76,6 +75,7 @@ public class OrderServiceImpl implements OrderService {
   private final CarService carService;
   private final OrderMapper orderMapper;
   private final PDFService pdfService;
+  private final LocationTranslationService locationTranslationService;
 
   private PaymentBillService paymentBillService;
   private RepairBillService repairBillService;
@@ -98,19 +98,29 @@ public class OrderServiceImpl implements OrderService {
   }
 
   @Override
-  public Page<OrderResponse> findAll(OrderSearchRequest orderSearchRequest) {
+  public Page<OrderResponse> findAll(OrderSearchRequest orderSearchRequest, String language) {
     var ordersPage = orderCriteriaRepository.findAll(orderSearchRequest);
     List<OrderResponse> ordersList = new ArrayList<>();
-    ordersPage.forEach(ord -> ordersList.add(orderMapper.orderToOrderResponse(ord)));
+    ordersPage.forEach(order -> {
+      if (!"en".equals(language)) {
+        locationTranslationService.setTranslation(order.getLocation(), language);
+      }
+      ordersList.add(orderMapper.orderToOrderResponse(order));
+    });
 
     return new PageImpl<>(ordersList, ordersPage.getPageable(), ordersPage.getTotalElements());
   }
 
   @Override
-  public Page<OrderNewResponse> findAllNew(Pageable pageable) {
+  public Page<OrderNewResponse> findAllNew(Pageable pageable, String language) {
     var ordersPage = orderRepository.findAllByRentalStatus(OrderRentalStatus.NEW, pageable);
     List<OrderNewResponse> ordersList = new ArrayList<>();
-    ordersPage.forEach(ord -> ordersList.add(orderMapper.orderToOrderNewResponse(ord)));
+    ordersPage.forEach(order -> {
+      if (!"en".equals(language)) {
+        locationTranslationService.setTranslation(order.getLocation(), language);
+      }
+      ordersList.add(orderMapper.orderToOrderNewResponse(order));
+    });
     return new PageImpl<>(ordersList, ordersPage.getPageable(), ordersPage.getTotalElements());
   }
 
@@ -120,21 +130,30 @@ public class OrderServiceImpl implements OrderService {
   }
 
   @Override
-  public Page<OrderInformationResponse> findAllCurrent(Pageable pageable) {
+  public Page<OrderInformationResponse> findAllCurrent(Pageable pageable, String language) {
     var ordersPage = orderRepository.findAllByRentalStatus(IN_PROCESS, pageable);
     List<OrderInformationResponse> ordersList = new ArrayList<>();
-    ordersPage.forEach(ord -> ordersList.add(orderMapper.orderToOrderInformationResponse(ord)));
+    ordersPage.forEach(order -> {
+      if (!"en".equals(language)) {
+        locationTranslationService.setTranslation(order.getLocation(), language);
+      }
+      ordersList.add(orderMapper.orderToOrderInformationResponse(order));
+    });
 
     return new PageImpl<>(ordersList, ordersPage.getPageable(), ordersPage.getTotalElements());
   }
 
   @Override
-  public Page<OrderInformationResponse> findAllFuture(Pageable pageable) {
-    var ordersPage = orderRepository
-        .findAllByRentalStatusAndPaymentStatus(NOT_STARTED,
-            PAID, pageable);
+  public Page<OrderInformationResponse> findAllFuture(Pageable pageable, String language) {
+    var ordersPage = orderRepository.findAllByRentalStatusAndPaymentStatus(NOT_STARTED, PAID,
+        pageable);
     List<OrderInformationResponse> ordersList = new ArrayList<>();
-    ordersPage.forEach(ord -> ordersList.add(orderMapper.orderToOrderInformationResponse(ord)));
+    ordersPage.forEach(order -> {
+      if (!"en".equals(language)) {
+        locationTranslationService.setTranslation(order.getLocation(), language);
+      }
+      ordersList.add(orderMapper.orderToOrderInformationResponse(order));
+    });
 
     return new PageImpl<>(ordersList, ordersPage.getPageable(), ordersPage.getTotalElements());
   }
@@ -151,6 +170,8 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   public OrderTotalCostResponse calculateTotalCost(OrderTotalCostRequest orderTotalCostRequest) {
+    int dayHours = 24;
+    int weekHours = 24 * 7;
     double totalCost;
     double costPerHour = orderTotalCostRequest.getCostPerHour();
     var orderCostDetails = rentalDetailsService.getRentalDetails();
@@ -159,9 +180,9 @@ public class OrderServiceImpl implements OrderService {
         .between(orderTotalCostRequest.getPickUpDate(), orderTotalCostRequest.getReturnDate())
         .toHours();
 
-    if (duration < DAY_HOURS) {
+    if (duration < dayHours) {
       totalCost = costPerHour * (duration + 1);
-    } else if (duration < WEEK_HOURS) {
+    } else if (duration < weekHours) {
       totalCost = costPerHour * duration * orderCostDetails.getFromDayToWeekCoefficient()
           .doubleValue();
     } else {
@@ -352,12 +373,7 @@ public class OrderServiceImpl implements OrderService {
 
     var notification = Notification
         .builder()
-        .message(String.format(
-            "%s. Based on the results of order №%d for a %s %s, you received a fine of %s BYN. "
-                + "To pay the fine, go to the \"Bills\" tab.",
-            orderCompleteWithPenaltyRequest.getMessage(), order.getId(),
-            order.getCar().getModel().getBrand().getName(), order.getCar().getModel().getName(),
-            orderCompleteWithPenaltyRequest.getTotalCost()))
+        .message(orderCompleteWithPenaltyRequest.getMessage())
         .notificationType(INFO)
         .sentDate(LocalDateTime.now())
         .status(NEW)
@@ -429,7 +445,7 @@ public class OrderServiceImpl implements OrderService {
   }
 
   @Override
-  public Page<UserOrderResponse> findNewUserOrders(Pageable pageable) {
+  public Page<UserOrderResponse> findAllNewUserOrders(Pageable pageable, String language) {
     var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     if (Optional.ofNullable(user).isEmpty()) {
       log.error("User not authenticated!");
@@ -440,23 +456,32 @@ public class OrderServiceImpl implements OrderService {
         user.getEmail(), PAID, pageable);
 
     List<UserOrderResponse> responses = new ArrayList<>();
-    orderPage.forEach(order -> responses.add(orderMapper.orderToNewUserOrderResponse(order)));
+    orderPage.forEach(order -> {
+      if (!"en".equals(language)) {
+        locationTranslationService.setTranslation(order.getLocation(), language);
+      }
+      responses.add(orderMapper.orderToNewUserOrderResponse(order));
+    });
     return new PageImpl<>(responses, orderPage.getPageable(), orderPage.getTotalElements());
   }
 
   @Override
-  public Page<UserOrderResponse> findUserOrdersHistory(Pageable pageable) {
+  public Page<UserOrderResponse> findAllUserOrdersHistory(Pageable pageable, String language) {
     var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     if (Optional.ofNullable(user).isEmpty()) {
       log.error("User not authenticated!");
       throw new IllegalStateException("User not authenticated");
     }
 
-    var orderPage = orderRepository
-        .findAllByRentalStatusOrRentalStatusAndUser_Email(FINISHED, FINISHED_WITH_PENALTY,
-            user.getEmail(), pageable);
+    var orderPage = orderRepository.findAllByRentalStatusOrRentalStatusAndUser_Email(FINISHED,
+        FINISHED_WITH_PENALTY, user.getEmail(), pageable);
     List<UserOrderResponse> responses = new ArrayList<>();
-    orderPage.forEach(order -> responses.add(orderMapper.orderToNewUserOrderResponse(order)));
+    orderPage.forEach(order -> {
+      if (!"en".equals(language)) {
+        locationTranslationService.setTranslation(order.getLocation(), language);
+      }
+      responses.add(orderMapper.orderToNewUserOrderResponse(order));
+    });
     return new PageImpl<>(responses, orderPage.getPageable(), orderPage.getTotalElements());
   }
 
@@ -464,6 +489,6 @@ public class OrderServiceImpl implements OrderService {
   public ByteArrayResource exportOrderToPDF(Long id) throws FontNotFoundException {
     var order = findById(id);
     var rentalDetails = rentalDetailsService.getRentalDetails();
-    return pdfService.exportOrderPDF(order, rentalDetails);
+    return pdfService.exportOrderToPDF(order, rentalDetails);
   }
 }

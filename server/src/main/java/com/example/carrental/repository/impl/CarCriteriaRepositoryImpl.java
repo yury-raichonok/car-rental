@@ -99,9 +99,8 @@ public class CarCriteriaRepositoryImpl implements CarCriteriaRepository {
     if (Objects.nonNull(carSearchRequest.getLocation())) {
       predicates.add(criteriaBuilder.equal(locationJoin.get("id"), carSearchRequest.getLocation()));
     }
-    if (Objects.nonNull(carSearchRequest.getCarClassName())) {
-      predicates.add(criteriaBuilder.like(carClassJoin.get("name"),
-          "%" + carSearchRequest.getCarClassName() + "%"));
+    if (Objects.nonNull(carSearchRequest.getCarClass())) {
+      predicates.add(criteriaBuilder.equal(carClassJoin.get("id"), carSearchRequest.getCarClass()));
     }
     if (Objects.nonNull(carSearchRequest.getVin())) {
       predicates

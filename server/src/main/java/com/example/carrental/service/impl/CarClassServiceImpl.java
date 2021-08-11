@@ -9,6 +9,7 @@ import com.example.carrental.repository.CarClassRepository;
 import com.example.carrental.service.CarClassService;
 import com.example.carrental.service.CarClassTranslationService;
 import com.example.carrental.service.exceptions.EntityAlreadyExistsException;
+import com.example.carrental.service.exceptions.NoContentException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,16 +33,39 @@ public class CarClassServiceImpl implements CarClassService {
   private final CarClassTranslationService carClassTranslationService;
 
   @Override
-  public List<CarClassNameResponse> findAll(String language) {
+  @Transactional
+  public String create(CreateCarClassRequest createCarClassRequest)
+      throws EntityAlreadyExistsException {
+    Optional<CarClass> carClass = carClassRepository.findByName(createCarClassRequest.getNameEn());
+    if (carClass.isPresent()) {
+      log.error("Car class with name {} already exists", createCarClassRequest.getNameEn());
+      throw new EntityAlreadyExistsException(String.format("Car class with name %s already exists",
+          createCarClassRequest.getNameEn()));
+    }
+
+    var carClassEn = CarClass.builder().name(createCarClassRequest.getNameEn())
+        .createdAt(LocalDateTime.now()).build();
+
+    carClassRepository.save(carClassEn);
+    carClassTranslationService.create(createCarClassRequest, carClassEn);
+
+    return "Success";
+  }
+
+  @Override
+  public List<CarClassNameResponse> findAll(String language) throws NoContentException {
     List<CarClass> classes = carClassRepository.findAll(Sort.by("name"));
-    List<CarClassNameResponse> carClassNameResponseList = new ArrayList<>();
+    List<CarClassNameResponse> carClassResponse = new ArrayList<>();
     classes.forEach(carClass -> {
       if (!"en".equals(language)) {
         carClassTranslationService.setTranslation(carClass, language);
       }
-      carClassNameResponseList.add(carClassMapper.carClassToCarClassNameResponse(carClass));
+      carClassResponse.add(carClassMapper.carClassToCarClassNameResponse(carClass));
     });
-    return carClassNameResponseList;
+    if (carClassResponse.isEmpty()) {
+      throw new NoContentException("No content");
+    }
+    return carClassResponse;
   }
 
   @Override
@@ -67,26 +91,6 @@ public class CarClassServiceImpl implements CarClassService {
 
   @Override
   @Transactional
-  public String create(CreateCarClassRequest createCarClassRequest)
-      throws EntityAlreadyExistsException {
-    Optional<CarClass> carClass = carClassRepository.findByName(createCarClassRequest.getNameEn());
-    if (carClass.isPresent()) {
-      log.error("Car class with name {} already exists", createCarClassRequest.getNameEn());
-      throw new EntityAlreadyExistsException(String.format("Car class with name %s already exists",
-          createCarClassRequest.getNameEn()));
-    }
-
-    var carClassEn = CarClass.builder().name(createCarClassRequest.getNameEn())
-        .createdAt(LocalDateTime.now()).build();
-
-    carClassRepository.save(carClassEn);
-    carClassTranslationService.create(createCarClassRequest, carClassEn);
-
-    return "Success";
-  }
-
-  @Override
-  @Transactional
   public String update(Long id, CreateCarClassRequest createCarClassRequest) {
     var carClass = findById(id);
 
@@ -96,16 +100,5 @@ public class CarClassServiceImpl implements CarClassService {
 
     carClassTranslationService.update(createCarClassRequest, carClass.getCarClassTranslations());
     return "Success";
-  }
-
-  @Override
-  public CarClass findNyName(String carClass) {
-    Optional<CarClass> optionalCarClass = carClassRepository.findByName(carClass);
-    if (optionalCarClass.isEmpty()) {
-      log.error("Car class with name {} does not exist", carClass);
-      throw new IllegalStateException(String.format("Car class with name %s does not exists",
-          carClass));
-    }
-    return optionalCarClass.get();
   }
 }

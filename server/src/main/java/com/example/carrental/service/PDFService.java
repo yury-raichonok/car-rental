@@ -9,6 +9,6 @@ import org.springframework.stereotype.Service;
 @Service
 public interface PDFService {
 
-  ByteArrayResource exportOrderPDF(Order order, RentalDetails rentalDetails)
+  ByteArrayResource exportOrderToPDF(Order order, RentalDetails rentalDetails)
       throws FontNotFoundException;
 }

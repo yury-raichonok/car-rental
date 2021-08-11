@@ -788,5 +788,7 @@
   "driving_license_not_specified": "не указано",
   "passport_not_specified": "не указан",
   "to_send_order_you_need_to_specify_and_confirm_your_driving_license": "Для отправления заказа Вам нужно указать и подтвердить данные водительского удостоверения",
-  "to_send_order_you_need_to_specify_and_confirm_your_passport": "Для отправления заказа Вам нужно указать и подтвердить паспортные данные"
+  "to_send_order_you_need_to_specify_and_confirm_your_passport": "Для отправления заказа Вам нужно указать и подтвердить паспортные данные",
+  "notification_message": "Сообщение",
+  "license_is_not_confirmed": "не подтверждено"
 }

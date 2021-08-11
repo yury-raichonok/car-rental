@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,16 +29,18 @@ public class RepairBillController {
   private final RepairBillService repairBillService;
 
   @PostMapping
-  public ResponseEntity<Page<RepairBillResponse>> findAll(@Valid @RequestBody
-      RepairBillSearchRequest repairBillSearchRequest) {
-    var repairBills = repairBillService.findAll(repairBillSearchRequest);
+  public ResponseEntity<Page<RepairBillResponse>> findAll(
+      @Valid @RequestBody RepairBillSearchRequest repairBillSearchRequest,
+      @NotNull @CookieValue(name = "i18next") String language) {
+    var repairBills = repairBillService.findAll(repairBillSearchRequest, language);
     return new ResponseEntity<>(repairBills, HttpStatus.OK);
   }
 
   @GetMapping(path = "/user")
-  public ResponseEntity<?> findUserBillsHistory(Pageable pageable) {
+  public ResponseEntity<?> findAllUserBillsHistory(Pageable pageable,
+      @NotNull @CookieValue(name = "i18next") String language) {
     try {
-      var paymentBills = repairBillService.findUserBillsHistory(pageable);
+      var paymentBills = repairBillService.findAllUserBillsHistory(pageable, language);
       return new ResponseEntity<>(paymentBills, HttpStatus.OK);
     } catch (IllegalStateException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -46,9 +48,10 @@ public class RepairBillController {
   }
 
   @GetMapping(path = "/user/new")
-  public ResponseEntity<?> findNewUserBills(Pageable pageable) {
+  public ResponseEntity<?> findAllNewUserBills(Pageable pageable,
+      @NotNull @CookieValue(name = "i18next") String language) {
     try {
-      var paymentBills = repairBillService.findNewUserBills(pageable);
+      var paymentBills = repairBillService.findAllNewUserBills(pageable, language);
       return new ResponseEntity<>(paymentBills, HttpStatus.OK);
     } catch (IllegalStateException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -56,7 +59,7 @@ public class RepairBillController {
   }
 
   @PostMapping("/pay/{id}")
-  public ResponseEntity<?> payBill(@NotNull @Positive @PathVariable Long id) {
+  public ResponseEntity<String> payBill(@NotNull @Positive @PathVariable Long id) {
     var response = repairBillService.payBill(id);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }

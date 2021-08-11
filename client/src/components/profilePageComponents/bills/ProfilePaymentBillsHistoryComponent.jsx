@@ -4,6 +4,7 @@ import { Table, notification } from 'antd';
 import PaymentBillDataService from '../../../services/bill/PaymentBillDataService';
 import Reload from "@kiwicom/orbit-components/lib/icons/Reload";
 import { useTranslation } from 'react-i18next';
+import cookies from 'js-cookie';
 
 const FunctionsContainer = styled.div`
   width: 100%;
@@ -106,7 +107,29 @@ const ButtonsContainer = styled.div`
   }
 `;
 
+const languages = [
+  {
+    code: 'be',
+    name: 'BY',
+    country_code: 'by',
+  },
+  {
+    code: 'ru',
+    name: 'RU',
+    country_code: 'ru',
+  },
+  {
+    code: 'en',
+    name: 'EN',
+    country_code: 'gb',
+  }
+]
+
 const ProfilePaymentBillsHistoryComponent = () => {
+
+  const currentLanguageCode = cookies.get('i18next') || 'en';
+  const currentLanguage = languages.find((l) => l.code === currentLanguageCode);
+
   const { t } = useTranslation();
 
   const [data, setData] = useState([]);
@@ -150,7 +173,7 @@ const ProfilePaymentBillsHistoryComponent = () => {
 
   useEffect(() => {
     fetchUserPaymentBillsHistory();
-  }, []);
+  }, [currentLanguage]);
 
   function handleTableChange(pagination, filter, sorter) {
     state.sortBy = sorter.field;

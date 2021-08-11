@@ -13,13 +13,13 @@ import org.springframework.stereotype.Service;
 @Service
 public interface RepairBillService {
 
-  Page<RepairBillResponse> findAll(RepairBillSearchRequest repairBillSearchRequest);
+  Page<RepairBillResponse> findAll(RepairBillSearchRequest repairBillSearchRequest, String language);
 
   String create(CreateRepairBillRequest createRepairBillRequest);
 
-  Page<RepairBillHistoryResponse> findUserBillsHistory(Pageable pageable);
+  Page<RepairBillHistoryResponse> findAllUserBillsHistory(Pageable pageable, String language);
 
-  Page<RepairBillNewResponse> findNewUserBills(Pageable pageable);
+  Page<RepairBillNewResponse> findAllNewUserBills(Pageable pageable, String language);
 
   String payBill(Long id);
 

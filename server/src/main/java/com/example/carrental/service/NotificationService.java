@@ -13,7 +13,7 @@ public interface NotificationService {
 
   Page<NotificationResponse> findAllNew(Pageable pageable);
 
-  Page<NotificationResponse> findNotificationsHistory(Pageable pageable);
+  Page<NotificationResponse> findAllNotificationsHistory(Pageable pageable);
 
   String updateNotificationAsRead(Long id);
 

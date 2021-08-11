@@ -787,5 +787,7 @@
   "driving_license_not_specified": "not specified",
   "passport_not_specified": "not specified",
   "to_send_order_you_need_to_specify_and_confirm_your_driving_license": "To send order you need to specify and confirm your driving license",
-  "to_send_order_you_need_to_specify_and_confirm_your_passport": "To send order you need to specify and confirm your passport"
+  "to_send_order_you_need_to_specify_and_confirm_your_passport": "To send order you need to specify and confirm your passport",
+  "notification_message": "Message",
+  "license_is_not_confirmed": "is not confirmed"
 }

@@ -23,10 +23,10 @@ public class CreateCarRequest {
 
   @NotNull
   @Positive
-  private Long brandId;
+  private long brandId;
   @NotNull
   @Positive
-  private Long modelId;
+  private long modelId;
   @NotNull
 //  @Pattern(
 //      regexp = "^[A-HJ-NPR-Za-hj-npr-z\\d]{8}[\\dX][A-HJ-NPR-Za-hj-npr-z\\d]{2}\\d{6}$"
@@ -34,10 +34,10 @@ public class CreateCarRequest {
   private String vin;
   @NotNull
   @Positive
-  private Long locationId;
+  private long locationId;
   @NotNull
   @Positive
-  private Long carClassId;
+  private long carClassId;
   @NotNull
   @PastOrPresent
   private LocalDate dateOfIssue;
@@ -55,6 +55,7 @@ public class CreateCarRequest {
   @Positive
   @Max(10)
   private int passengersAmt;
+  @NotNull
   @Positive
   @Max(10)
   private int baggageAmt;

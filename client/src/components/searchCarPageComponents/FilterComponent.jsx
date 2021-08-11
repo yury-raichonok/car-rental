@@ -269,7 +269,7 @@ const FilterComponent = (props) => {
           <Select placeholder={t('car_class')} onChange={props.handleCarClassChange}>
             <Option key="0" value="0">{t('any_class')}</Option>
             {carClasses && carClasses?.map((carClass) => (
-              <Option key={carClass.id} value={carClass.name}>{carClass.name}</Option>
+              <Option key={carClass.id} value={carClass.id}>{carClass.name}</Option>
             ))}
           </Select>
         </FilterColumn>

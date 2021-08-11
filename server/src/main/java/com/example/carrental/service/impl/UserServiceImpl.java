@@ -95,7 +95,7 @@ public class UserServiceImpl implements UserService {
         .builder()
         .email(userRegistrationRequest.getEmail())
         .password(encodedPassword)
-        .role(userRoleServiceService.getByRole("USER"))
+        .role(userRoleServiceService.findByRole("USER"))
         .createdAt(LocalDateTime.now())
         .changedAt(LocalDateTime.now())
         .enabled(true)
@@ -312,7 +312,7 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public String updateUserRoleToAdmin(Long id) {
     var user = findById(id);
-    var role = userRoleServiceService.getByRole("ADMIN");
+    var role = userRoleServiceService.findByRole("ADMIN");
     user.setRole(role);
     userRepository.save(user);
     return "Success";
@@ -322,7 +322,7 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public String updateUserRoleToUser(Long id) {
     var user = findById(id);
-    var role = userRoleServiceService.getByRole("USER");
+    var role = userRoleServiceService.findByRole("USER");
     user.setRole(role);
     userRepository.save(user);
     return "Success";

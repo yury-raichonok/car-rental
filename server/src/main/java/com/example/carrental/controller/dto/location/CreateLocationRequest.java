@@ -1,6 +1,5 @@
 package com.example.carrental.controller.dto.location;
 
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -42,6 +41,5 @@ public class CreateLocationRequest {
   private double coordinateY;
   @NotNull
   @Min(0)
-  @Max(21)
   private int zoom;
 }

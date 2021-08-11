@@ -198,8 +198,6 @@ const AdminCarsComponent = () => {
     sortBy: "id",
     brandName: null,
     modelName: null,
-    carClassName: null,
-    locationName: null,
     vin: null,
     inRental: true,
   });
@@ -482,8 +480,6 @@ const AdminCarsComponent = () => {
     state.sortBy = "id";
     state.brandName = null;
     state.modelName = null;
-    state.carClassName = null;
-    state.locationName = null;
     state.vin = null;
     state.inRental = true;
     fetchCars();
@@ -522,8 +518,6 @@ const AdminCarsComponent = () => {
   const onSearch = value => {
     state.brandName = null;
     state.modelName = null;
-    state.carClassName = null;
-    state.locationName = null;
     state.vin = null;
     switch (searchParameter) {
       case "brandName":
@@ -533,16 +527,8 @@ const AdminCarsComponent = () => {
         state.modelName = value;
         break;
 
-      case "carClassName":
-        state.carClassName = value;
-        break;
-
       case "vin":
         state.vin = value;
-        break;
-
-      case "locationName":
-        state.locationName = value;
         break;
                         
       default:
@@ -573,9 +559,7 @@ const AdminCarsComponent = () => {
           >
             <Option value="brandName" default>{t('search_by_brand')}</Option>
             <Option value="modelName">{t('search_by_model')}</Option>
-            <Option value="carClassName">{t('search_by_class')}</Option>
             <Option value="vin">vin</Option>
-            <Option value="locationName">{t('search_by_location')}</Option>
           </Select>
           <Search placeholder={t('input_search_text')} onSearch={onSearch} style={{ width: 200 }} />
         </SearchButtonsContainer>

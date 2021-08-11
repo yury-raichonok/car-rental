@@ -788,5 +788,7 @@
   "driving_license_not_specified": "не пазначана",
   "passport_not_specified": "не пазначаны",
   "to_send_order_you_need_to_specify_and_confirm_your_driving_license": "Для адпраўлення замовы Вам трэба ўказаць і пацвердзіць дадзеныя вадзіцельскага пасведчання",
-  "to_send_order_you_need_to_specify_and_confirm_your_passport": "Для адпраўлення замовы Вам трэба ўказаць і пацвердзіць пашпартныя дадзеныя"
+  "to_send_order_you_need_to_specify_and_confirm_your_passport": "Для адпраўлення замовы Вам трэба ўказаць і пацвердзіць пашпартныя дадзеныя",
+  "notification_message": "Паведамленне",
+  "license_is_not_confirmed": "не пацверджана"
 }

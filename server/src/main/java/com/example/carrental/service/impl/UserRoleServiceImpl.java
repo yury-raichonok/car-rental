@@ -16,7 +16,7 @@ public class UserRoleServiceImpl implements UserRoleService {
   private final UserRoleRepository userRoleRepository;
 
   @Override
-  public UserRole getById(Long id) {
+  public UserRole findById(Long id) {
     Optional<UserRole> optionalRole = userRoleRepository.findById(id);
     if (optionalRole.isEmpty()) {
       log.error("User role with id {} does not exists", id);
@@ -26,7 +26,7 @@ public class UserRoleServiceImpl implements UserRoleService {
   }
 
   @Override
-  public UserRole getByRole(String role) {
+  public UserRole findByRole(String role) {
     Optional<UserRole> optionalRole = userRoleRepository.findByRole(role);
     if (optionalRole.isEmpty()) {
       log.error("User role with role name {} does not exists", role);

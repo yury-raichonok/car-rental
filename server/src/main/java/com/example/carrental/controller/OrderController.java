@@ -22,7 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,26 +41,30 @@ public class OrderController {
 
   @PostMapping(path = "/search")
   public ResponseEntity<Page<OrderResponse>> findAll(
-      @Valid @RequestBody OrderSearchRequest orderSearchRequest) {
-    var ordersPage = orderService.findAll(orderSearchRequest);
+      @Valid @RequestBody OrderSearchRequest orderSearchRequest,
+      @NotNull @CookieValue(name = "i18next") String language) {
+    var ordersPage = orderService.findAll(orderSearchRequest, language);
     return new ResponseEntity<>(ordersPage, HttpStatus.OK);
   }
 
   @GetMapping(path = "/new")
-  public ResponseEntity<Page<OrderNewResponse>> findAllNew(Pageable pageable) {
-    var ordersPage = orderService.findAllNew(pageable);
+  public ResponseEntity<Page<OrderNewResponse>> findAllNew(Pageable pageable,
+      @NotNull @CookieValue(name = "i18next") String language) {
+    var ordersPage = orderService.findAllNew(pageable, language);
     return new ResponseEntity<>(ordersPage, HttpStatus.OK);
   }
 
   @GetMapping(path = "/current")
-  public ResponseEntity<Page<OrderInformationResponse>> findAllCurrent(Pageable pageable) {
-    var ordersPage = orderService.findAllCurrent(pageable);
+  public ResponseEntity<Page<OrderInformationResponse>> findAllCurrent(Pageable pageable,
+      @NotNull @CookieValue(name = "i18next") String language) {
+    var ordersPage = orderService.findAllCurrent(pageable, language);
     return new ResponseEntity<>(ordersPage, HttpStatus.OK);
   }
 
   @GetMapping(path = "/future")
-  public ResponseEntity<Page<OrderInformationResponse>> findAllFuture(Pageable pageable) {
-    var ordersPage = orderService.findAllFuture(pageable);
+  public ResponseEntity<Page<OrderInformationResponse>> findAllFuture(Pageable pageable,
+      @NotNull @CookieValue(name = "i18next") String language) {
+    var ordersPage = orderService.findAllFuture(pageable, language);
     return new ResponseEntity<>(ordersPage, HttpStatus.OK);
   }
 
@@ -163,9 +167,10 @@ public class OrderController {
   }
 
   @GetMapping(path = "/user")
-  public ResponseEntity<?> findNewUserOrders(Pageable pageable) {
+  public ResponseEntity<?> findAllNewUserOrders(Pageable pageable,
+      @NotNull @CookieValue(name = "i18next") String language) {
     try {
-      var ordersPage = orderService.findNewUserOrders(pageable);
+      var ordersPage = orderService.findAllNewUserOrders(pageable, language);
       return new ResponseEntity<>(ordersPage, HttpStatus.OK);
     } catch (IllegalStateException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -173,9 +178,10 @@ public class OrderController {
   }
 
   @GetMapping(path = "/user/history")
-  public ResponseEntity<?> findUserOrdersHistory(Pageable pageable) {
+  public ResponseEntity<?> findAllUserOrdersHistory(Pageable pageable,
+      @NotNull @CookieValue(name = "i18next") String language) {
     try {
-      var ordersPage = orderService.findUserOrdersHistory(pageable);
+      var ordersPage = orderService.findAllUserOrdersHistory(pageable, language);
       return new ResponseEntity<>(ordersPage, HttpStatus.OK);
     } catch (IllegalStateException e) {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
