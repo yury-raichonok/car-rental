@@ -1,8 +1,8 @@
-#Car rental web app
+# Car rental web app
 Web application for car rental service. 
 The application implements a full set of functionalities from customer registration to payment and order support. 
 
-#Application features
+# Application features
 User:
 - Registration and authentication;
 - Confirmation of email address and password recovery;
@@ -22,7 +22,7 @@ Administrator:
 - Completion of current orders, issuing a fine and invoicing for repairs to the user;
 - Editing rental data.
 
-#Technologies used
+# Technologies used
 Frontend - React JS, Axios, Styled components, Antd, Bootstrap;
 
 Backend - Java EE, Spring Boot, REST, Hibernate, MySql, Amazon S3, Twilio.
