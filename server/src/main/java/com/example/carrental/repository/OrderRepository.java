@@ -13,6 +13,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
+  int countAllByRentalStatus(OrderRentalStatus rentalStatus);
+
+  int countAllBySentDateAfter(LocalDateTime date);
+
+  int countAllByUser_EmailAndRentalStatusAndPaymentStatus(String email, OrderRentalStatus status,
+      OrderPaymentStatus paymentStatus);
+
   Page<Order> findAllByRentalStatus(OrderRentalStatus rentalStatus, Pageable pageable);
 
   Page<Order> findAllByRentalStatusAndPaymentStatus(OrderRentalStatus rentalStatus,
@@ -23,13 +30,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
   Page<Order> findAllByRentalStatusOrRentalStatusAndUser_Email(OrderRentalStatus firstStatus,
       OrderRentalStatus secondStatus, String email, Pageable pageable);
-
-  int countAllByRentalStatus(OrderRentalStatus rentalStatus);
-
-  int countAllBySentDateAfter(LocalDateTime date);
-
-  int countAllByUser_EmailAndRentalStatusAndPaymentStatus(String email, OrderRentalStatus status,
-      OrderPaymentStatus paymentStatus);
 
   List<Order> getAllByRentalStatusOrRentalStatusAndCar_Vin(OrderRentalStatus status1,
       OrderRentalStatus status2, String carVin);

@@ -25,11 +25,14 @@ public interface UserPassportMapper {
   @Mapping(target = "firstName", source = "userPassport.firstName")
   @Mapping(target = "middleName", source = "userPassport.middleName")
   @Mapping(target = "lastName", source = "userPassport.lastName")
-  @Mapping(target = "dateOfBirth", source = "userPassport.dateOfBirth", dateFormat = PASSPORT_DATE_FORMAT_PATTERN)
+  @Mapping(target = "dateOfBirth", source = "userPassport.dateOfBirth",
+      dateFormat = PASSPORT_DATE_FORMAT_PATTERN)
   @Mapping(target = "passportSeries", source = "userPassport.passportSeries")
   @Mapping(target = "passportNumber", source = "userPassport.passportNumber")
-  @Mapping(target = "dateOfIssue", source = "userPassport.dateOfIssue", dateFormat = PASSPORT_DATE_FORMAT_PATTERN)
-  @Mapping(target = "validityPeriod", source = "userPassport.validityPeriod", dateFormat = PASSPORT_DATE_FORMAT_PATTERN)
+  @Mapping(target = "dateOfIssue", source = "userPassport.dateOfIssue",
+      dateFormat = PASSPORT_DATE_FORMAT_PATTERN)
+  @Mapping(target = "validityPeriod", source = "userPassport.validityPeriod",
+      dateFormat = PASSPORT_DATE_FORMAT_PATTERN)
   @Mapping(target = "organizationThatIssued", source = "userPassport.organizationThatIssued")
   @Mapping(target = "documentsFileLink", source = "userPassport.documentsFileLink")
   UserPassportConfirmationDataResponse userPassportToUserPassportConfirmationDataResponse(

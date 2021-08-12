@@ -82,8 +82,26 @@ public class RentalRequestServiceImpl implements RentalRequestService {
   }
 
   @Override
-  public int findNewRequestsAmount() {
-    return rentalRequestRepository.countAllByConsideredFalse();
+  public UserDrivingLicenseConfirmationDataResponse findRequestDrivingLicenseData(Long id) {
+    var request = findById(id);
+    if (!DRIVING_LICENSE_CONFIRMATION_REQUEST.equals(request.getRentalRequestType())) {
+      log.error("Type of request does not {}", DRIVING_LICENSE_CONFIRMATION_REQUEST);
+      throw new IllegalStateException(
+          String.format("Type of request does not %s", DRIVING_LICENSE_CONFIRMATION_REQUEST));
+    }
+
+    var optionalDrivingLicense = Optional.ofNullable(request.getUser().getDrivingLicense());
+    if (optionalDrivingLicense.isEmpty()) {
+      log.error("Driving license of user {} does not exists", request.getUser().getEmail());
+      throw new IllegalStateException(
+          String
+              .format("Driving license of user %s does not exists", request.getUser().getEmail()));
+    }
+
+    var drivingLicense = optionalDrivingLicense.get();
+
+    return userDrivingLicenseMapper
+        .drivingLicenseToUserDrivingLicenseConfirmationDataResponse(drivingLicense);
   }
 
   @Override
@@ -108,31 +126,8 @@ public class RentalRequestServiceImpl implements RentalRequestService {
   }
 
   @Override
-  public UserDrivingLicenseConfirmationDataResponse findRequestDrivingLicenseData(Long id) {
-    var request = findById(id);
-    if (!DRIVING_LICENSE_CONFIRMATION_REQUEST.equals(request.getRentalRequestType())) {
-      log.error("Type of request does not {}", DRIVING_LICENSE_CONFIRMATION_REQUEST);
-      throw new IllegalStateException(
-          String.format("Type of request does not %s", DRIVING_LICENSE_CONFIRMATION_REQUEST));
-    }
-
-    var optionalDrivingLicense = Optional.ofNullable(request.getUser().getDrivingLicense());
-    if (optionalDrivingLicense.isEmpty()) {
-      log.error("Driving license of user {} does not exists", request.getUser().getEmail());
-      throw new IllegalStateException(
-          String
-              .format("Driving license of user %s does not exists", request.getUser().getEmail()));
-    }
-
-    var drivingLicense = optionalDrivingLicense.get();
-
-    return userDrivingLicenseMapper
-        .drivingLicenseToUserDrivingLicenseConfirmationDataResponse(drivingLicense);
-  }
-
-  @Override
   @Transactional
-  public String create(CreateRentalRequestRequest createRentalRequestRequest) {
+  public void create(CreateRentalRequestRequest createRentalRequestRequest) {
     var username = SecurityContextHolder.getContext().getAuthentication().getName();
     if ("anonymousUser".equals(username)) {
       log.error("User is not authenticated!");
@@ -162,48 +157,11 @@ public class RentalRequestServiceImpl implements RentalRequestService {
         .user(user)
         .build();
     rentalRequestRepository.save(rentalRequest);
-    return "Success";
   }
 
   @Override
   @Transactional
-  public String rejectRequest(Long id, RentalRequestRejectRequest rentalRequestRejectRequest) {
-    var rentalRequest = findById(id);
-
-    rentalRequest.setConsiderationDate(LocalDateTime.now());
-    rentalRequest.setConsidered(true);
-    rentalRequest.setComments(rentalRequestRejectRequest.getComments());
-
-    var notification = Notification
-        .builder()
-        .message(rentalRequestRejectRequest.getComments())
-        .notificationType(DENY)
-        .sentDate(LocalDateTime.now())
-        .status(NotificationStatus.NEW)
-        .user(rentalRequest.getUser())
-        .build();
-
-    switch (rentalRequest.getRentalRequestType()) {
-      case PASSPORT_CONFIRMATION_REQUEST:
-        var passport = rentalRequest.getUser().getPassport();
-        passport.setStatus(UserDocumentStatus.NOT_CONFIRMED);
-        userPassportService.update(passport.getId(), passport);
-        break;
-      case DRIVING_LICENSE_CONFIRMATION_REQUEST:
-        var drivingLicense = rentalRequest.getUser().getDrivingLicense();
-        drivingLicense.setStatus(UserDocumentStatus.NOT_CONFIRMED);
-        userDrivingLicenseService.update(drivingLicense.getId(), drivingLicense);
-        break;
-    }
-
-    notificationService.sendNotification(notification);
-    rentalRequestRepository.save(rentalRequest);
-    return "Success";
-  }
-
-  @Override
-  @Transactional
-  public String approveRequest(Long id) {
+  public void approveRequest(Long id) {
     var rentalRequest = findById(id);
 
     var notification = Notification
@@ -237,7 +195,46 @@ public class RentalRequestServiceImpl implements RentalRequestService {
 
     notificationService.sendNotification(notification);
     rentalRequestRepository.save(rentalRequest);
-    return "Success";
+  }
+
+  @Override
+  @Transactional
+  public void rejectRequest(Long id, RentalRequestRejectRequest rentalRequestRejectRequest) {
+    var rentalRequest = findById(id);
+
+    rentalRequest.setConsiderationDate(LocalDateTime.now());
+    rentalRequest.setConsidered(true);
+    rentalRequest.setComments(rentalRequestRejectRequest.getComments());
+
+    var notification = Notification
+        .builder()
+        .message(rentalRequestRejectRequest.getComments())
+        .notificationType(DENY)
+        .sentDate(LocalDateTime.now())
+        .status(NotificationStatus.NEW)
+        .user(rentalRequest.getUser())
+        .build();
+
+    switch (rentalRequest.getRentalRequestType()) {
+      case PASSPORT_CONFIRMATION_REQUEST:
+        var passport = rentalRequest.getUser().getPassport();
+        passport.setStatus(UserDocumentStatus.NOT_CONFIRMED);
+        userPassportService.update(passport.getId(), passport);
+        break;
+      case DRIVING_LICENSE_CONFIRMATION_REQUEST:
+        var drivingLicense = rentalRequest.getUser().getDrivingLicense();
+        drivingLicense.setStatus(UserDocumentStatus.NOT_CONFIRMED);
+        userDrivingLicenseService.update(drivingLicense.getId(), drivingLicense);
+        break;
+    }
+
+    notificationService.sendNotification(notification);
+    rentalRequestRepository.save(rentalRequest);
+  }
+
+  @Override
+  public int findNewRequestsAmount() {
+    return rentalRequestRepository.countAllByConsideredFalse();
   }
 
   @Override

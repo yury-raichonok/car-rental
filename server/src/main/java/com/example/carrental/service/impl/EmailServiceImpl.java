@@ -22,9 +22,9 @@ public class EmailServiceImpl implements EmailService {
 
   @Override
   @Transactional
-  public String sendEmail(String to, String body, String topic) {
+  public void sendEmail(String to, String body, String topic) {
     try {
-      SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+      var simpleMailMessage = new SimpleMailMessage();
       simpleMailMessage.setFrom(email);
       simpleMailMessage.setTo(to);
       simpleMailMessage.setSubject(topic);
@@ -34,6 +34,5 @@ public class EmailServiceImpl implements EmailService {
       log.error("Email was not sent to the mail {}", to);
       throw new MailSendException(String.format("Email was not sent to the mail %s", to));
     }
-    return "Success";
   }
 }

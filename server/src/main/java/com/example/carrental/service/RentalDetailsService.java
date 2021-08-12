@@ -11,15 +11,15 @@ import org.springframework.stereotype.Service;
 @Service
 public interface RentalDetailsService {
 
-  RentalDetailsAndStatisticResponse getRentalDetailsAndStatistic(String language);
-
-  RentalDetails getRentalDetails();
+  RentalAdminDetailsStatisticResponse getAdminDetailsStatistic();
 
   RentalDetailsContactInformationResponse getContactInformation(String language);
 
-  String createOrUpdate(RentalDetailsUpdateRequest rentalDetailsUpdateRequest);
+  RentalDetails getRentalDetails();
 
-  RentalAdminDetailsStatisticResponse getAdminDetailsStatistic();
+  RentalDetailsAndStatisticResponse getRentalDetailsAndStatistic(String language);
 
   RentalUserDetailsStatisticResponse getUserDetailsStatistic();
+
+  void createOrUpdate(RentalDetailsUpdateRequest rentalDetailsUpdateRequest);
 }

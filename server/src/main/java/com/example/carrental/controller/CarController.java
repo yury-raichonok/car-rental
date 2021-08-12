@@ -38,13 +38,6 @@ public class CarController {
 
   private final CarService carService;
 
-  @PostMapping
-  public ResponseEntity<String> create(@Valid @RequestBody CreateCarRequest createCarRequest)
-      throws EntityAlreadyExistsException {
-    var response = carService.create(createCarRequest);
-    return new ResponseEntity<>(response, HttpStatus.OK);
-  }
-
   @GetMapping(path = "/profitable")
   public ResponseEntity<List<CarProfitableOfferResponse>> findAllProfitableOffers(
       @NotNull @CookieValue(name = "i18next") String language) throws NoContentException {
@@ -57,6 +50,13 @@ public class CarController {
       @NotNull @CookieValue(name = "i18next") String language) {
     var carSearchByIdResponse = carService.findCarById(id, language);
     return new ResponseEntity<>(carSearchByIdResponse, HttpStatus.OK);
+  }
+
+  @PostMapping
+  public ResponseEntity<HttpStatus> create(@Valid @RequestBody CreateCarRequest createCarRequest)
+      throws EntityAlreadyExistsException {
+    carService.create(createCarRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @PostMapping(path = "/search")
@@ -75,23 +75,25 @@ public class CarController {
     return new ResponseEntity<>(carsAdminPageResponse, HttpStatus.OK);
   }
 
+  @PostMapping(path = "/{id}/upload/image")
+  public ResponseEntity<HttpStatus> uploadCarImage(@NotNull @Positive @PathVariable Long id,
+      @NotNull @RequestParam MultipartFile carFile) {
+    carService.uploadCarImage(id, carFile);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
   @PutMapping(path = "/{id}")
-  public ResponseEntity<String> update(@NotNull @Positive @PathVariable Long id,
+  public ResponseEntity<HttpStatus> update(@NotNull @Positive @PathVariable Long id,
       @Valid @RequestBody UpdateCarRequest updateCarRequest) throws EntityAlreadyExistsException {
-    var response = carService.update(id, updateCarRequest);
-    return new ResponseEntity<>(response, HttpStatus.OK);
+    carService.update(id, updateCarRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @PutMapping(path = "/update/status/{id}")
-  public ResponseEntity<String> updateRentalStatus(@NotNull @Positive @PathVariable Long id) {
-    var response = carService.updateRentalStatus(id);
-    return new ResponseEntity<>(response, HttpStatus.OK);
+  public ResponseEntity<HttpStatus> updateRentalStatus(@NotNull @Positive @PathVariable Long id) {
+    carService.updateRentalStatus(id);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
-  @PostMapping(path = "/{id}/upload/image")
-  public ResponseEntity<String> uploadCarImage(@NotNull @Positive @PathVariable Long id,
-      @NotNull @RequestParam MultipartFile carFile) {
-    var response = carService.uploadCarImage(id, carFile);
-    return new ResponseEntity<>(response, HttpStatus.OK);
-  }
+
 }

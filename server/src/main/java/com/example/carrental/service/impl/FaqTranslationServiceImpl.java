@@ -1,5 +1,9 @@
 package com.example.carrental.service.impl;
 
+import static com.example.carrental.service.impl.CarClassTranslationServiceImpl.BELORUSSIAN;
+import static com.example.carrental.service.impl.CarClassTranslationServiceImpl.ENGLISH;
+import static com.example.carrental.service.impl.CarClassTranslationServiceImpl.RUSSIAN;
+
 import com.example.carrental.controller.dto.faq.CreateFaqRequest;
 import com.example.carrental.controller.dto.faq.UpdateFaqRequest;
 import com.example.carrental.entity.faq.Faq;
@@ -27,7 +31,7 @@ public class FaqTranslationServiceImpl implements FaqTranslationService {
         .question(createFaqRequest.getQuestionBe())
         .answer(createFaqRequest.getAnswerBe())
         .faq(faq)
-        .language("be")
+        .language(BELORUSSIAN)
         .build());
 
     faqTranslationRepository.save(FaqTranslation
@@ -35,7 +39,7 @@ public class FaqTranslationServiceImpl implements FaqTranslationService {
         .question(createFaqRequest.getQuestionRu())
         .answer(createFaqRequest.getAnswerRu())
         .faq(faq)
-        .language("ru")
+        .language(RUSSIAN)
         .build());
   }
 
@@ -43,7 +47,7 @@ public class FaqTranslationServiceImpl implements FaqTranslationService {
   @Transactional
   public void update(UpdateFaqRequest updateFaqRequest, List<FaqTranslation> translations) {
     var faqTranslationRu = translations.stream()
-        .filter(translation -> "ru".equals(translation.getLanguage())).findFirst();
+        .filter(translation -> RUSSIAN.equals(translation.getLanguage())).findFirst();
     faqTranslationRu.ifPresent(faqTranslation -> {
       faqTranslation.setQuestion(updateFaqRequest.getQuestionRu());
       faqTranslation.setAnswer(updateFaqRequest.getAnswerRu());
@@ -51,7 +55,7 @@ public class FaqTranslationServiceImpl implements FaqTranslationService {
     });
 
     var faqTranslationBe = translations.stream()
-        .filter(translation -> "be".equals(translation.getLanguage())).findFirst();
+        .filter(translation -> BELORUSSIAN.equals(translation.getLanguage())).findFirst();
     faqTranslationBe.ifPresent(faqTranslation -> {
       faqTranslation.setQuestion(updateFaqRequest.getQuestionBe());
       faqTranslation.setAnswer(updateFaqRequest.getAnswerBe());
@@ -61,13 +65,15 @@ public class FaqTranslationServiceImpl implements FaqTranslationService {
 
   @Override
   public void setTranslation(Faq faq, String language) {
-    faq.getFaqTranslations()
-        .stream()
-        .filter(translation -> language.equals(translation.getLanguage()))
-        .findFirst()
-        .ifPresent(faqTranslation -> {
-          faq.setQuestion(faqTranslation.getQuestion());
-          faq.setAnswer(faqTranslation.getAnswer());
-        });
+    if (!ENGLISH.equals(language)) {
+      faq.getFaqTranslations()
+          .stream()
+          .filter(translation -> language.equals(translation.getLanguage()))
+          .findFirst()
+          .ifPresent(faqTranslation -> {
+            faq.setQuestion(faqTranslation.getQuestion());
+            faq.setAnswer(faqTranslation.getAnswer());
+          });
+    }
   }
 }

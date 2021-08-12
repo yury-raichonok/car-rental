@@ -32,11 +32,11 @@ public class PaymentBillCriteriaRepositoryImpl implements PaymentBillCriteriaRep
 
   @Override
   public Page<PaymentBill> findAll(PaymentBillSearchRequest paymentBillSearchRequest) {
-    CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+    var criteriaBuilder = entityManager.getCriteriaBuilder();
     CriteriaQuery<PaymentBill> paymentBillCriteriaQuery = criteriaBuilder
         .createQuery(PaymentBill.class);
     Root<PaymentBill> paymentBillRoot = paymentBillCriteriaQuery.from(PaymentBill.class);
-    Predicate predicate = getPredicate(criteriaBuilder, paymentBillSearchRequest, paymentBillRoot);
+    var predicate = getPredicate(criteriaBuilder, paymentBillSearchRequest, paymentBillRoot);
     paymentBillCriteriaQuery.where(predicate);
     setPaymentBill(criteriaBuilder, paymentBillSearchRequest, paymentBillCriteriaQuery,
         paymentBillRoot);
@@ -48,7 +48,7 @@ public class PaymentBillCriteriaRepositoryImpl implements PaymentBillCriteriaRep
             paymentBillSearchRequest.getPageNumber() * paymentBillSearchRequest.getPageSize());
     paymentBillTypedQuery.setMaxResults(paymentBillSearchRequest.getPageSize());
 
-    Pageable pageable = getPageable(paymentBillSearchRequest);
+    var pageable = getPageable(paymentBillSearchRequest);
 
     long paymentBillCount = getPaymentBillCount(criteriaBuilder, predicate);
 
@@ -68,7 +68,7 @@ public class PaymentBillCriteriaRepositoryImpl implements PaymentBillCriteriaRep
   }
 
   private Pageable getPageable(PaymentBillSearchRequest paymentBillSearchRequest) {
-    Sort sort = Sort
+    var sort = Sort
         .by(paymentBillSearchRequest.getSortDirection(), paymentBillSearchRequest.getSortBy());
     return PageRequest
         .of(paymentBillSearchRequest.getPageNumber(), paymentBillSearchRequest.getPageSize(), sort);

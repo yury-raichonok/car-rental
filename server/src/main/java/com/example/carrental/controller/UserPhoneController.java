@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -28,43 +27,25 @@ public class UserPhoneController {
 
   private final UserPhoneService userPhoneService;
 
-  @PutMapping
-  public ResponseEntity<String> sendConfirmationSms(
-      @Valid @RequestBody UserSmsRequest userSmsRequest) {
-    try {
-      var response = userPhoneService.sendConfirmationSms(userSmsRequest);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (EntityAlreadyExistsException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+  @PostMapping
+  public ResponseEntity<HttpStatus> create(
+      @Valid @RequestBody UserPhoneConfirmationRequest userPhoneConfirmationRequest)
+      throws TokenExpireException, EntityAlreadyExistsException {
+    userPhoneService.create(userPhoneConfirmationRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
-  @PostMapping
-  public ResponseEntity<String> create(
-      @Valid @RequestBody UserPhoneConfirmationRequest userPhoneConfirmationRequest) {
-    try {
-      var response = userPhoneService.create(userPhoneConfirmationRequest);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (TokenExpireException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    } catch (EntityAlreadyExistsException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.METHOD_NOT_ALLOWED);
-    }
+  @PutMapping
+  public ResponseEntity<HttpStatus> sendConfirmationSms(
+      @Valid @RequestBody UserSmsRequest userSmsRequest) throws EntityAlreadyExistsException {
+    userPhoneService.sendConfirmationSms(userSmsRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @PutMapping(path = "/{id}")
-  public ResponseEntity<String> updatePhoneStatus(@NotNull @Positive @PathVariable Long id) {
-    try {
-      var response = userPhoneService.updatePhoneStatus(id);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    } catch (EntityAlreadyExistsException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.METHOD_NOT_ALLOWED);
-    }
+  public ResponseEntity<HttpStatus> updatePhoneStatus(@NotNull @Positive @PathVariable Long id)
+      throws EntityAlreadyExistsException {
+    userPhoneService.updatePhoneStatus(id);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }

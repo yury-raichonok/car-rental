@@ -8,6 +8,7 @@ import com.example.carrental.entity.user.User;
 import com.example.carrental.service.UserAuthenticationService;
 import com.example.carrental.service.UserSecurityService;
 import com.example.carrental.service.UserService;
+import com.example.carrental.service.exceptions.UserNotAuthenticatedException;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,20 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
   private final JwtTokenHelper jwtTokenHelper;
 
   @Override
+  public UserInfoResponse getUserInfo(Principal user) throws UserNotAuthenticatedException {
+    if (null == user) {
+      log.error("User is not authenticated");
+      throw new UserNotAuthenticatedException("User is not authenticated");
+    }
+    var userObj = (User) userSecurityService.loadUserByUsername(user.getName());
+    return UserInfoResponse
+        .builder()
+        .email(userObj.getEmail())
+        .role(userObj.getAuthorities())
+        .build();
+  }
+
+  @Override
   @Transactional
   public UserLoginResponse login(UserLoginRequest userLoginRequest) {
     final Authentication authentication = authenticationManager
@@ -43,19 +58,5 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
     userService.updateLastLoginDate(userLoginRequest.getEmail());
 
     return new UserLoginResponse(jwtToken);
-  }
-
-  @Override
-  public UserInfoResponse getUserInfo(Principal user) {
-    if (null == user) {
-      log.error("User is not authenticated");
-      throw new IllegalStateException("User is not authenticated");
-    }
-    var userObj = (User) userSecurityService.loadUserByUsername(user.getName());
-    return UserInfoResponse
-        .builder()
-        .email(userObj.getEmail())
-        .role(userObj.getAuthorities())
-        .build();
   }
 }

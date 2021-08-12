@@ -19,20 +19,6 @@ public class FileStoreAmazonS3RepositoryImpl implements FileStoreRepository {
 
   private final AmazonS3 s3;
 
-
-  @Override
-  public String uploadPublicFile(String bucketName, String fileName, File file) {
-    s3.putObject(new PutObjectRequest(bucketName, fileName, file)
-        .withCannedAcl(CannedAccessControlList.PublicRead));
-    return "Success";
-  }
-
-  @Override
-  public String uploadFile(String bucketName, String fileName, File file) {
-    s3.putObject(new PutObjectRequest(bucketName, fileName, file));
-    return "Success";
-  }
-
   @Override
   public List<S3Object> downloadFiles(String bucketName, String directory) {
     ObjectListing objectListing = s3.listObjects(bucketName, directory);
@@ -40,5 +26,16 @@ public class FileStoreAmazonS3RepositoryImpl implements FileStoreRepository {
     objectListing.getObjectSummaries().forEach(oL -> s3ObjectList
         .add(s3.getObject(new GetObjectRequest(oL.getBucketName(), oL.getKey()))));
     return s3ObjectList;
+  }
+
+  @Override
+  public void uploadFile(String bucketName, String fileName, File file) {
+    s3.putObject(new PutObjectRequest(bucketName, fileName, file));
+  }
+
+  @Override
+  public void uploadPublicFile(String bucketName, String fileName, File file) {
+    s3.putObject(new PutObjectRequest(bucketName, fileName, file)
+        .withCannedAcl(CannedAccessControlList.PublicRead));
   }
 }

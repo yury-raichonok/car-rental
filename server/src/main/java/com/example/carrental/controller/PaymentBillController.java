@@ -2,6 +2,8 @@ package com.example.carrental.controller;
 
 import com.example.carrental.controller.dto.bill.PaymentBillResponse;
 import com.example.carrental.controller.dto.bill.PaymentBillSearchRequest;
+import com.example.carrental.controller.dto.bill.UserNewPaymentBillsResponse;
+import com.example.carrental.controller.dto.bill.UserPaymentBillsResponse;
 import com.example.carrental.service.PaymentBillService;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -37,45 +39,29 @@ public class PaymentBillController {
     return new ResponseEntity<>(paymentBills, HttpStatus.OK);
   }
 
-  @GetMapping(path = "/user")
-  public ResponseEntity<?> findAllUserBillsHistory(Pageable pageable,
+  @GetMapping(path = "/user/new")
+  public ResponseEntity<Page<UserNewPaymentBillsResponse>> findAllNewUserBills(Pageable pageable,
       @NotNull @CookieValue(name = "i18next") String language) {
-    try {
-      var paymentBills = paymentBillService.findAllUserBillsHistory(pageable, language);
-      return new ResponseEntity<>(paymentBills, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+    var paymentBills = paymentBillService.findAllNewUserBills(pageable, language);
+    return new ResponseEntity<>(paymentBills, HttpStatus.OK);
   }
 
-  @GetMapping(path = "/user/new")
-  public ResponseEntity<?> findAllNewUserBills(Pageable pageable,
+  @GetMapping(path = "/user")
+  public ResponseEntity<Page<UserPaymentBillsResponse>> findAllUserBillsHistory(Pageable pageable,
       @NotNull @CookieValue(name = "i18next") String language) {
-    try {
-      var paymentBills = paymentBillService.findAllNewUserBills(pageable, language);
-      return new ResponseEntity<>(paymentBills, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+    var paymentBills = paymentBillService.findAllUserBillsHistory(pageable, language);
+    return new ResponseEntity<>(paymentBills, HttpStatus.OK);
   }
 
   @PutMapping(path = "/{id}")
-  public ResponseEntity<String> approveWithoutPayment(@NotNull @Positive @PathVariable Long id) {
-    try {
-      var response = paymentBillService.approveWithoutPayment(id);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+  public ResponseEntity<HttpStatus> approveWithoutPayment(@NotNull @Positive @PathVariable Long id) {
+    paymentBillService.approveWithoutPayment(id);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @PostMapping("/pay/{id}")
-  public ResponseEntity<?> payBill(@NotNull @Positive @PathVariable Long id) {
-    try {
-      var response = paymentBillService.payBill(id);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+  public ResponseEntity<HttpStatus> payBill(@NotNull @Positive @PathVariable Long id) {
+    paymentBillService.payBill(id);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }

@@ -11,45 +11,43 @@ import com.example.carrental.entity.user.User;
 import com.example.carrental.service.exceptions.TokenExpireException;
 import com.example.carrental.service.exceptions.UsernameAlreadyTakenException;
 import org.springframework.data.domain.Page;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 @Service
 public interface UserService {
 
+  UserProfileResponse getUserProfile();
+
+  void sendEmailConfirmationMessage();
+
+  void confirmEmail(String token) throws TokenExpireException;
+
+  void changePassword(UserChangePasswordRequest changePasswordRequest)
+      throws TokenExpireException;
+
+  void create(UserRegistrationRequest userRegistrationRequest)
+      throws UsernameAlreadyTakenException;
+
   Page<UserDataResponse> findAll(UserSearchRequest userSearchRequest);
 
-  User findById(Long id);
+  void forgotPassword(UserForgotPasswordRequest forgotPasswordRequest);
+
+  void update(Long id, UserUpdateRequest userUpdateRequest)
+      throws UsernameAlreadyTakenException;
+
+  void updateUserRoleToAdmin(Long id);
+
+  void updateUserRoleToUser(Long id);
+
+  void updateUserStatus(Long id);
 
   String checkExistedEmail(String email) throws UsernameAlreadyTakenException;
 
-  String create(UserRegistrationRequest userRegistrationRequest)
-      throws UsernameAlreadyTakenException;
+  User findById(Long id);
 
-  String confirmEmail(String token) throws TokenExpireException;
-
-  String update(Long id, UserUpdateRequest userUpdateRequest)
-      throws UsernameAlreadyTakenException;
-
-  String forgotPassword(UserForgotPasswordRequest forgotPasswordRequest);
-
-  String changePassword(UserChangePasswordRequest changePasswordRequest)
-      throws TokenExpireException;
-
-  UserProfileResponse getUserProfile();
-
-  String sendEmailConfirmationMessage();
+  int findNewUsersAmountPerDay();
 
   User findUserByEmail(String username);
 
-  String updateLastLoginDate(String email);
-
-  String updateUserStatus(Long id);
-
-  String updateUserRoleToAdmin(Long id);
-
-  String updateUserRoleToUser(Long id);
-
-  int findNewUsersAmountPerDay();
+  void updateLastLoginDate(String email);
 }

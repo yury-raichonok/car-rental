@@ -14,24 +14,23 @@ import org.springframework.stereotype.Service;
 @Service
 public interface RentalRequestService {
 
-
   Page<RentalAllRequestResponse> findAll(Pageable pageable);
 
   Page<RentalRequestResponse> findAllNew(Pageable pageable);
 
   RentalRequest findById(Long id);
 
-  int findNewRequestsAmount();
+  UserDrivingLicenseConfirmationDataResponse findRequestDrivingLicenseData(Long id);
 
   UserPassportConfirmationDataResponse findRequestPassportData(Long id);
 
-  UserDrivingLicenseConfirmationDataResponse findRequestDrivingLicenseData(Long id);
+  void create(CreateRentalRequestRequest createRentalRequestRequest);
 
-  String create(CreateRentalRequestRequest createRentalRequestRequest);
+  void approveRequest(Long id);
 
-  String rejectRequest(Long id, RentalRequestRejectRequest rentalRequestRejectRequest);
+  void rejectRequest(Long id, RentalRequestRejectRequest rentalRequestRejectRequest);
 
-  String approveRequest(Long id);
+  int findNewRequestsAmount();
 
   int findNewRequestsAmountPerDay();
 }

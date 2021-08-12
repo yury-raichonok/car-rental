@@ -40,6 +40,7 @@ import com.example.carrental.service.RentalDetailsService;
 import com.example.carrental.service.RepairBillService;
 import com.example.carrental.service.UserService;
 import com.example.carrental.service.exceptions.CarAlreadyBookedException;
+import com.example.carrental.service.exceptions.DocumentNotGeneratedException;
 import com.example.carrental.service.exceptions.DocumentsNotConfirmedException;
 import com.example.carrental.service.exceptions.FontNotFoundException;
 import java.math.BigDecimal;
@@ -98,38 +99,6 @@ public class OrderServiceImpl implements OrderService {
   }
 
   @Override
-  public Page<OrderResponse> findAll(OrderSearchRequest orderSearchRequest, String language) {
-    var ordersPage = orderCriteriaRepository.findAll(orderSearchRequest);
-    List<OrderResponse> ordersList = new ArrayList<>();
-    ordersPage.forEach(order -> {
-      if (!"en".equals(language)) {
-        locationTranslationService.setTranslation(order.getLocation(), language);
-      }
-      ordersList.add(orderMapper.orderToOrderResponse(order));
-    });
-
-    return new PageImpl<>(ordersList, ordersPage.getPageable(), ordersPage.getTotalElements());
-  }
-
-  @Override
-  public Page<OrderNewResponse> findAllNew(Pageable pageable, String language) {
-    var ordersPage = orderRepository.findAllByRentalStatus(OrderRentalStatus.NEW, pageable);
-    List<OrderNewResponse> ordersList = new ArrayList<>();
-    ordersPage.forEach(order -> {
-      if (!"en".equals(language)) {
-        locationTranslationService.setTranslation(order.getLocation(), language);
-      }
-      ordersList.add(orderMapper.orderToOrderNewResponse(order));
-    });
-    return new PageImpl<>(ordersList, ordersPage.getPageable(), ordersPage.getTotalElements());
-  }
-
-  @Override
-  public int findNewOrdersAmount() {
-    return orderRepository.countAllByRentalStatus(OrderRentalStatus.NEW);
-  }
-
-  @Override
   public Page<OrderInformationResponse> findAllCurrent(Pageable pageable, String language) {
     var ordersPage = orderRepository.findAllByRentalStatus(IN_PROCESS, pageable);
     List<OrderInformationResponse> ordersList = new ArrayList<>();
@@ -159,13 +128,57 @@ public class OrderServiceImpl implements OrderService {
   }
 
   @Override
-  public Order findById(Long id) {
-    Optional<Order> optionalOrder = orderRepository.findById(id);
-    if (optionalOrder.isEmpty()) {
-      log.error("Order with id {} does not exists", id);
-      throw new IllegalStateException(String.format("Order with id %d does not exists", id));
+  public Page<OrderNewResponse> findAllNew(Pageable pageable, String language) {
+    var ordersPage = orderRepository.findAllByRentalStatus(OrderRentalStatus.NEW, pageable);
+    List<OrderNewResponse> ordersList = new ArrayList<>();
+    ordersPage.forEach(order -> {
+      if (!"en".equals(language)) {
+        locationTranslationService.setTranslation(order.getLocation(), language);
+      }
+      ordersList.add(orderMapper.orderToOrderNewResponse(order));
+    });
+    return new PageImpl<>(ordersList, ordersPage.getPageable(), ordersPage.getTotalElements());
+  }
+
+  @Override
+  public Page<UserOrderResponse> findAllNewUserOrders(Pageable pageable, String language) {
+    var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    if (Optional.ofNullable(user).isEmpty()) {
+      log.error("User not authenticated!");
+      throw new IllegalStateException("User not authenticated");
     }
-    return optionalOrder.get();
+
+    var orderPage = orderRepository.findAllByRentalStatusAndUser_EmailAndPaymentStatus(NOT_STARTED,
+        user.getEmail(), PAID, pageable);
+
+    List<UserOrderResponse> responses = new ArrayList<>();
+    orderPage.forEach(order -> {
+      if (!"en".equals(language)) {
+        locationTranslationService.setTranslation(order.getLocation(), language);
+      }
+      responses.add(orderMapper.orderToNewUserOrderResponse(order));
+    });
+    return new PageImpl<>(responses, orderPage.getPageable(), orderPage.getTotalElements());
+  }
+
+  @Override
+  public Page<UserOrderResponse> findAllUserOrdersHistory(Pageable pageable, String language) {
+    var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    if (Optional.ofNullable(user).isEmpty()) {
+      log.error("User not authenticated!");
+      throw new IllegalStateException("User not authenticated");
+    }
+
+    var orderPage = orderRepository.findAllByRentalStatusOrRentalStatusAndUser_Email(FINISHED,
+        FINISHED_WITH_PENALTY, user.getEmail(), pageable);
+    List<UserOrderResponse> responses = new ArrayList<>();
+    orderPage.forEach(order -> {
+      if (!"en".equals(language)) {
+        locationTranslationService.setTranslation(order.getLocation(), language);
+      }
+      responses.add(orderMapper.orderToNewUserOrderResponse(order));
+    });
+    return new PageImpl<>(responses, orderPage.getPageable(), orderPage.getTotalElements());
   }
 
   @Override
@@ -195,7 +208,7 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   @Transactional
-  public String create(CreateOrderRequest createOrderRequest)
+  public void create(CreateOrderRequest createOrderRequest)
       throws DocumentsNotConfirmedException, CarAlreadyBookedException {
 
     var car = carService.findById(createOrderRequest.getCarId());
@@ -270,49 +283,25 @@ public class OrderServiceImpl implements OrderService {
         .location(location)
         .user(user)
         .build());
+  }
 
-    return "Success";
+  @Override
+  public Page<OrderResponse> findAll(OrderSearchRequest orderSearchRequest, String language) {
+    var ordersPage = orderCriteriaRepository.findAll(orderSearchRequest);
+    List<OrderResponse> ordersList = new ArrayList<>();
+    ordersPage.forEach(order -> {
+      if (!"en".equals(language)) {
+        locationTranslationService.setTranslation(order.getLocation(), language);
+      }
+      ordersList.add(orderMapper.orderToOrderResponse(order));
+    });
+
+    return new PageImpl<>(ordersList, ordersPage.getPageable(), ordersPage.getTotalElements());
   }
 
   @Override
   @Transactional
-  public String update(Long id, CreateOrderRequest createOrderRequest) {
-    var order = findById(id);
-    var car = carService.findById(createOrderRequest.getCarId());
-
-    order.setPickUpDate(createOrderRequest.getPickUpDate());
-    order.setReturnDate(createOrderRequest.getReturnDate());
-    order.setTotalCost(BigDecimal.valueOf(createOrderRequest.getTotalCost()));
-    order.setCar(car);
-
-    orderRepository.save(order);
-    return "Success";
-  }
-
-  @Override
-  @Transactional
-  public String rejectOrder(Long id, OrderRejectRequest orderRejectRequest) {
-    var order = findById(id);
-    order.setComments(orderRejectRequest.getComments());
-    order.setDenyingDate(LocalDateTime.now());
-    order.setRentalStatus(OrderRentalStatus.DENIED);
-    orderRepository.save(order);
-
-    var notification = Notification
-        .builder()
-        .message(orderRejectRequest.getComments())
-        .notificationType(NotificationType.DENY)
-        .sentDate(LocalDateTime.now())
-        .user(order.getUser())
-        .status(NEW)
-        .build();
-    notificationService.sendNotification(notification);
-    return "Success";
-  }
-
-  @Override
-  @Transactional
-  public String approveOrder(Long id) {
+  public void approveOrder(Long id) {
     var order = findById(id);
     var orderDetails = rentalDetailsService.getRentalDetails();
 
@@ -337,12 +326,34 @@ public class OrderServiceImpl implements OrderService {
 
     order.setRentalStatus(NOT_STARTED);
     orderRepository.save(order);
-    return "Success";
   }
 
   @Override
   @Transactional
-  public String completeOrder(Long id) {
+  public void cancelOrderAfterPayment(Long id, OrderRejectRequest orderRejectRequest) {
+    var order = findById(id);
+    order.setComments(orderRejectRequest.getComments());
+    order.setRentalStatus(CANCELED);
+    orderRepository.save(order);
+
+    var notification = Notification
+        .builder()
+        .message(String.format(
+            "Your order №%d for a %s %s has been canceled. "
+                + "For a refund, contact the administration by e-mail, "
+                + "or the phone number listed on the website.", order.getId(),
+            order.getCar().getModel().getBrand().getName(), order.getCar().getModel().getName()))
+        .notificationType(INFO)
+        .sentDate(LocalDateTime.now())
+        .status(NEW)
+        .user(order.getUser())
+        .build();
+    notificationService.sendNotification(notification);
+  }
+
+  @Override
+  @Transactional
+  public void completeOrder(Long id) {
     var order = findById(id);
     order.setRentalStatus(FINISHED);
     orderRepository.save(order);
@@ -359,12 +370,11 @@ public class OrderServiceImpl implements OrderService {
         .user(order.getUser())
         .build();
     notificationService.sendNotification(notification);
-    return "Success";
   }
 
   @Override
   @Transactional
-  public String completeOrderWithPenalty(Long id,
+  public void completeOrderWithPenalty(Long id,
       OrderCompleteWithPenaltyRequest orderCompleteWithPenaltyRequest) {
     var order = findById(id);
     order.setRentalStatus(FINISHED_WITH_PENALTY);
@@ -387,41 +397,71 @@ public class OrderServiceImpl implements OrderService {
         .totalCost(BigDecimal.valueOf(orderCompleteWithPenaltyRequest.getTotalCost()))
         .orderId(order.getId())
         .build());
-
-    return "Success";
   }
 
   @Override
   @Transactional
-  public String startRentalPeriod(Long id) {
-    var order = findById(id);
-    order.setRentalStatus(IN_PROCESS);
-    orderRepository.save(order);
-    return "Success";
-  }
-
-  @Override
-  @Transactional
-  public String cancelOrderAfterPayment(Long id, OrderRejectRequest orderRejectRequest) {
+  public void rejectOrder(Long id, OrderRejectRequest orderRejectRequest) {
     var order = findById(id);
     order.setComments(orderRejectRequest.getComments());
-    order.setRentalStatus(CANCELED);
+    order.setDenyingDate(LocalDateTime.now());
+    order.setRentalStatus(OrderRentalStatus.DENIED);
     orderRepository.save(order);
 
     var notification = Notification
         .builder()
-        .message(String.format(
-            "Your order №%d for a %s %s has been canceled. "
-                + "For a refund, contact the administration by e-mail, "
-                + "or the phone number listed on the website.", order.getId(),
-            order.getCar().getModel().getBrand().getName(), order.getCar().getModel().getName()))
-        .notificationType(INFO)
+        .message(orderRejectRequest.getComments())
+        .notificationType(NotificationType.DENY)
         .sentDate(LocalDateTime.now())
-        .status(NEW)
         .user(order.getUser())
+        .status(NEW)
         .build();
     notificationService.sendNotification(notification);
-    return null;
+  }
+
+  @Override
+  @Transactional
+  public void startRentalPeriod(Long id) {
+    var order = findById(id);
+    order.setRentalStatus(IN_PROCESS);
+    orderRepository.save(order);
+  }
+
+  @Override
+  @Transactional
+  public void update(Long id, CreateOrderRequest createOrderRequest) {
+    var order = findById(id);
+    var car = carService.findById(createOrderRequest.getCarId());
+
+    order.setPickUpDate(createOrderRequest.getPickUpDate());
+    order.setReturnDate(createOrderRequest.getReturnDate());
+    order.setTotalCost(BigDecimal.valueOf(createOrderRequest.getTotalCost()));
+    order.setCar(car);
+
+    orderRepository.save(order);
+  }
+
+  @Override
+  public ByteArrayResource exportOrderToPDF(Long id)
+      throws FontNotFoundException, DocumentNotGeneratedException {
+    var order = findById(id);
+    var rentalDetails = rentalDetailsService.getRentalDetails();
+    return pdfService.exportOrderToPDF(order, rentalDetails);
+  }
+
+  @Override
+  public Order findById(Long id) {
+    Optional<Order> optionalOrder = orderRepository.findById(id);
+    if (optionalOrder.isEmpty()) {
+      log.error("Order with id {} does not exists", id);
+      throw new IllegalStateException(String.format("Order with id %d does not exists", id));
+    }
+    return optionalOrder.get();
+  }
+
+  @Override
+  public int findNewOrdersAmount() {
+    return orderRepository.countAllByRentalStatus(OrderRentalStatus.NEW);
   }
 
   @Override
@@ -431,64 +471,15 @@ public class OrderServiceImpl implements OrderService {
   }
 
   @Override
-  public String updatePaymentDateAndStatusToPaid(Order order) {
-    order.setPaymentDate(LocalDateTime.now());
-    order.setPaymentStatus(PAID);
-    orderRepository.save(order);
-    return "Success";
-  }
-
-  @Override
   public int findNewUserOrdersAmount(String email) {
     return orderRepository.countAllByUser_EmailAndRentalStatusAndPaymentStatus(email, NOT_STARTED,
         PAID);
   }
 
   @Override
-  public Page<UserOrderResponse> findAllNewUserOrders(Pageable pageable, String language) {
-    var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    if (Optional.ofNullable(user).isEmpty()) {
-      log.error("User not authenticated!");
-      throw new IllegalStateException("User not authenticated");
-    }
-
-    var orderPage = orderRepository.findAllByRentalStatusAndUser_EmailAndPaymentStatus(NOT_STARTED,
-        user.getEmail(), PAID, pageable);
-
-    List<UserOrderResponse> responses = new ArrayList<>();
-    orderPage.forEach(order -> {
-      if (!"en".equals(language)) {
-        locationTranslationService.setTranslation(order.getLocation(), language);
-      }
-      responses.add(orderMapper.orderToNewUserOrderResponse(order));
-    });
-    return new PageImpl<>(responses, orderPage.getPageable(), orderPage.getTotalElements());
-  }
-
-  @Override
-  public Page<UserOrderResponse> findAllUserOrdersHistory(Pageable pageable, String language) {
-    var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    if (Optional.ofNullable(user).isEmpty()) {
-      log.error("User not authenticated!");
-      throw new IllegalStateException("User not authenticated");
-    }
-
-    var orderPage = orderRepository.findAllByRentalStatusOrRentalStatusAndUser_Email(FINISHED,
-        FINISHED_WITH_PENALTY, user.getEmail(), pageable);
-    List<UserOrderResponse> responses = new ArrayList<>();
-    orderPage.forEach(order -> {
-      if (!"en".equals(language)) {
-        locationTranslationService.setTranslation(order.getLocation(), language);
-      }
-      responses.add(orderMapper.orderToNewUserOrderResponse(order));
-    });
-    return new PageImpl<>(responses, orderPage.getPageable(), orderPage.getTotalElements());
-  }
-
-  @Override
-  public ByteArrayResource exportOrderToPDF(Long id) throws FontNotFoundException {
-    var order = findById(id);
-    var rentalDetails = rentalDetailsService.getRentalDetails();
-    return pdfService.exportOrderToPDF(order, rentalDetails);
+  public void updatePaymentDateAndStatusToPaid(Order order) {
+    order.setPaymentDate(LocalDateTime.now());
+    order.setPaymentStatus(PAID);
+    orderRepository.save(order);
   }
 }

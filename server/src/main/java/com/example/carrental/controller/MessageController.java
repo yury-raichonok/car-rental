@@ -41,23 +41,15 @@ public class MessageController {
   }
 
   @PostMapping
-  public ResponseEntity<String> create(
+  public ResponseEntity<HttpStatus> create(
       @Valid @RequestBody CreateMessageRequest createMessageRequest) {
-    try {
-      var response = messageService.create(createMessageRequest);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+    messageService.create(createMessageRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @PutMapping(path = "/{id}")
-  public ResponseEntity<String> updateMessageAsRead(@NotNull @Positive @PathVariable Long id) {
-    try {
-      var response = messageService.updateMessageAsRead(id);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+  public ResponseEntity<HttpStatus> updateMessageAsRead(@NotNull @Positive @PathVariable Long id) {
+    messageService.updateMessageAsRead(id);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }

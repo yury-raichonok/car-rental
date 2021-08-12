@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 @Service
 public interface FileStoreService {
 
-  String uploadPublicFile(String bucketName, String fileName, File file);
+  void uploadPublicFile(String bucketName, String fileName, File file);
 
-  String uploadFile(String bucketName, String fileName, File file);
+  void uploadFile(String bucketName, String fileName, File file);
 
   List<S3Object> downloadFiles(String bucketName, String directory);
 }

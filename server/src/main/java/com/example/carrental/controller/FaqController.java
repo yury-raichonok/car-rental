@@ -6,6 +6,7 @@ import com.example.carrental.controller.dto.faq.FaqWithTranslationsResponse;
 import com.example.carrental.controller.dto.faq.UpdateFaqRequest;
 import com.example.carrental.service.FaqService;
 import com.example.carrental.service.exceptions.EntityAlreadyExistsException;
+import com.example.carrental.service.exceptions.NoContentException;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -36,11 +37,8 @@ public class FaqController {
 
   @GetMapping
   public ResponseEntity<List<FaqResponse>> findAll(
-      @CookieValue(name = "i18next") String language) {
+      @CookieValue(name = "i18next") String language) throws NoContentException {
     var faqList = faqService.findAll(language);
-    if (faqList.isEmpty()) {
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
     return new ResponseEntity<>(faqList, HttpStatus.OK);
   }
 
@@ -51,35 +49,22 @@ public class FaqController {
   }
 
   @PostMapping
-  public ResponseEntity<String> create(@Valid @RequestBody CreateFaqRequest createFaqRequest) {
-    try {
-      var response = faqService.create(createFaqRequest);
-      return new ResponseEntity<>(response, HttpStatus.CREATED);
-    } catch (EntityAlreadyExistsException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+  public ResponseEntity<HttpStatus> create(@Valid @RequestBody CreateFaqRequest createFaqRequest)
+      throws EntityAlreadyExistsException {
+    faqService.create(createFaqRequest);
+    return new ResponseEntity<>(HttpStatus.CREATED);
   }
 
   @PutMapping(path = "/{id}")
-  public ResponseEntity<String> update(@NotNull @Positive @PathVariable Long id,
+  public ResponseEntity<HttpStatus> update(@NotNull @Positive @PathVariable Long id,
       @Valid @RequestBody UpdateFaqRequest updateFaqRequest) {
-    try {
-      var response = faqService.update(id, updateFaqRequest);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+    faqService.update(id, updateFaqRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @DeleteMapping(path = "/{id}")
-  public ResponseEntity<String> delete(@NotNull @Positive @PathVariable Long id) {
-    try {
-      var response = faqService.delete(id);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+  public ResponseEntity<HttpStatus> delete(@NotNull @Positive @PathVariable Long id) {
+    faqService.delete(id);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }

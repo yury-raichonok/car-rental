@@ -31,14 +31,6 @@ public class CarModelController {
 
   private final CarModelService carModelService;
 
-  @PostMapping
-  public ResponseEntity<String> create(
-      @Valid @RequestBody CreateCarModelRequest createCarModelRequest)
-      throws EntityAlreadyExistsException {
-    var response = carModelService.create(createCarModelRequest);
-    return new ResponseEntity<>(response, HttpStatus.OK);
-  }
-
   @GetMapping
   public ResponseEntity<List<CarModelResponse>> findAll() throws NoContentException {
     var models = carModelService.findAll();
@@ -66,11 +58,19 @@ public class CarModelController {
     return new ResponseEntity<>(models, HttpStatus.OK);
   }
 
+  @PostMapping
+  public ResponseEntity<HttpStatus> create(
+      @Valid @RequestBody CreateCarModelRequest createCarModelRequest)
+      throws EntityAlreadyExistsException {
+    carModelService.create(createCarModelRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
   @PutMapping(path = "/{id}")
-  public ResponseEntity<String> update(@NotNull @Positive @PathVariable Long id,
+  public ResponseEntity<HttpStatus> update(@NotNull @Positive @PathVariable Long id,
       @Valid @RequestBody UpdateCarModelRequest updateCarModelRequest)
       throws EntityAlreadyExistsException {
-    var response = carModelService.update(id, updateCarModelRequest);
-    return new ResponseEntity<>(response, HttpStatus.OK);
+    carModelService.update(id, updateCarModelRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }

@@ -6,5 +6,5 @@ import org.springframework.stereotype.Service;
 @Service
 public interface SmsSenderService {
 
-  String sendSms(PhoneNumber to, PhoneNumber from, String token);
+  void sendSms(PhoneNumber to, PhoneNumber from, String token);
 }

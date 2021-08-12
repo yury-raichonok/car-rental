@@ -18,8 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public interface CarService {
 
-  String create(CreateCarRequest createCarRequest) throws EntityAlreadyExistsException;
-
   List<CarProfitableOfferResponse> findAllProfitableOffers(String language)
       throws NoContentException;
 
@@ -29,14 +27,16 @@ public interface CarService {
 
   CarByIdResponse findCarById(Long id, String language);
 
+  void create(CreateCarRequest createCarRequest) throws EntityAlreadyExistsException;
+
   Page<CarSearchResponse> searchCars(CarSearchRequest carSearchRequest, String language);
 
   Page<CarAdminSearchResponse> searchCarsByAdmin(CarSearchRequest carSearchRequest,
       String language);
 
-  String update(Long id, UpdateCarRequest updateCarRequest) throws EntityAlreadyExistsException;
+  void uploadCarImage(Long id, MultipartFile carFile);
 
-  String updateRentalStatus(Long id);
+  void update(Long id, UpdateCarRequest updateCarRequest) throws EntityAlreadyExistsException;
 
-  String uploadCarImage(Long id, MultipartFile carFile);
+  void updateRentalStatus(Long id);
 }

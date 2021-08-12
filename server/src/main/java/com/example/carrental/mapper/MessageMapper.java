@@ -15,6 +15,7 @@ public interface MessageMapper {
   @Mapping(target = "email", source = "message.email")
   @Mapping(target = "phone", source = "message.phone")
   @Mapping(target = "message", source = "message.message")
-  @Mapping(target = "sentDate", source = "message.sentDate", dateFormat = MESSAGE_DATE_FORMAT_PATTERN)
+  @Mapping(target = "sentDate", source = "message.sentDate",
+      dateFormat = MESSAGE_DATE_FORMAT_PATTERN)
   MessageResponse messageToMessageResponse(Message message);
 }

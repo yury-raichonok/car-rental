@@ -1,5 +1,9 @@
 package com.example.carrental.service.impl;
 
+import static com.example.carrental.service.impl.CarClassTranslationServiceImpl.BELORUSSIAN;
+import static com.example.carrental.service.impl.CarClassTranslationServiceImpl.ENGLISH;
+import static com.example.carrental.service.impl.CarClassTranslationServiceImpl.RUSSIAN;
+
 import com.example.carrental.controller.dto.location.CreateLocationRequest;
 import com.example.carrental.entity.location.Location;
 import com.example.carrental.entity.location.LocationTranslation;
@@ -25,14 +29,14 @@ public class LocationTranslationServiceImpl implements LocationTranslationServic
         .builder()
         .name(createLocationRequest.getNameBe())
         .location(location)
-        .language("be")
+        .language(BELORUSSIAN)
         .build());
 
     locationTranslationRepository.save(LocationTranslation
         .builder()
         .name(createLocationRequest.getNameRu())
         .location(location)
-        .language("ru")
+        .language(RUSSIAN)
         .build());
   }
 
@@ -41,14 +45,14 @@ public class LocationTranslationServiceImpl implements LocationTranslationServic
   public void update(CreateLocationRequest createLocationRequest,
       List<LocationTranslation> translations) {
     var locationTranslationRu = translations.stream()
-        .filter(translation -> "ru".equals(translation.getLanguage())).findFirst();
+        .filter(translation -> RUSSIAN.equals(translation.getLanguage())).findFirst();
     locationTranslationRu.ifPresent(carClassTranslation -> {
       carClassTranslation.setName(createLocationRequest.getNameRu());
       locationTranslationRepository.save(carClassTranslation);
     });
 
     var locationTranslationBe = translations.stream()
-        .filter(translation -> "be".equals(translation.getLanguage())).findFirst();
+        .filter(translation -> BELORUSSIAN.equals(translation.getLanguage())).findFirst();
     locationTranslationBe.ifPresent(carClassTranslation -> {
       carClassTranslation.setName(createLocationRequest.getNameBe());
       locationTranslationRepository.save(carClassTranslation);
@@ -57,10 +61,13 @@ public class LocationTranslationServiceImpl implements LocationTranslationServic
 
   @Override
   public void setTranslation(Location location, String language) {
-    location.getLocationTranslations()
-        .stream()
-        .filter(translation -> language.equals(translation.getLanguage()))
-        .findFirst()
-        .ifPresent(locationTranslation -> location.setName(locationTranslation.getName()));
+    if (!ENGLISH.equals(language)) {
+      location.getLocationTranslations()
+          .stream()
+          .filter(translation -> language.equals(translation.getLanguage()))
+          .findFirst()
+          .ifPresent(locationTranslation -> location.setName(locationTranslation.getName()));
+    }
+
   }
 }

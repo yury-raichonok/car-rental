@@ -33,14 +33,6 @@ public class CarClassController {
 
   private final CarClassService carClassService;
 
-  @PostMapping
-  public ResponseEntity<String> create(
-      @Valid @RequestBody CreateCarClassRequest createCarClassRequest)
-      throws EntityAlreadyExistsException {
-    var response = carClassService.create(createCarClassRequest);
-    return new ResponseEntity<>(response, HttpStatus.OK);
-  }
-
   @GetMapping
   public ResponseEntity<List<CarClassNameResponse>> findAll(
       @NotNull @CookieValue(name = "i18next") String language) throws NoContentException {
@@ -55,10 +47,18 @@ public class CarClassController {
     return new ResponseEntity<>(carClasses, HttpStatus.OK);
   }
 
+  @PostMapping
+  public ResponseEntity<HttpStatus> create(
+      @Valid @RequestBody CreateCarClassRequest createCarClassRequest)
+      throws EntityAlreadyExistsException {
+    carClassService.create(createCarClassRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
   @PutMapping(path = "/{id}")
-  public ResponseEntity<String> update(@NotNull @Positive @PathVariable Long id,
+  public ResponseEntity<HttpStatus> update(@NotNull @Positive @PathVariable Long id,
       @Valid @RequestBody CreateCarClassRequest createCarClassRequest) {
-    var response = carClassService.update(id, createCarClassRequest);
-    return new ResponseEntity<>(response, HttpStatus.OK);
+    carClassService.update(id, createCarClassRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }

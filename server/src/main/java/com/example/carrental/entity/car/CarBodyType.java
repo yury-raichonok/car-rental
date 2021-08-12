@@ -9,7 +9,7 @@ public enum CarBodyType {
 
   HATCHBACK("Hatchback"),
   SEDAN("Sedan"),
-  MUV("MUV/SUV"),
+  MUV("MUV"),
   COUPE("Coupe"),
   CONVERTIBLE("Convertible"),
   WAGON("Wagon"),

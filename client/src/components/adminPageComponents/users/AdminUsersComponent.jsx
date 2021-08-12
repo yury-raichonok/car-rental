@@ -282,7 +282,7 @@ const AdminUsersComponent = (props) => {
       
       if(err && err.response){
         switch(err.response.status){
-          case 405:
+          case 406:
             notification.error({
               message: `${t('this_phone_number_is_already_taken')}`,
             });

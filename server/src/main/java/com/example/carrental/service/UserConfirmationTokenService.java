@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 @Service
 public interface UserConfirmationTokenService {
 
-  String createUserConfirmationToken(UserConfirmationToken token);
+  void createUserConfirmationToken(UserConfirmationToken token);
 
   UserConfirmationToken getUserConfirmationTokenByToken(String token);
 
-  String updateUserConfirmationTokenConfirmedAt(String token);
+  void updateUserConfirmationTokenConfirmedAt(String token);
 }

@@ -34,10 +34,10 @@ public class CarCriteriaRepositoryImpl implements CarCriteriaRepository {
 
   @Override
   public Page<Car> findCars(CarSearchRequest carSearchRequest) {
-    CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+    var criteriaBuilder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Car> carCriteriaQuery = criteriaBuilder.createQuery(Car.class);
     Root<Car> carRoot = carCriteriaQuery.from(Car.class);
-    Predicate predicate = getPredicate(criteriaBuilder, carSearchRequest, carRoot);
+    var predicate = getPredicate(criteriaBuilder, carSearchRequest, carRoot);
     carCriteriaQuery.where(predicate);
     setOrder(criteriaBuilder, carSearchRequest, carCriteriaQuery, carRoot);
 
@@ -45,11 +45,11 @@ public class CarCriteriaRepositoryImpl implements CarCriteriaRepository {
     carTypedQuery.setFirstResult(carSearchRequest.getPageNumber() * carSearchRequest.getPageSize());
     carTypedQuery.setMaxResults(carSearchRequest.getPageSize());
 
-    Pageable pageable = getPageable(carSearchRequest);
+    var pageable = getPageable(carSearchRequest);
 
     long carsCount = getCarsCount(criteriaBuilder, predicate);
 
-    List<Car> cars = carTypedQuery.getResultList();
+    var cars = carTypedQuery.getResultList();
 
     return new PageImpl<>(cars, pageable, carsCount);
   }
@@ -66,7 +66,7 @@ public class CarCriteriaRepositoryImpl implements CarCriteriaRepository {
   }
 
   private Pageable getPageable(CarSearchRequest carSearchRequest) {
-    Sort sort = Sort.by(carSearchRequest.getSortDirection(), carSearchRequest.getSortBy());
+    var sort = Sort.by(carSearchRequest.getSortDirection(), carSearchRequest.getSortBy());
     return PageRequest.of(carSearchRequest.getPageNumber(), carSearchRequest.getPageSize(), sort);
   }
 

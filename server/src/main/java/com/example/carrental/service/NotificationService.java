@@ -9,17 +9,17 @@ import org.springframework.stereotype.Service;
 @Service
 public interface NotificationService {
 
-  void sendNotification(Notification notification);
-
   Page<NotificationResponse> findAllNew(Pageable pageable);
 
   Page<NotificationResponse> findAllNotificationsHistory(Pageable pageable);
 
-  String updateNotificationAsRead(Long id);
+  void sendNotification(Notification notification);
+
+  void updateNotificationAsRead(Long id);
 
   Notification findById(Long id);
 
-  String delete(Long id);
+  void delete(Long id);
 
   int findNewUserNotificationsAmount(String email);
 }

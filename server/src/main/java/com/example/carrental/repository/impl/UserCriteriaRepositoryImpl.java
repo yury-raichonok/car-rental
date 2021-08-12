@@ -28,10 +28,10 @@ public class UserCriteriaRepositoryImpl implements UserCriteriaRepository {
 
   @Override
   public Page<User> findUsers(UserSearchRequest userSearchRequest) {
-    CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+    var criteriaBuilder = entityManager.getCriteriaBuilder();
     CriteriaQuery<User> userCriteriaQuery = criteriaBuilder.createQuery(User.class);
     Root<User> userRoot = userCriteriaQuery.from(User.class);
-    Predicate predicate = getPredicate(criteriaBuilder, userSearchRequest, userRoot);
+    var predicate = getPredicate(criteriaBuilder, userSearchRequest, userRoot);
     userCriteriaQuery.where(predicate);
     setOrder(criteriaBuilder, userSearchRequest, userCriteriaQuery, userRoot);
 
@@ -40,7 +40,7 @@ public class UserCriteriaRepositoryImpl implements UserCriteriaRepository {
         .setFirstResult(userSearchRequest.getPageNumber() * userSearchRequest.getPageSize());
     userTypedQuery.setMaxResults(userSearchRequest.getPageSize());
 
-    Pageable pageable = getPageable(userSearchRequest);
+    var pageable = getPageable(userSearchRequest);
 
     long usersCount = getUsersCount(criteriaBuilder, predicate);
 
@@ -57,7 +57,7 @@ public class UserCriteriaRepositoryImpl implements UserCriteriaRepository {
   }
 
   private Pageable getPageable(UserSearchRequest userSearchRequest) {
-    Sort sort = Sort.by(userSearchRequest.getSortDirection(), userSearchRequest.getSortBy());
+    var sort = Sort.by(userSearchRequest.getSortDirection(), userSearchRequest.getSortBy());
     return PageRequest.of(userSearchRequest.getPageNumber(), userSearchRequest.getPageSize(), sort);
   }
 

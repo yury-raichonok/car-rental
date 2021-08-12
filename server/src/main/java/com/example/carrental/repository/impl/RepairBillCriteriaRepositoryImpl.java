@@ -32,11 +32,11 @@ public class RepairBillCriteriaRepositoryImpl implements RepairBillCriteriaRepos
 
   @Override
   public Page<RepairBill> findAll(RepairBillSearchRequest repairBillSearchRequest) {
-    CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+    var criteriaBuilder = entityManager.getCriteriaBuilder();
     CriteriaQuery<RepairBill> repairBillCriteriaQuery = criteriaBuilder
         .createQuery(RepairBill.class);
     Root<RepairBill> repairBillRoot = repairBillCriteriaQuery.from(RepairBill.class);
-    Predicate predicate = getPredicate(criteriaBuilder, repairBillSearchRequest, repairBillRoot);
+    var predicate = getPredicate(criteriaBuilder, repairBillSearchRequest, repairBillRoot);
     repairBillCriteriaQuery.where(predicate);
     setRepairBill(criteriaBuilder, repairBillSearchRequest, repairBillCriteriaQuery,
         repairBillRoot);
@@ -48,7 +48,7 @@ public class RepairBillCriteriaRepositoryImpl implements RepairBillCriteriaRepos
             repairBillSearchRequest.getPageNumber() * repairBillSearchRequest.getPageSize());
     repairBillTypedQuery.setMaxResults(repairBillSearchRequest.getPageSize());
 
-    Pageable pageable = getPageable(repairBillSearchRequest);
+    var pageable = getPageable(repairBillSearchRequest);
 
     long repairBillCount = getRepairBillCount(criteriaBuilder, predicate);
 
@@ -68,7 +68,7 @@ public class RepairBillCriteriaRepositoryImpl implements RepairBillCriteriaRepos
   }
 
   private Pageable getPageable(RepairBillSearchRequest repairBillSearchRequest) {
-    Sort sort = Sort
+    var sort = Sort
         .by(repairBillSearchRequest.getSortDirection(), repairBillSearchRequest.getSortBy());
     return PageRequest
         .of(repairBillSearchRequest.getPageNumber(), repairBillSearchRequest.getPageSize(), sort);

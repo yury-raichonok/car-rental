@@ -11,11 +11,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PaymentBillRepository extends JpaRepository<PaymentBill, Long> {
 
-  Page<PaymentBill> findAllByOrder_UserEmailAndPaymentDateNotNull(String email, Pageable pageable);
+  int countAllByExpirationTimeIsAfterAndOrder_UserEmailAndOrder_PaymentStatus(LocalDateTime date,
+      String email, OrderPaymentStatus paymentStatus);
 
   Page<PaymentBill> findAllByExpirationTimeIsAfterAndOrder_UserEmailAndOrder_PaymentStatus(
       LocalDateTime date, String email, OrderPaymentStatus paymentStatus, Pageable pageable);
 
-  int countAllByExpirationTimeIsAfterAndOrder_UserEmailAndOrder_PaymentStatus(LocalDateTime date,
-      String email, OrderPaymentStatus paymentStatus);
+  Page<PaymentBill> findAllByOrder_UserEmailAndPaymentDateNotNull(String email, Pageable pageable);
 }

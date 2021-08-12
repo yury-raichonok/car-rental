@@ -21,7 +21,7 @@ public interface RepairBillService {
 
   Page<RepairBillNewResponse> findAllNewUserBills(Pageable pageable, String language);
 
-  String payBill(Long id);
+  void payBill(Long id);
 
   int findNewUserBillsAmount(String email);
 

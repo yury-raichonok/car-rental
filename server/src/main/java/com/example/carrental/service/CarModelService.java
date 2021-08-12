@@ -15,9 +15,6 @@ import org.springframework.stereotype.Service;
 @Service
 public interface CarModelService {
 
-  String create(CreateCarModelRequest createCarModelRequest)
-      throws EntityAlreadyExistsException;
-
   List<CarModelResponse> findAll() throws NoContentException;
 
   Page<CarModelBrandNameResponse> findAllModelsWithBrandName(Pageable pageable);
@@ -30,6 +27,9 @@ public interface CarModelService {
 
   List<CarModelResponse> findModelsByBrandName(String name) throws NoContentException;
 
-  String update(Long id, UpdateCarModelRequest updateCarModelRequest)
+  void create(CreateCarModelRequest createCarModelRequest)
+      throws EntityAlreadyExistsException;
+
+  void update(Long id, UpdateCarModelRequest updateCarModelRequest)
       throws EntityAlreadyExistsException;
 }

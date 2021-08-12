@@ -60,9 +60,9 @@ public class LoggerAspect {
     String methodName = proceedingJoinPoint.getSignature().getName();
     String className = proceedingJoinPoint.getTarget().getClass().toString();
     Object[] argsArray = proceedingJoinPoint.getArgs();
-    log.info("{} method {}() called, arguments: {}", className, methodName, argsArray);
+    log.debug("{} method {}() called, arguments: {}", className, methodName, argsArray);
     Object object = proceedingJoinPoint.proceed();
-    log.info("{} method {}() finished, response: {}", className, methodName, object);
+    log.debug("{} method {}() finished, response: {}", className, methodName, object);
     return object;
   }
 
@@ -70,9 +70,9 @@ public class LoggerAspect {
   public Object getAllEntitiesLogger(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
     String methodName = proceedingJoinPoint.getSignature().getName();
     String className = proceedingJoinPoint.getTarget().getClass().toString();
-    log.info("{} method {}() called.", className, methodName);
+    log.debug("{} method {}() called.", className, methodName);
     Object object = proceedingJoinPoint.proceed();
-    log.info("{} method {}() finished, response: {}", className, methodName, object);
+    log.debug("{} method {}() finished, response: {}", className, methodName, object);
     return object;
   }
 
@@ -80,9 +80,9 @@ public class LoggerAspect {
   public Object getInfoLogger(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
     String methodName = proceedingJoinPoint.getSignature().getName();
     String className = proceedingJoinPoint.getTarget().getClass().toString();
-    log.info("{} method {}() called.", className, methodName);
+    log.debug("{} method {}() called.", className, methodName);
     Object object = proceedingJoinPoint.proceed();
-    log.info("{} method {}() finished", className, methodName);
+    log.debug("{} method {}() finished", className, methodName);
     return object;
   }
 }

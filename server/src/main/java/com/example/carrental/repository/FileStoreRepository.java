@@ -8,9 +8,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FileStoreRepository {
 
-  String uploadPublicFile(String bucketName, String fileName, File file);
-
-  String uploadFile(String bucketName, String fileName, File file);
-
   List<S3Object> downloadFiles(String bucketName, String directory);
+
+  void uploadFile(String bucketName, String fileName, File file);
+
+  void uploadPublicFile(String bucketName, String fileName, File file);
 }

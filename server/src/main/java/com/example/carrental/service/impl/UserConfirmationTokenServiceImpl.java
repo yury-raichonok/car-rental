@@ -18,9 +18,8 @@ public class UserConfirmationTokenServiceImpl implements UserConfirmationTokenSe
 
   @Override
   @Transactional
-  public String createUserConfirmationToken(UserConfirmationToken token) {
+  public void createUserConfirmationToken(UserConfirmationToken token) {
     userConfirmationTokenRepository.save(token);
-    return "Success";
   }
 
   @Override
@@ -35,10 +34,9 @@ public class UserConfirmationTokenServiceImpl implements UserConfirmationTokenSe
 
   @Override
   @Transactional
-  public String updateUserConfirmationTokenConfirmedAt(String token) {
+  public void updateUserConfirmationTokenConfirmedAt(String token) {
     var userConfirmationToken = getUserConfirmationTokenByToken(token);
     userConfirmationToken.setConfirmationTime(LocalDateTime.now());
     userConfirmationTokenRepository.save(userConfirmationToken);
-    return "Success";
   }
 }

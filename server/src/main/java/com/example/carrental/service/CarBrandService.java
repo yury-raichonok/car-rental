@@ -14,9 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public interface CarBrandService {
 
-  String create(CreateCarBrandRequest createCarBrandRequest)
-      throws EntityAlreadyExistsException;
-
   List<CarBrandResponse> findAll() throws NoContentException;
 
   List<CarBrandResponse> findAllBrandsWithRentalOffers() throws NoContentException;
@@ -27,8 +24,11 @@ public interface CarBrandService {
 
   CarBrand findByName(String name);
 
-  String update(Long id, CreateCarBrandRequest createCarBrandRequest)
+  void create(CreateCarBrandRequest createCarBrandRequest)
       throws EntityAlreadyExistsException;
 
-  String uploadBrandImage(Long id, MultipartFile brandFile);
+  void uploadBrandImage(Long id, MultipartFile brandFile);
+
+  void update(Long id, CreateCarBrandRequest createCarBrandRequest)
+      throws EntityAlreadyExistsException;
 }

@@ -16,6 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CarClassTranslationServiceImpl implements CarClassTranslationService {
 
+  public static final String BELORUSSIAN = "be";
+  public static final String RUSSIAN = "ru";
+  public static final String ENGLISH = "en";
+
   private final CarClassTranslationRepository carClassTranslationRepository;
 
   @Override
@@ -25,13 +29,13 @@ public class CarClassTranslationServiceImpl implements CarClassTranslationServic
         .builder()
         .name(createCarClassRequest.getNameBe())
         .carClass(carClass)
-        .language("be")
+        .language(BELORUSSIAN)
         .build());
     carClassTranslationRepository.save(CarClassTranslation
         .builder()
         .name(createCarClassRequest.getNameRu())
         .carClass(carClass)
-        .language("ru")
+        .language(RUSSIAN)
         .build());
   }
 
@@ -40,14 +44,14 @@ public class CarClassTranslationServiceImpl implements CarClassTranslationServic
   public void update(CreateCarClassRequest createCarClassRequest,
       List<CarClassTranslation> translations) {
     var carClassTranslationRu = translations.stream()
-        .filter(translation -> "ru".equals(translation.getLanguage())).findFirst();
+        .filter(translation -> RUSSIAN.equals(translation.getLanguage())).findFirst();
     carClassTranslationRu.ifPresent(carClassTranslation -> {
       carClassTranslation.setName(createCarClassRequest.getNameRu());
       carClassTranslationRepository.save(carClassTranslation);
     });
 
     var carClassTranslationBe = translations.stream()
-        .filter(translation -> "be".equals(translation.getLanguage())).findFirst();
+        .filter(translation -> BELORUSSIAN.equals(translation.getLanguage())).findFirst();
     carClassTranslationBe.ifPresent(carClassTranslation -> {
       carClassTranslation.setName(createCarClassRequest.getNameBe());
       carClassTranslationRepository.save(carClassTranslation);
@@ -56,10 +60,12 @@ public class CarClassTranslationServiceImpl implements CarClassTranslationServic
 
   @Override
   public void setTranslation(CarClass carClass, String language) {
-    carClass.getCarClassTranslations()
-        .stream()
-        .filter(translation -> language.equals(translation.getLanguage()))
-        .findFirst()
-        .ifPresent(classTranslation -> carClass.setName(classTranslation.getName()));
+    if (!ENGLISH.equals(language)) {
+      carClass.getCarClassTranslations()
+          .stream()
+          .filter(translation -> language.equals(translation.getLanguage()))
+          .findFirst()
+          .ifPresent(classTranslation -> carClass.setName(classTranslation.getName()));
+    }
   }
 }

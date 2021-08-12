@@ -10,8 +10,10 @@ public interface UserDrivingLicenseMapper {
 
   String DRIVING_LICENSE_DATE_FORMAT_PATTERN = "dd.MM.yyyy";
 
-  @Mapping(target = "dateOfIssue", source = "userDrivingLicense.dateOfIssue", dateFormat = DRIVING_LICENSE_DATE_FORMAT_PATTERN)
-  @Mapping(target = "validityPeriod", source = "userDrivingLicense.validityPeriod", dateFormat = DRIVING_LICENSE_DATE_FORMAT_PATTERN)
+  @Mapping(target = "dateOfIssue", source = "userDrivingLicense.dateOfIssue",
+      dateFormat = DRIVING_LICENSE_DATE_FORMAT_PATTERN)
+  @Mapping(target = "validityPeriod", source = "userDrivingLicense.validityPeriod",
+      dateFormat = DRIVING_LICENSE_DATE_FORMAT_PATTERN)
   @Mapping(target = "organizationThatIssued", source = "userDrivingLicense.organizationThatIssued")
   @Mapping(target = "documentsFileLink", source = "userDrivingLicense.documentsFileLink")
   UserDrivingLicenseConfirmationDataResponse drivingLicenseToUserDrivingLicenseConfirmationDataResponse(

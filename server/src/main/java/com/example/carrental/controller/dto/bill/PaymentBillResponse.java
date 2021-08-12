@@ -2,7 +2,6 @@ package com.example.carrental.controller.dto.bill;
 
 import java.math.BigDecimal;
 import javax.validation.constraints.Email;
-import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PastOrPresent;

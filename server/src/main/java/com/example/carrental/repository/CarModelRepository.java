@@ -1,6 +1,5 @@
 package com.example.carrental.repository;
 
-import com.example.carrental.entity.car.CarBrand;
 import com.example.carrental.entity.car.CarModel;
 import java.util.List;
 import java.util.Optional;

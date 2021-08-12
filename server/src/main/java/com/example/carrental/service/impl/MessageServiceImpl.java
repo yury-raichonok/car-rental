@@ -24,15 +24,19 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
 
+  private static final int START_HOUR_OF_STATISTIC = 0;
+  private static final int START_MINUTES_OF_STATISTIC = 0;
+
   private final MessageRepository messageRepository;
   private final MessageMapper messageMapper;
 
   @Override
   public Page<MessageResponse> findAll(Pageable pageable) {
     var messagesPage = messageRepository.findAll(pageable);
-    List<MessageResponse> messageResponses = new ArrayList<>();
-    messagesPage.forEach(m -> messageResponses.add(messageMapper.messageToMessageResponse(m)));
-    return new PageImpl<>(messageResponses, messagesPage.getPageable(),
+    List<MessageResponse> messagesResponse = new ArrayList<>();
+    messagesPage
+        .forEach(message -> messagesResponse.add(messageMapper.messageToMessageResponse(message)));
+    return new PageImpl<>(messagesResponse, messagesPage.getPageable(),
         messagesPage.getTotalElements());
   }
 
@@ -40,23 +44,22 @@ public class MessageServiceImpl implements MessageService {
   public Page<MessageResponse> findAllNewMessages(Pageable pageable) {
     var messagesPage = messageRepository.findAllByReadedFalse(pageable);
     List<MessageResponse> messageResponses = new ArrayList<>();
-    messagesPage.forEach(m -> messageResponses.add(messageMapper.messageToMessageResponse(m)));
+    messagesPage
+        .forEach(message -> messageResponses.add(messageMapper.messageToMessageResponse(message)));
     return new PageImpl<>(messageResponses, messagesPage.getPageable(),
         messagesPage.getTotalElements());
   }
 
   @Override
   public Message findById(Long id) {
-    var optionalMessage = messageRepository.findById(id);
-    if (optionalMessage.isEmpty()) {
+    return messageRepository.findById(id).orElseThrow(() -> {
       log.error("Message with id {} does not exist", id);
       throw new IllegalStateException(String.format("Message with id %d does not exists", id));
-    }
-    return optionalMessage.get();
+    });
   }
 
   @Override
-  public String create(CreateMessageRequest createMessageRequest) {
+  public void create(CreateMessageRequest createMessageRequest) {
     messageRepository.save(Message
         .builder()
         .name(createMessageRequest.getName())
@@ -66,18 +69,14 @@ public class MessageServiceImpl implements MessageService {
         .sentDate(LocalDateTime.now())
         .readed(false)
         .build());
-    return "Success";
   }
 
   @Override
   @Transactional
-  public String updateMessageAsRead(Long id) {
+  public void updateMessageAsRead(Long id) {
     var message = findById(id);
-
     message.setReaded(true);
     messageRepository.save(message);
-
-    return "Success";
   }
 
   @Override
@@ -87,7 +86,7 @@ public class MessageServiceImpl implements MessageService {
 
   @Override
   public int findNewMessagesAmountPerDay() {
-    return messageRepository
-        .countAllBySentDateAfter(LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0)));
+    return messageRepository.countAllBySentDateAfter(LocalDateTime.of(LocalDate.now(),
+        LocalTime.of(START_HOUR_OF_STATISTIC, START_MINUTES_OF_STATISTIC)));
   }
 }

@@ -59,6 +59,49 @@ public class RentalDetailsServiceImpl implements RentalDetailsService {
   }
 
   @Override
+  public RentalAdminDetailsStatisticResponse getAdminDetailsStatistic() {
+    int messagesAmt = messageService.findNewMessagesAmount();
+    int requests = rentalRequestService.findNewRequestsAmount();
+    int orders = orderService.findNewOrdersAmount();
+    return RentalAdminDetailsStatisticResponse
+        .builder()
+        .messagesAmt(messagesAmt)
+        .requests(requests)
+        .orders(orders)
+        .build();
+  }
+
+  @Override
+  public RentalDetailsContactInformationResponse getContactInformation(String language) {
+    var rentalDetails = getRentalDetails();
+    var location = rentalDetails.getLocation();
+
+    if (!"en".equals(language)) {
+      locationTranslationService.setTranslation(location, language);
+    }
+
+    return RentalDetailsContactInformationResponse
+        .builder()
+        .phone(rentalDetails.getPhone())
+        .email(rentalDetails.getEmail())
+        .locationName(location.getName())
+        .locationCoordinateX(rentalDetails.getLocation().getCoordinateX())
+        .locationCoordinateY(rentalDetails.getLocation().getCoordinateY())
+        .zoom(rentalDetails.getLocation().getZoom())
+        .build();
+  }
+
+  @Override
+  public RentalDetails getRentalDetails() {
+    Optional<RentalDetails> optionalDetails = rentalDetailsRepository.findById(1L);
+    if (optionalDetails.isEmpty()) {
+      log.error("Rental details does not set");
+      throw new IllegalStateException("Rental details does not set");
+    }
+    return optionalDetails.get();
+  }
+
+  @Override
   public RentalDetailsAndStatisticResponse getRentalDetailsAndStatistic(String language) {
     var rentalDetails = getRentalDetails();
     var newMessagesPerDay = messageService.findNewMessagesAmountPerDay();
@@ -88,37 +131,28 @@ public class RentalDetailsServiceImpl implements RentalDetailsService {
   }
 
   @Override
-  public RentalDetails getRentalDetails() {
-    Optional<RentalDetails> optionalDetails = rentalDetailsRepository.findById(1L);
-    if (optionalDetails.isEmpty()) {
-      log.error("Rental details does not set");
-      throw new IllegalStateException("Rental details does not set");
-    }
-    return optionalDetails.get();
-  }
-
-  @Override
-  public RentalDetailsContactInformationResponse getContactInformation(String language) {
-    var rentalDetails = getRentalDetails();
-    var location = rentalDetails.getLocation();
-
-    if (!"en".equals(language)) {
-      locationTranslationService.setTranslation(location, language);
+  public RentalUserDetailsStatisticResponse getUserDetailsStatistic() {
+    var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    if (Optional.ofNullable(user).isEmpty()) {
+      log.error("User not authenticated!");
+      throw new IllegalStateException("User not authenticated");
     }
 
-    return RentalDetailsContactInformationResponse
+    int paymentBills = paymentBillService.findNewUserBillsAmount(user.getEmail());
+    int repairBills = repairBillService.findNewUserBillsAmount(user.getEmail());
+    int orders = orderService.findNewUserOrdersAmount(user.getEmail());
+    int notifications = notificationService.findNewUserNotificationsAmount(user.getEmail());
+    return RentalUserDetailsStatisticResponse
         .builder()
-        .phone(rentalDetails.getPhone())
-        .email(rentalDetails.getEmail())
-        .locationName(location.getName())
-        .locationCoordinateX(rentalDetails.getLocation().getCoordinateX())
-        .locationCoordinateY(rentalDetails.getLocation().getCoordinateY())
-        .zoom(rentalDetails.getLocation().getZoom())
+        .paymentBills(paymentBills)
+        .repairBills(repairBills)
+        .orders(orders)
+        .notifications(notifications)
         .build();
   }
 
   @Override
-  public String createOrUpdate(RentalDetailsUpdateRequest rentalDetailsUpdateRequest) {
+  public void createOrUpdate(RentalDetailsUpdateRequest rentalDetailsUpdateRequest) {
     var location = locationService.findById(rentalDetailsUpdateRequest.getLocation());
     rentalDetailsRepository.findById(1L).ifPresentOrElse(
         details -> {
@@ -145,40 +179,5 @@ public class RentalDetailsServiceImpl implements RentalDetailsService {
             .paymentBillValidityPeriodInMinutes(rentalDetailsUpdateRequest.getBillValidityPeriod())
             .build())
     );
-    return "Success";
-  }
-
-  @Override
-  public RentalAdminDetailsStatisticResponse getAdminDetailsStatistic() {
-    int messagesAmt = messageService.findNewMessagesAmount();
-    int requests = rentalRequestService.findNewRequestsAmount();
-    int orders = orderService.findNewOrdersAmount();
-    return RentalAdminDetailsStatisticResponse
-        .builder()
-        .messagesAmt(messagesAmt)
-        .requests(requests)
-        .orders(orders)
-        .build();
-  }
-
-  @Override
-  public RentalUserDetailsStatisticResponse getUserDetailsStatistic() {
-    var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    if (Optional.ofNullable(user).isEmpty()) {
-      log.error("User not authenticated!");
-      throw new IllegalStateException("User not authenticated");
-    }
-
-    int paymentBills = paymentBillService.findNewUserBillsAmount(user.getEmail());
-    int repairBills = repairBillService.findNewUserBillsAmount(user.getEmail());
-    int orders = orderService.findNewUserOrdersAmount(user.getEmail());
-    int notifications = notificationService.findNewUserNotificationsAmount(user.getEmail());
-    return RentalUserDetailsStatisticResponse
-        .builder()
-        .paymentBills(paymentBills)
-        .repairBills(repairBills)
-        .orders(orders)
-        .notifications(notifications)
-        .build();
   }
 }

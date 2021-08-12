@@ -8,14 +8,18 @@ import com.example.carrental.controller.dto.order.OrderRejectRequest;
 import com.example.carrental.controller.dto.order.OrderResponse;
 import com.example.carrental.controller.dto.order.OrderSearchRequest;
 import com.example.carrental.controller.dto.order.OrderTotalCostRequest;
+import com.example.carrental.controller.dto.order.OrderTotalCostResponse;
+import com.example.carrental.controller.dto.order.UserOrderResponse;
 import com.example.carrental.service.OrderService;
 import com.example.carrental.service.exceptions.CarAlreadyBookedException;
+import com.example.carrental.service.exceptions.DocumentNotGeneratedException;
 import com.example.carrental.service.exceptions.DocumentsNotConfirmedException;
 import com.example.carrental.service.exceptions.FontNotFoundException;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -39,21 +43,6 @@ public class OrderController {
 
   private final OrderService orderService;
 
-  @PostMapping(path = "/search")
-  public ResponseEntity<Page<OrderResponse>> findAll(
-      @Valid @RequestBody OrderSearchRequest orderSearchRequest,
-      @NotNull @CookieValue(name = "i18next") String language) {
-    var ordersPage = orderService.findAll(orderSearchRequest, language);
-    return new ResponseEntity<>(ordersPage, HttpStatus.OK);
-  }
-
-  @GetMapping(path = "/new")
-  public ResponseEntity<Page<OrderNewResponse>> findAllNew(Pageable pageable,
-      @NotNull @CookieValue(name = "i18next") String language) {
-    var ordersPage = orderService.findAllNew(pageable, language);
-    return new ResponseEntity<>(ordersPage, HttpStatus.OK);
-  }
-
   @GetMapping(path = "/current")
   public ResponseEntity<Page<OrderInformationResponse>> findAllCurrent(Pageable pageable,
       @NotNull @CookieValue(name = "i18next") String language) {
@@ -68,137 +57,102 @@ public class OrderController {
     return new ResponseEntity<>(ordersPage, HttpStatus.OK);
   }
 
-  @PostMapping(path = "/calculate")
-  public ResponseEntity<?> calculateTotalCost(
-      @RequestBody OrderTotalCostRequest orderTotalCostRequest) {
-    try {
-      var totalCost = orderService.calculateTotalCost(orderTotalCostRequest);
-      return new ResponseEntity<>(totalCost, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @PostMapping
-  public ResponseEntity<String> create(@RequestBody CreateOrderRequest createOrderRequest) {
-    try {
-      var response = orderService.create(createOrderRequest);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (DocumentsNotConfirmedException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    } catch (CarAlreadyBookedException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.METHOD_NOT_ALLOWED);
-    }
-  }
-
-  @PutMapping(path = "/reject/{id}")
-  public ResponseEntity<?> rejectOrder(@NotNull @Positive @PathVariable Long id,
-      @RequestBody OrderRejectRequest orderRejectRequest) {
-    try {
-      var response = orderService.rejectOrder(id, orderRejectRequest);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @PutMapping(path = "/approve/{id}")
-  public ResponseEntity<?> approveOrder(@NotNull @Positive @PathVariable Long id) {
-    try {
-      var response = orderService.approveOrder(id);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @PutMapping(path = "/complete/{id}")
-  public ResponseEntity<?> completeOrder(@NotNull @Positive @PathVariable Long id) {
-    try {
-      var response = orderService.completeOrder(id);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-  }
-
-
-  @PutMapping(path = "/complete/{id}/penalty")
-  public ResponseEntity<?> completeOrderWithPenalty(@NotNull @Positive @PathVariable Long id,
-      @Valid @RequestBody OrderCompleteWithPenaltyRequest orderCompleteWithPenaltyRequest) {
-    try {
-      var response = orderService.completeOrderWithPenalty(id, orderCompleteWithPenaltyRequest);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @PutMapping(path = "/{id}")
-  public ResponseEntity<?> update(@NotNull @Positive @PathVariable Long id,
-      @Valid CreateOrderRequest createOrderRequest) {
-    try {
-      var response = orderService.update(id, createOrderRequest);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @PutMapping(path = "/start/{id}")
-  public ResponseEntity<?> startRentalPeriod(@NotNull @Positive @PathVariable Long id) {
-    try {
-      var response = orderService.startRentalPeriod(id);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @PutMapping(path = "/cancel/{id}")
-  public ResponseEntity<?> cancelOrderAfterPayment(@NotNull @Positive @PathVariable Long id,
-      @RequestBody OrderRejectRequest orderRejectRequest) {
-    try {
-      var response = orderService.cancelOrderAfterPayment(id, orderRejectRequest);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+  @GetMapping(path = "/new")
+  public ResponseEntity<Page<OrderNewResponse>> findAllNew(Pageable pageable,
+      @NotNull @CookieValue(name = "i18next") String language) {
+    var ordersPage = orderService.findAllNew(pageable, language);
+    return new ResponseEntity<>(ordersPage, HttpStatus.OK);
   }
 
   @GetMapping(path = "/user")
-  public ResponseEntity<?> findAllNewUserOrders(Pageable pageable,
+  public ResponseEntity<Page<UserOrderResponse>> findAllNewUserOrders(Pageable pageable,
       @NotNull @CookieValue(name = "i18next") String language) {
-    try {
-      var ordersPage = orderService.findAllNewUserOrders(pageable, language);
-      return new ResponseEntity<>(ordersPage, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+    var ordersPage = orderService.findAllNewUserOrders(pageable, language);
+    return new ResponseEntity<>(ordersPage, HttpStatus.OK);
   }
 
   @GetMapping(path = "/user/history")
-  public ResponseEntity<?> findAllUserOrdersHistory(Pageable pageable,
+  public ResponseEntity<Page<UserOrderResponse>> findAllUserOrdersHistory(Pageable pageable,
       @NotNull @CookieValue(name = "i18next") String language) {
-    try {
-      var ordersPage = orderService.findAllUserOrdersHistory(pageable, language);
-      return new ResponseEntity<>(ordersPage, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+    var ordersPage = orderService.findAllUserOrdersHistory(pageable, language);
+    return new ResponseEntity<>(ordersPage, HttpStatus.OK);
+  }
+
+  @PostMapping(path = "/calculate")
+  public ResponseEntity<OrderTotalCostResponse> calculateTotalCost(
+      @RequestBody OrderTotalCostRequest orderTotalCostRequest) {
+    var totalCost = orderService.calculateTotalCost(orderTotalCostRequest);
+    return new ResponseEntity<>(totalCost, HttpStatus.OK);
+  }
+
+  @PostMapping
+  public ResponseEntity<HttpStatus> create(@RequestBody CreateOrderRequest createOrderRequest)
+      throws CarAlreadyBookedException, DocumentsNotConfirmedException {
+    orderService.create(createOrderRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @PostMapping(path = "/search")
+  public ResponseEntity<Page<OrderResponse>> findAll(
+      @Valid @RequestBody OrderSearchRequest orderSearchRequest,
+      @NotNull @CookieValue(name = "i18next") String language) {
+    var ordersPage = orderService.findAll(orderSearchRequest, language);
+    return new ResponseEntity<>(ordersPage, HttpStatus.OK);
+  }
+
+  @PutMapping(path = "/approve/{id}")
+  public ResponseEntity<HttpStatus> approveOrder(@NotNull @Positive @PathVariable Long id) {
+    orderService.approveOrder(id);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @PutMapping(path = "/cancel/{id}")
+  public ResponseEntity<HttpStatus> cancelOrderAfterPayment(
+      @NotNull @Positive @PathVariable Long id,
+      @RequestBody OrderRejectRequest orderRejectRequest) {
+    orderService.cancelOrderAfterPayment(id, orderRejectRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @PutMapping(path = "/complete/{id}")
+  public ResponseEntity<HttpStatus> completeOrder(@NotNull @Positive @PathVariable Long id) {
+    orderService.completeOrder(id);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @PutMapping(path = "/complete/{id}/penalty")
+  public ResponseEntity<HttpStatus> completeOrderWithPenalty(
+      @NotNull @Positive @PathVariable Long id,
+      @Valid @RequestBody OrderCompleteWithPenaltyRequest orderCompleteWithPenaltyRequest) {
+    orderService.completeOrderWithPenalty(id, orderCompleteWithPenaltyRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @PutMapping(path = "/reject/{id}")
+  public ResponseEntity<HttpStatus> rejectOrder(@NotNull @Positive @PathVariable Long id,
+      @RequestBody OrderRejectRequest orderRejectRequest) {
+    orderService.rejectOrder(id, orderRejectRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @PutMapping(path = "/start/{id}")
+  public ResponseEntity<HttpStatus> startRentalPeriod(@NotNull @Positive @PathVariable Long id) {
+    orderService.startRentalPeriod(id);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @PutMapping(path = "/{id}")
+  public ResponseEntity<HttpStatus> update(@NotNull @Positive @PathVariable Long id,
+      @Valid CreateOrderRequest createOrderRequest) {
+    orderService.update(id, createOrderRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @GetMapping(path = "/{id}/export")
-  public ResponseEntity<?> exportOrderToPDF(@NotNull @Positive @PathVariable Long id) {
-    try {
-      var response = orderService.exportOrderToPDF(id);
-      return ResponseEntity.ok()
-          .contentType(MediaType.APPLICATION_PDF)
-          .body(response);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    } catch (FontNotFoundException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.METHOD_NOT_ALLOWED);
-    }
+  public ResponseEntity<ByteArrayResource> exportOrderToPDF(
+      @NotNull @Positive @PathVariable Long id)
+      throws FontNotFoundException, DocumentNotGeneratedException {
+    var response = orderService.exportOrderToPDF(id);
+    return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(response);
   }
 }

@@ -34,14 +34,6 @@ public class CarBrandsController {
 
   private final CarBrandService carBrandService;
 
-  @PostMapping
-  public ResponseEntity<String> create(
-      @Valid @RequestBody CreateCarBrandRequest createCarBrandRequest)
-      throws EntityAlreadyExistsException {
-    var response = carBrandService.create(createCarBrandRequest);
-    return new ResponseEntity<>(response, HttpStatus.CREATED);
-  }
-
   @GetMapping(path = "/all")
   public ResponseEntity<List<CarBrandResponse>> findAll() throws NoContentException {
     var brands = carBrandService.findAll();
@@ -61,12 +53,12 @@ public class CarBrandsController {
     return new ResponseEntity<>(brands, HttpStatus.OK);
   }
 
-  @PutMapping(path = "/{id}")
-  public ResponseEntity<String> update(@NotNull @Positive @PathVariable Long id,
+  @PostMapping
+  public ResponseEntity<HttpStatus> create(
       @Valid @RequestBody CreateCarBrandRequest createCarBrandRequest)
       throws EntityAlreadyExistsException {
-    var response = carBrandService.update(id, createCarBrandRequest);
-    return new ResponseEntity<>(response, HttpStatus.OK);
+    carBrandService.create(createCarBrandRequest);
+    return new ResponseEntity<>(HttpStatus.CREATED);
   }
 
   @PostMapping(
@@ -74,9 +66,17 @@ public class CarBrandsController {
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE
   )
-  public ResponseEntity<String> uploadBrandImage(@NotNull @Positive @PathVariable Long id,
+  public ResponseEntity<HttpStatus> uploadBrandImage(@NotNull @Positive @PathVariable Long id,
       @NotNull @RequestParam MultipartFile brandFile) {
-    var response = carBrandService.uploadBrandImage(id, brandFile);
-    return new ResponseEntity<>(response, HttpStatus.OK);
+    carBrandService.uploadBrandImage(id, brandFile);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @PutMapping(path = "/{id}")
+  public ResponseEntity<HttpStatus> update(@NotNull @Positive @PathVariable Long id,
+      @Valid @RequestBody CreateCarBrandRequest createCarBrandRequest)
+      throws EntityAlreadyExistsException {
+    carBrandService.update(id, createCarBrandRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }

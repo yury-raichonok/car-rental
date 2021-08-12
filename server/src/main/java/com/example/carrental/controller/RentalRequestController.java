@@ -4,6 +4,8 @@ import com.example.carrental.controller.dto.rentalDetails.CreateRentalRequestReq
 import com.example.carrental.controller.dto.rentalDetails.RentalAllRequestResponse;
 import com.example.carrental.controller.dto.rentalDetails.RentalRequestRejectRequest;
 import com.example.carrental.controller.dto.rentalDetails.RentalRequestResponse;
+import com.example.carrental.controller.dto.user.UserDrivingLicenseConfirmationDataResponse;
+import com.example.carrental.controller.dto.user.UserPassportConfirmationDataResponse;
 import com.example.carrental.service.RentalRequestService;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -14,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,51 +44,37 @@ public class RentalRequestController {
     return new ResponseEntity<>(rentalRequests, HttpStatus.OK);
   }
 
-  @GetMapping(path = "/passports/{id}")
-  public ResponseEntity<?> findRequestPassportData(@NotNull @Positive @PathVariable Long id) {
-    try {
-      var response = rentalRequestService.findRequestPassportData(id);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-  }
-
   @GetMapping(path = "/drivinglicenses/{id}")
-  public ResponseEntity<?> findRequestDrivingLicenseData(@NotNull @Positive @PathVariable Long id) {
-    try {
-      var response = rentalRequestService.findRequestDrivingLicenseData(id);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @PostMapping
-  public ResponseEntity<?> create(
-      @Valid @RequestBody CreateRentalRequestRequest createRentalRequestRequest) {
-    var response = rentalRequestService.create(createRentalRequestRequest);
+  public ResponseEntity<UserDrivingLicenseConfirmationDataResponse> findRequestDrivingLicenseData(
+      @NotNull @Positive @PathVariable Long id) {
+    var response = rentalRequestService.findRequestDrivingLicenseData(id);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
-  @PutMapping(path = "/reject/{id}")
-  public ResponseEntity<?> rejectRequest(@NotNull @Positive @PathVariable Long id,
-      @RequestBody RentalRequestRejectRequest rentalRequestRejectRequest) {
-    try {
-      var response = rentalRequestService.rejectRequest(id, rentalRequestRejectRequest);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+  @GetMapping(path = "/passports/{id}")
+  public ResponseEntity<UserPassportConfirmationDataResponse> findRequestPassportData(
+      @NotNull @Positive @PathVariable Long id) {
+    var response = rentalRequestService.findRequestPassportData(id);
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
+  @PostMapping
+  public ResponseEntity<HttpStatus> create(
+      @Valid @RequestBody CreateRentalRequestRequest createRentalRequestRequest) {
+    rentalRequestService.create(createRentalRequestRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @PutMapping(path = "/approve/{id}")
-  public ResponseEntity<?> approveRequest(@NotNull @Positive @PathVariable Long id) {
-    try {
-      var response = rentalRequestService.approveRequest(id);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+  public ResponseEntity<HttpStatus> approveRequest(@NotNull @Positive @PathVariable Long id) {
+    rentalRequestService.approveRequest(id);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @PutMapping(path = "/reject/{id}")
+  public ResponseEntity<HttpStatus> rejectRequest(@NotNull @Positive @PathVariable Long id,
+      @RequestBody RentalRequestRejectRequest rentalRequestRejectRequest) {
+    rentalRequestService.rejectRequest(id, rentalRequestRejectRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }

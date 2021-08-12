@@ -9,9 +9,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RepairBillRepository extends JpaRepository<RepairBill, Long> {
 
+  int countAllByOrder_UserEmailAndPaymentDateNull(String email);
+
   Page<RepairBill> findAllByOrder_UserEmailAndPaymentDateNotNull(String email, Pageable pageable);
 
   Page<RepairBill> findAllByOrder_UserEmailAndPaymentDateNull(String email, Pageable pageable);
-
-  int countAllByOrder_UserEmailAndPaymentDateNull(String email);
 }

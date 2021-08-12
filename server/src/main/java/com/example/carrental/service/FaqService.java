@@ -6,6 +6,7 @@ import com.example.carrental.controller.dto.faq.FaqWithTranslationsResponse;
 import com.example.carrental.controller.dto.faq.UpdateFaqRequest;
 import com.example.carrental.entity.faq.Faq;
 import com.example.carrental.service.exceptions.EntityAlreadyExistsException;
+import com.example.carrental.service.exceptions.NoContentException;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,15 +15,15 @@ import org.springframework.stereotype.Service;
 @Service
 public interface FaqService {
 
-  List<FaqResponse> findAll(String language);
+  List<FaqResponse> findAll(String language) throws NoContentException;
 
   Page<FaqWithTranslationsResponse> findAllPaged(Pageable pageable);
 
   Faq findById(Long id);
 
-  String create(CreateFaqRequest createFaqRequest) throws EntityAlreadyExistsException;
+  void create(CreateFaqRequest createFaqRequest) throws EntityAlreadyExistsException;
 
-  String update(Long id, UpdateFaqRequest updateFaqRequest);
+  void update(Long id, UpdateFaqRequest updateFaqRequest);
 
-  String delete(Long id);
+  void delete(Long id);
 }

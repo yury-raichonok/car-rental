@@ -16,17 +16,17 @@ public interface PaymentBillService {
   Page<PaymentBillResponse> findAll(PaymentBillSearchRequest paymentBillSearchRequest,
       String language);
 
-  PaymentBill findById(long id);
-
-  String create(CreatePaymentBillRequest createPaymentBillRequest);
-
-  String approveWithoutPayment(Long id);
+  Page<UserNewPaymentBillsResponse> findAllNewUserBills(Pageable pageable, String language);
 
   Page<UserPaymentBillsResponse> findAllUserBillsHistory(Pageable pageable, String language);
 
-  Page<UserNewPaymentBillsResponse> findAllNewUserBills(Pageable pageable, String language);
+  void approveWithoutPayment(Long id);
 
-  String payBill(Long id);
+  void payBill(Long id);
+
+  void create(CreatePaymentBillRequest createPaymentBillRequest);
+
+  PaymentBill findById(long id);
 
   int findNewUserBillsAmount(String email);
 }

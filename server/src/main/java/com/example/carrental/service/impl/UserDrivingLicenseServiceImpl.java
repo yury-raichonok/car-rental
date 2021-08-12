@@ -14,8 +14,8 @@ import com.example.carrental.repository.UserDrivingLicenseRepository;
 import com.example.carrental.service.FileStoreService;
 import com.example.carrental.service.UserDrivingLicenseService;
 import com.example.carrental.service.UserService;
-import com.example.carrental.service.exceptions.DocumentsNotConfirmedException;
-import com.example.carrental.service.exceptions.NoDrivingLicenseDataException;
+import com.example.carrental.service.exceptions.DrivingLicenseNotConfirmedException;
+import com.example.carrental.service.exceptions.NoContentException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -56,8 +56,8 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
   }
 
   @Override
-  public UserDrivingLicenseDataResponse getUserDrivingLicenseData()
-      throws NoDrivingLicenseDataException {
+  public UserDrivingLicenseDataResponse findUserDrivingLicenseData()
+      throws NoContentException {
     var username = SecurityContextHolder.getContext().getAuthentication().getName();
     if ("anonymousUser".equals(username)) {
       log.error("User is not authenticated!");
@@ -70,7 +70,7 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
 
     if (optionalDrivingLicense.isEmpty()) {
       log.error("Driving license of user {}  is not specified!", username);
-      throw new NoDrivingLicenseDataException("Driving license data is not specified!");
+      throw new NoContentException("Driving license data is not specified!");
     }
 
     var passport = optionalDrivingLicense.get();
@@ -96,7 +96,7 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
 
   @Override
   @Transactional
-  public String createOrUpdate(
+  public void createOrUpdate(
       CreateOrUpdateUserDrivingLicenseRequest createOrUpdateUserDrivingLicenseRequest) {
     var username = SecurityContextHolder.getContext().getAuthentication().getName();
     if ("anonymousUser".equals(username)) {
@@ -128,12 +128,11 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
           .user(user)
           .build());
     }
-    return "Success";
   }
 
   @Override
   @Transactional
-  public String update(Long id, UserDrivingLicense userDrivingLicense) {
+  public void update(Long id, UserDrivingLicense userDrivingLicense) {
     var drivingLicense = findById(id);
 
     drivingLicense.setDateOfIssue(userDrivingLicense.getDateOfIssue());
@@ -146,12 +145,11 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
     userDrivingLicense.setDocumentsFileLink(userDrivingLicense.getDocumentsFileLink());
 
     userDrivingLicenseRepository.save(drivingLicense);
-    return "Success";
   }
 
   @Override
   @Transactional
-  public String updateDrivingLicenseStatus(Long id) throws DocumentsNotConfirmedException {
+  public void updateDrivingLicenseStatus(Long id) throws DrivingLicenseNotConfirmedException {
     var drivingLicense = findById(id);
     switch (drivingLicense.getStatus()) {
       case CONFIRMED:
@@ -164,15 +162,14 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
         break;
       case UNDER_CONSIDERATION:
         log.error("Driver's license is pending. You cannot change the status");
-        throw new DocumentsNotConfirmedException(
+        throw new DrivingLicenseNotConfirmedException(
             "Driver's license is pending. You cannot change the status");
     }
     userDrivingLicenseRepository.save(drivingLicense);
-    return "Success";
   }
 
   @Override
-  public String uploadFile(MultipartFile drivingLicenseFile) {
+  public void uploadFile(MultipartFile drivingLicenseFile) {
     if (drivingLicenseFile.isEmpty()) {
       log.error("Cannot upload empty file [{}]", drivingLicenseFile.getSize());
       throw new IllegalStateException(String.format("Cannot upload empty file [%s]",
@@ -217,7 +214,6 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
     drivingLicense.setDocumentsFileLink(filesLink);
     drivingLicense.setChangedAt(LocalDateTime.now());
     userDrivingLicenseRepository.save(drivingLicense);
-    return "Success";
   }
 
   @Override

@@ -47,7 +47,35 @@ public class UserPhoneServiceImpl implements UserPhoneService {
 
   @Override
   @Transactional
-  public String sendConfirmationSms(UserSmsRequest userSmsRequest)
+  public void create(UserPhoneConfirmationRequest userPhoneConfirmationRequest)
+      throws EntityAlreadyExistsException, TokenExpireException {
+    var phone = userPhoneRepository.findByPhoneAndActiveTrue(userPhoneConfirmationRequest.getPhoneNumber());
+    if (phone.isPresent()) {
+      log.error("Phone with number {} already exists!", phone);
+      throw new EntityAlreadyExistsException(String.format("Phone with number %s already exists!",
+          phone));
+    }
+
+    var confirmationToken = userConfirmationTokenService
+        .getUserConfirmationTokenByToken(userPhoneConfirmationRequest.getToken());
+    if (confirmationToken.getExpirationTime().isBefore(LocalDateTime.now())) {
+      log.error("Token {} expired", userPhoneConfirmationRequest.getToken());
+      throw new TokenExpireException("Token expired!");
+    }
+
+    userConfirmationTokenService
+        .updateUserConfirmationTokenConfirmedAt(userPhoneConfirmationRequest.getToken());
+    userPhoneRepository.save(UserPhone
+        .builder()
+        .phone(userPhoneConfirmationRequest.getPhoneNumber())
+        .active(true)
+        .user(confirmationToken.getUser())
+        .build());
+  }
+
+  @Override
+  @Transactional
+  public void sendConfirmationSms(UserSmsRequest userSmsRequest)
       throws EntityAlreadyExistsException {
     var phone = userPhoneRepository.findByPhoneAndActiveTrue(userSmsRequest.getPhoneNumber());
     if (phone.isPresent()) {
@@ -79,41 +107,10 @@ public class UserPhoneServiceImpl implements UserPhoneService {
 
     smsSenderService.sendSms(new PhoneNumber(String.format("+%s", userSmsRequest.getPhoneNumber())),
         new PhoneNumber(twilioTrialNumber), String.valueOf(token));
-    return "Success";
   }
 
   @Override
-  @Transactional
-  public String create(UserPhoneConfirmationRequest userPhoneConfirmationRequest)
-      throws EntityAlreadyExistsException, TokenExpireException {
-    var phone = userPhoneRepository.findByPhoneAndActiveTrue(userPhoneConfirmationRequest.getPhoneNumber());
-    if (phone.isPresent()) {
-      log.error("Phone with number {} already exists!", phone);
-      throw new EntityAlreadyExistsException(String.format("Phone with number %s already exists!",
-          phone));
-    }
-
-    var confirmationToken = userConfirmationTokenService
-        .getUserConfirmationTokenByToken(userPhoneConfirmationRequest.getToken());
-    if (confirmationToken.getExpirationTime().isBefore(LocalDateTime.now())) {
-      log.error("Token {} expired", userPhoneConfirmationRequest.getToken());
-      throw new TokenExpireException("Token expired!");
-    }
-
-    userConfirmationTokenService
-        .updateUserConfirmationTokenConfirmedAt(userPhoneConfirmationRequest.getToken());
-    userPhoneRepository.save(UserPhone
-        .builder()
-        .phone(userPhoneConfirmationRequest.getPhoneNumber())
-        .active(true)
-        .user(confirmationToken.getUser())
-        .build());
-
-    return "Success";
-  }
-
-  @Override
-  public String updatePhoneStatus(Long id) throws EntityAlreadyExistsException {
+  public void updatePhoneStatus(Long id) throws EntityAlreadyExistsException {
     var phone = findById(id);
     if (phone.isActive()) {
       phone.setActive(false);
@@ -124,6 +121,5 @@ public class UserPhoneServiceImpl implements UserPhoneService {
     }
     phone.setActive(!phone.isActive());
     userPhoneRepository.save(phone);
-    return "Success";
   }
 }

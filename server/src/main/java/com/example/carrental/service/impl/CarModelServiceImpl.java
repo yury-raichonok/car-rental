@@ -1,10 +1,11 @@
 package com.example.carrental.service.impl;
 
+import static com.example.carrental.service.impl.CarBrandServiceImpl.NO_CONTENT;
+
 import com.example.carrental.controller.dto.car.CarModelBrandNameResponse;
 import com.example.carrental.controller.dto.car.CarModelResponse;
 import com.example.carrental.controller.dto.car.CreateCarModelRequest;
 import com.example.carrental.controller.dto.car.UpdateCarModelRequest;
-import com.example.carrental.entity.car.CarBrand;
 import com.example.carrental.entity.car.CarModel;
 import com.example.carrental.mapper.CarModelMapper;
 import com.example.carrental.repository.CarModelRepository;
@@ -15,7 +16,6 @@ import com.example.carrental.service.exceptions.NoContentException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -34,125 +34,100 @@ public class CarModelServiceImpl implements CarModelService {
   private final CarModelMapper carModelMapper;
 
   @Override
-  @Transactional
-  public String create(CreateCarModelRequest createCarModelRequest)
-      throws EntityAlreadyExistsException {
-    CarBrand carBrand = carBrandService.findById(createCarModelRequest.getBrandId());
-
-    Optional<CarModel> optionalCarModel = carModelRepository
-        .findByNameAndBrandName(createCarModelRequest.getName(), carBrand.getName());
-    if (optionalCarModel.isPresent()) {
-      log.error("Car model of brand {} with name {} already exists", carBrand.getName(),
-          createCarModelRequest.getName());
-      throw new EntityAlreadyExistsException(String
-          .format("Car model of brand %s with name %s already exists", carBrand.getName(),
-              createCarModelRequest.getName()));
-    }
-
-    carModelRepository.save(CarModel.builder()
-        .name(createCarModelRequest.getName())
-        .brand(carBrand)
-        .createdAt(LocalDateTime.now())
-        .build());
-    return "Success";
-  }
-
-  @Override
   public List<CarModelResponse> findAll() throws NoContentException {
-    List<CarModel> models = carModelRepository.findAll();
+    var models = carModelRepository.findAll();
     List<CarModelResponse> modelsResponse = new ArrayList<>();
     models.forEach(model -> modelsResponse.add(carModelMapper.carModelToCarModelResponse(model)));
     if (modelsResponse.isEmpty()) {
-      throw new NoContentException("No content");
+      throw new NoContentException(NO_CONTENT);
     }
     return modelsResponse;
   }
 
   @Override
   public Page<CarModelBrandNameResponse> findAllModelsWithBrandName(Pageable pageable) {
-    Page<CarModel> modelsPage = carModelRepository.findAll(pageable);
-    List<CarModelBrandNameResponse> carModelBrandNameResponses = new ArrayList<>();
-    modelsPage.forEach(
-        m -> carModelBrandNameResponses.add(carModelMapper.carModelToCarModelBrandNameResponse(m)));
-    return new PageImpl<>(carModelBrandNameResponses, modelsPage.getPageable(),
-        modelsPage.getTotalElements());
+    var modelsPage = carModelRepository.findAll(pageable);
+    List<CarModelBrandNameResponse> modelsResponse = new ArrayList<>();
+    modelsPage.forEach(model -> modelsResponse
+        .add(carModelMapper.carModelToCarModelBrandNameResponse(model)));
+    return new PageImpl<>(modelsResponse, modelsPage.getPageable(), modelsPage.getTotalElements());
   }
 
   @Override
   public CarModel findById(Long id) {
-    Optional<CarModel> optionalCarModel = carModelRepository.findById(id);
-    if (optionalCarModel.isEmpty()) {
+    return carModelRepository.findById(id).orElseThrow(() -> {
       log.error("Car model with id {} does not exist", id);
       throw new IllegalStateException(String.format("Car model with id %d does not exists", id));
-    }
-    return optionalCarModel.get();
+    });
   }
 
   @Override
   public CarModel findModelByNameAndBrandName(String name, String brandName) {
-    Optional<CarModel> optionalModel = carModelRepository.findByNameAndBrandName(name, brandName);
-
-    if (optionalModel.isEmpty()) {
+    return carModelRepository.findByNameAndBrandName(name, brandName).orElseThrow(() -> {
       log.error("Car model with brand name {} and name {} does not exist", brandName, name);
       throw new IllegalStateException(String
           .format("Car model with brand name %s and name %s does not exist", brandName, name));
-    }
-
-    return optionalModel.get();
+    });
   }
 
   @Override
   public List<CarModelResponse> findModelsByBrandId(Long id) throws NoContentException {
     carBrandService.findById(id);
-
     var models = carModelRepository.findAllByBrandId(id);
     List<CarModelResponse> modelsResponse = new ArrayList<>();
-
     models.forEach(model -> modelsResponse.add(carModelMapper.carModelToCarModelResponse(model)));
-
     if (modelsResponse.isEmpty()) {
-      throw new NoContentException("No content");
+      throw new NoContentException(NO_CONTENT);
     }
-
     return modelsResponse;
   }
 
   @Override
   public List<CarModelResponse> findModelsByBrandName(String name) throws NoContentException {
     carBrandService.findByName(name);
-
     var models = carModelRepository.findAllByBrandNameOrderByName(name);
     List<CarModelResponse> modelsResponse = new ArrayList<>();
-
     models.forEach(model -> modelsResponse.add(carModelMapper.carModelToCarModelResponse(model)));
     if (modelsResponse.isEmpty()) {
-      throw new NoContentException("No content");
+      throw new NoContentException(NO_CONTENT);
     }
-
     return modelsResponse;
   }
 
   @Override
   @Transactional
-  public String update(Long id, UpdateCarModelRequest updateCarModelRequest)
+  public void create(CreateCarModelRequest createCarModelRequest)
       throws EntityAlreadyExistsException {
-    Optional<CarModel> optionalCarModel = carModelRepository
-        .findByNameAndBrandName(updateCarModelRequest.getName(), updateCarModelRequest.getBrand());
-    if (optionalCarModel.isPresent()) {
-      log.error("Car model of brand {} with name {} already exists",
-          updateCarModelRequest.getBrand(), updateCarModelRequest.getName());
-      throw new EntityAlreadyExistsException(String
-          .format("Car model of brand %s with name %s already exists",
-              updateCarModelRequest.getBrand(), updateCarModelRequest.getName()));
-    }
+    var carBrand = carBrandService.findById(createCarModelRequest.getBrandId());
+    validateCarModelByBrandAndName(createCarModelRequest.getName(), carBrand.getName());
+    carModelRepository.save(CarModel.builder()
+        .name(createCarModelRequest.getName())
+        .brand(carBrand)
+        .createdAt(LocalDateTime.now())
+        .build());
+  }
 
-    CarModel carModel = findById(id);
-    CarBrand carBrand = carBrandService.findByName(updateCarModelRequest.getBrand());
+  @Override
+  @Transactional
+  public void update(Long id, UpdateCarModelRequest updateCarModelRequest)
+      throws EntityAlreadyExistsException {
+    validateCarModelByBrandAndName(updateCarModelRequest.getBrand(),
+        updateCarModelRequest.getName());
+    var carModel = findById(id);
+    var carBrand = carBrandService.findByName(updateCarModelRequest.getBrand());
 
     carModel.setName(updateCarModelRequest.getName());
     carModel.setBrand(carBrand);
     carModel.setChangedAt(LocalDateTime.now());
     carModelRepository.save(carModel);
-    return "Success";
+  }
+
+  private void validateCarModelByBrandAndName(String modelName, String brandName)
+      throws EntityAlreadyExistsException {
+    if (carModelRepository.findByNameAndBrandName(modelName, brandName).isPresent()) {
+      log.error("Car model of brand {} with name {} already exists", brandName, modelName);
+      throw new EntityAlreadyExistsException(String
+          .format("Car model of brand %s with name %s already exists", brandName, modelName));
+    }
   }
 }

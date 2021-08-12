@@ -1,5 +1,7 @@
 package com.example.carrental.controller;
 
+import com.example.carrental.controller.dto.bill.RepairBillHistoryResponse;
+import com.example.carrental.controller.dto.bill.RepairBillNewResponse;
 import com.example.carrental.controller.dto.bill.RepairBillResponse;
 import com.example.carrental.controller.dto.bill.RepairBillSearchRequest;
 import com.example.carrental.service.RepairBillService;
@@ -37,30 +39,22 @@ public class RepairBillController {
   }
 
   @GetMapping(path = "/user")
-  public ResponseEntity<?> findAllUserBillsHistory(Pageable pageable,
+  public ResponseEntity<Page<RepairBillHistoryResponse>> findAllUserBillsHistory(Pageable pageable,
       @NotNull @CookieValue(name = "i18next") String language) {
-    try {
-      var paymentBills = repairBillService.findAllUserBillsHistory(pageable, language);
-      return new ResponseEntity<>(paymentBills, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+    var paymentBills = repairBillService.findAllUserBillsHistory(pageable, language);
+    return new ResponseEntity<>(paymentBills, HttpStatus.OK);
   }
 
   @GetMapping(path = "/user/new")
-  public ResponseEntity<?> findAllNewUserBills(Pageable pageable,
+  public ResponseEntity<Page<RepairBillNewResponse>> findAllNewUserBills(Pageable pageable,
       @NotNull @CookieValue(name = "i18next") String language) {
-    try {
-      var paymentBills = repairBillService.findAllNewUserBills(pageable, language);
-      return new ResponseEntity<>(paymentBills, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+    var paymentBills = repairBillService.findAllNewUserBills(pageable, language);
+    return new ResponseEntity<>(paymentBills, HttpStatus.OK);
   }
 
   @PostMapping("/pay/{id}")
-  public ResponseEntity<String> payBill(@NotNull @Positive @PathVariable Long id) {
-    var response = repairBillService.payBill(id);
-    return new ResponseEntity<>(response, HttpStatus.OK);
+  public ResponseEntity<HttpStatus> payBill(@NotNull @Positive @PathVariable Long id) {
+    repairBillService.payBill(id);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }

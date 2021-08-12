@@ -18,9 +18,9 @@ public class FileStoreServiceImpl implements FileStoreService {
   private final FileStoreRepository fileStoreRepository;
 
   @Override
-  public String uploadPublicFile(String bucketName, String fileName, File file) {
+  public void uploadPublicFile(String bucketName, String fileName, File file) {
     try {
-      return fileStoreRepository.uploadPublicFile(bucketName, fileName, file);
+      fileStoreRepository.uploadPublicFile(bucketName, fileName, file);
     } catch (AmazonServiceException e) {
       log.error("Failed to store file {} to s3. Exception: {}", fileName, e.getMessage());
       throw new IllegalStateException(String.format("Failed to store file %s to s3. Exception: %s",
@@ -29,9 +29,9 @@ public class FileStoreServiceImpl implements FileStoreService {
   }
 
   @Override
-  public String uploadFile(String bucketName, String fileName, File file) {
+  public void uploadFile(String bucketName, String fileName, File file) {
     try {
-      return fileStoreRepository.uploadFile(bucketName, fileName, file);
+      fileStoreRepository.uploadFile(bucketName, fileName, file);
     } catch (AmazonServiceException e) {
       log.error("Failed to store file {} to s3. Exception: {}", fileName, e.getMessage());
       throw new IllegalStateException(String.format("Failed to store file %s to s3. Exception: %s",

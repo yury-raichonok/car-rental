@@ -514,7 +514,6 @@ const ProfileComponent = (props) => {
 
   const onConfirmPhoneNumber = () => {
     
-
     PhoneDataService.create(token).then(
       res => {
         notification.success({
@@ -531,9 +530,15 @@ const ProfileComponent = (props) => {
             case 406:
               console.log("406 status");
               notification.error({
-                message: `${t('token_expired_try_again')}`,
+                message: `${t('this_phone_number_is_already_taken')}`,
               });
               break;
+            case 405:
+              console.log("406 status");
+              notification.error({
+                message: `${t('token_expired_try_again')}`,
+              });
+              break;  
             default:
               notification.error({
                 message: `${t('something_wrong_please_try_again')}`,
@@ -738,7 +743,7 @@ const ProfileComponent = (props) => {
       
       if(err && err.response){
         switch(err.response.status){
-          case 405:
+          case 406:
             notification.error({
               message: `${t('this_phone_number_is_already_taken')}`,
             });

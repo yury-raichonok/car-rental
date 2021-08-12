@@ -12,10 +12,10 @@ public interface UserPhoneService {
 
   UserPhone findById(Long id);
 
-  String sendConfirmationSms(UserSmsRequest userSmsRequest) throws EntityAlreadyExistsException;
-
-  String create(UserPhoneConfirmationRequest userPhoneConfirmationRequest)
+  void create(UserPhoneConfirmationRequest userPhoneConfirmationRequest)
       throws EntityAlreadyExistsException, TokenExpireException;
 
-  String updatePhoneStatus(Long id) throws EntityAlreadyExistsException;
+  void sendConfirmationSms(UserSmsRequest userSmsRequest) throws EntityAlreadyExistsException;
+
+  void updatePhoneStatus(Long id) throws EntityAlreadyExistsException;
 }

@@ -18,7 +18,8 @@ public interface CarClassMapper {
   @Mapping(target = "nameEn", source = "carClass.name")
   @Mapping(target = "nameRu", source = "carClass", qualifiedByName = "getNameRu")
   @Mapping(target = "nameBe", source = "carClass", qualifiedByName = "getNameBe")
-  CarClassNameWithTranslationsResponse carClassToCarClassNameWithTranslationsResponse(CarClass carClass);
+  CarClassNameWithTranslationsResponse carClassToCarClassNameWithTranslationsResponse(
+      CarClass carClass);
 
   @Named("getNameRu")
   default String getNameRu(CarClass carClass) {

@@ -10,8 +10,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
+  int countAllByUser_EmailAndStatus(String email, NotificationStatus status);
+
   Page<Notification> findAllByUser_EmailAndStatus(String email, NotificationStatus status,
       Pageable pageable);
-
-  int countAllByUser_EmailAndStatus(String email, NotificationStatus status);
 }

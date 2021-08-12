@@ -10,9 +10,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RentalRequestRepository extends JpaRepository<RentalRequest, Long> {
 
-  Page<RentalRequest> findAllByConsideredFalse(Pageable pageable);
-
   int countAllByConsideredFalse();
 
   int countAllBySentDateAfter(LocalDateTime date);
+
+  Page<RentalRequest> findAllByConsideredFalse(Pageable pageable);
 }

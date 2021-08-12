@@ -1,5 +1,7 @@
 package com.example.carrental.service.impl;
 
+import static com.example.carrental.service.impl.CarBrandServiceImpl.NO_CONTENT;
+
 import com.example.carrental.controller.dto.faq.CreateFaqRequest;
 import com.example.carrental.controller.dto.faq.FaqResponse;
 import com.example.carrental.controller.dto.faq.FaqWithTranslationsResponse;
@@ -10,6 +12,7 @@ import com.example.carrental.repository.FaqRepository;
 import com.example.carrental.service.FaqService;
 import com.example.carrental.service.FaqTranslationService;
 import com.example.carrental.service.exceptions.EntityAlreadyExistsException;
+import com.example.carrental.service.exceptions.NoContentException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,21 +35,22 @@ public class FaqServiceImpl implements FaqService {
   private final FaqMapper faqMapper;
 
   @Override
-  public List<FaqResponse> findAll(String language) {
+  public List<FaqResponse> findAll(String language) throws NoContentException {
     var faqs = faqRepository.findAll();
-    List<FaqResponse> faqResponses = new ArrayList<>();
+    List<FaqResponse> faqsResponse = new ArrayList<>();
     faqs.forEach(faq -> {
-      if (!"en".equals(language)) {
-        faqTranslationService.setTranslation(faq, language);
-      }
-      faqResponses.add(faqMapper.faqToFaqResponse(faq));
+      faqTranslationService.setTranslation(faq, language);
+      faqsResponse.add(faqMapper.faqToFaqResponse(faq));
     });
-    return faqResponses;
+    if (faqsResponse.isEmpty()) {
+      throw new NoContentException(NO_CONTENT);
+    }
+    return faqsResponse;
   }
 
   @Override
   public Page<FaqWithTranslationsResponse> findAllPaged(Pageable pageable) {
-    Page<Faq> faqsPage = faqRepository.findAll(pageable);
+    var faqsPage = faqRepository.findAll(pageable);
     List<FaqWithTranslationsResponse> faqResponses = new ArrayList<>();
     faqsPage.forEach(faq -> faqResponses.add(faqMapper.faqToFaqWithTranslationsResponse(faq)));
     return new PageImpl<>(faqResponses, faqsPage.getPageable(), faqsPage.getTotalElements());
@@ -54,23 +58,20 @@ public class FaqServiceImpl implements FaqService {
 
   @Override
   public Faq findById(Long id) {
-    Optional<Faq> optionalFaq = faqRepository.findById(id);
-    if (optionalFaq.isEmpty()) {
+    return faqRepository.findById(id).orElseThrow(() -> {
       log.error("Faq with id {} does not exist", id);
       throw new IllegalStateException(String.format("Faq with id %d does not exists", id));
-    }
-    return optionalFaq.get();
+    });
   }
 
   @Override
   @Transactional
-  public String create(CreateFaqRequest createFaqRequest) throws EntityAlreadyExistsException {
+  public void create(CreateFaqRequest createFaqRequest) throws EntityAlreadyExistsException {
     if (faqRepository.findByQuestion(createFaqRequest.getQuestionEn()).isPresent()) {
       log.error("Faq with question {} already exists", createFaqRequest.getQuestionEn());
       throw new EntityAlreadyExistsException(String.format("Faq with question %s already exists",
           createFaqRequest.getQuestionEn()));
     }
-
     var faq = Faq
         .builder()
         .question(createFaqRequest.getQuestionEn())
@@ -80,29 +81,24 @@ public class FaqServiceImpl implements FaqService {
 
     faqRepository.save(faq);
     faqTranslationService.create(createFaqRequest, faq);
-    return "Success";
   }
 
   @Override
   @Transactional
-  public String update(Long id, UpdateFaqRequest updateFaqRequest) {
-    Faq faq = findById(id);
-
+  public void update(Long id, UpdateFaqRequest updateFaqRequest) {
+    var faq = findById(id);
     faq.setQuestion(updateFaqRequest.getQuestionEn());
     faq.setAnswer(updateFaqRequest.getAnswerEn());
     faq.setChangedAt(LocalDateTime.now());
-    faqRepository.save(faq);
 
+    faqRepository.save(faq);
     faqTranslationService.update(updateFaqRequest, faq.getFaqTranslations());
-    return "Success";
   }
 
   @Override
   @Transactional
-  public String delete(Long id) {
-    Faq faq = findById(id);
-
+  public void delete(Long id) {
+    var faq = findById(id);
     faqRepository.delete(faq);
-    return "Success";
   }
 }

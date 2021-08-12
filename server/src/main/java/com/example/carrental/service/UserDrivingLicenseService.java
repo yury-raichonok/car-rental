@@ -5,8 +5,8 @@ import com.example.carrental.controller.dto.user.UserDocumentsDownloadRequest;
 import com.example.carrental.controller.dto.user.UserDrivingLicenseConfirmationDataResponse;
 import com.example.carrental.controller.dto.user.UserDrivingLicenseDataResponse;
 import com.example.carrental.entity.user.UserDrivingLicense;
-import com.example.carrental.service.exceptions.DocumentsNotConfirmedException;
-import com.example.carrental.service.exceptions.NoDrivingLicenseDataException;
+import com.example.carrental.service.exceptions.DrivingLicenseNotConfirmedException;
+import com.example.carrental.service.exceptions.NoContentException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,18 +16,19 @@ public interface UserDrivingLicenseService {
 
   UserDrivingLicenseConfirmationDataResponse findDrivingLicenseById(Long id);
 
-  UserDrivingLicenseDataResponse getUserDrivingLicenseData() throws NoDrivingLicenseDataException;
+  UserDrivingLicenseDataResponse findUserDrivingLicenseData()
+      throws NoContentException;
 
   UserDrivingLicense findById(Long id);
 
-  String createOrUpdate(
+  void createOrUpdate(
       CreateOrUpdateUserDrivingLicenseRequest createOrUpdateUserDrivingLicenseRequest);
 
-  String update(Long id, UserDrivingLicense userDrivingLicense);
+  void update(Long id, UserDrivingLicense userDrivingLicense);
 
-  String updateDrivingLicenseStatus(Long id) throws DocumentsNotConfirmedException;
+  void updateDrivingLicenseStatus(Long id) throws DrivingLicenseNotConfirmedException;
 
-  String uploadFile(MultipartFile drivingLicenseFile);
+  void uploadFile(MultipartFile drivingLicenseFile);
 
   ByteArrayResource downloadFiles(UserDocumentsDownloadRequest userDocumentsDownloadRequest);
 }

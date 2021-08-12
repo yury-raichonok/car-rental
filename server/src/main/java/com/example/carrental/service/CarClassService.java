@@ -14,13 +14,13 @@ import org.springframework.stereotype.Service;
 @Service
 public interface CarClassService {
 
-  String create(CreateCarClassRequest createCarClassRequest) throws EntityAlreadyExistsException;
-
   List<CarClassNameResponse> findAll(String language) throws NoContentException;
 
   Page<CarClassNameWithTranslationsResponse> findAllPaged(Pageable pageable);
 
   CarClass findById(Long id);
 
-  String update(Long id, CreateCarClassRequest createCarClassRequest);
+  void create(CreateCarClassRequest createCarClassRequest) throws EntityAlreadyExistsException;
+
+  void update(Long id, CreateCarClassRequest createCarClassRequest);
 }

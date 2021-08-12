@@ -1,13 +1,18 @@
 package com.example.carrental.service.impl;
 
 import static com.example.carrental.mapper.OrderMapper.ORDER_DATE_FORMAT_PATTERN;
+import static com.itextpdf.text.BaseColor.WHITE;
 import static com.itextpdf.text.Element.ALIGN_CENTER;
 import static com.itextpdf.text.Element.ALIGN_MIDDLE;
 import static com.itextpdf.text.Element.ALIGN_RIGHT;
+import static com.itextpdf.text.Font.NORMAL;
+import static com.itextpdf.text.pdf.BaseFont.EMBEDDED;
+import static com.itextpdf.text.pdf.BaseFont.IDENTITY_H;
 
 import com.example.carrental.entity.order.Order;
 import com.example.carrental.entity.rentalDetails.RentalDetails;
 import com.example.carrental.service.PDFService;
+import com.example.carrental.service.exceptions.DocumentNotGeneratedException;
 import com.example.carrental.service.exceptions.FontNotFoundException;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
@@ -34,27 +39,26 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PDFServiceImpl implements PDFService {
 
+  public static final String ARIAL_FONT_PATH = "./src/main/resources/fonts/arial.ttf";
+  public static final int FONT_SIZE = 14;
+  public static final int TITLE_FONT_SIZE = 20;
+  public static final int TEXT_PADDING = 10;
+  public static final int TABLE_WIDTH_PERCENTS = 100;
+  public static final int TABLE_COLUMNS_AMOUNT = 5;
+  public static final BaseColor BASE_COLOR = new BaseColor(234, 92, 82);
+
   public ByteArrayResource exportOrderToPDF(Order order, RentalDetails rentalDetails)
-      throws FontNotFoundException {
-    var document = new Document();
-    var baos = new ByteArrayOutputStream();
-    try {
-      PdfWriter.getInstance(document, baos);
+      throws FontNotFoundException, DocumentNotGeneratedException {
+    try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+      var document = new Document();
+      PdfWriter.getInstance(document, byteArrayOutputStream);
       document.open();
 
-      String fontFilePath = "./src/main/resources/fonts/arial.ttf";
-      BaseFont bf;
-      try {
-        bf = BaseFont.createFont(fontFilePath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-      } catch (IOException e) {
-        log.error("Font Arial on path \"{}\" not found", fontFilePath);
-        throw new FontNotFoundException(String.format("Font Arial on path \"%s\" not found",
-            fontFilePath));
-      }
+      var baseFont = BaseFont.createFont(ARIAL_FONT_PATH, IDENTITY_H, EMBEDDED);
 
-      var titleFont = new Font(bf, 20);
-      var textFont = new Font(bf, 14);
-      var tableHeaderFont = new Font(bf, 14, Font.NORMAL, BaseColor.WHITE);
+      var titleFont = new Font(baseFont, TITLE_FONT_SIZE);
+      var textFont = new Font(baseFont, FONT_SIZE);
+      var tableHeaderFont = new Font(baseFont, FONT_SIZE, NORMAL, WHITE);
 
       var titleParagraph = new Paragraph("CarRental", titleFont);
       titleParagraph.setAlignment(ALIGN_RIGHT);
@@ -103,76 +107,76 @@ public class PDFServiceImpl implements PDFService {
       document.add(customerEmailParagraph);
       document.add(Chunk.NEWLINE);
 
-      var orderInfoTable = new PdfPTable(5);
-      orderInfoTable.setWidthPercentage(100);
+      var orderInfoTable = new PdfPTable(TABLE_COLUMNS_AMOUNT);
+      orderInfoTable.setWidthPercentage(TABLE_WIDTH_PERCENTS);
 
       var carCell = new PdfPCell(new Paragraph("Car", tableHeaderFont));
-      carCell.setBackgroundColor(new BaseColor(234, 92, 82));
-      carCell.setBorderColor(new BaseColor(234, 92, 82));
-      carCell.setPadding(10);
+      carCell.setBackgroundColor(BASE_COLOR);
+      carCell.setBorderColor(BASE_COLOR);
+      carCell.setPadding(TEXT_PADDING);
       carCell.setHorizontalAlignment(ALIGN_CENTER);
       carCell.setVerticalAlignment(ALIGN_MIDDLE);
 
       var carVinCell = new PdfPCell(new Paragraph("Car VIN", tableHeaderFont));
-      carVinCell.setBackgroundColor(new BaseColor(234, 92, 82));
-      carVinCell.setBorderColor(new BaseColor(234, 92, 82));
-      carVinCell.setPadding(10);
+      carVinCell.setBackgroundColor(BASE_COLOR);
+      carVinCell.setBorderColor(BASE_COLOR);
+      carVinCell.setPadding(TEXT_PADDING);
       carVinCell.setHorizontalAlignment(ALIGN_CENTER);
       carVinCell.setVerticalAlignment(ALIGN_MIDDLE);
 
       var pickUpDateCell = new PdfPCell(new Paragraph("Pick-up date", tableHeaderFont));
-      pickUpDateCell.setBackgroundColor(new BaseColor(234, 92, 82));
-      pickUpDateCell.setBorderColor(new BaseColor(234, 92, 82));
-      pickUpDateCell.setPadding(10);
+      pickUpDateCell.setBackgroundColor(BASE_COLOR);
+      pickUpDateCell.setBorderColor(BASE_COLOR);
+      pickUpDateCell.setPadding(TEXT_PADDING);
       pickUpDateCell.setHorizontalAlignment(ALIGN_CENTER);
       pickUpDateCell.setVerticalAlignment(ALIGN_MIDDLE);
 
       var returnUpDateCell = new PdfPCell(new Paragraph("Return date date", tableHeaderFont));
-      returnUpDateCell.setBackgroundColor(new BaseColor(234, 92, 82));
-      returnUpDateCell.setBorderColor(new BaseColor(234, 92, 82));
-      returnUpDateCell.setPadding(10);
+      returnUpDateCell.setBackgroundColor(BASE_COLOR);
+      returnUpDateCell.setBorderColor(BASE_COLOR);
+      returnUpDateCell.setPadding(TEXT_PADDING);
       returnUpDateCell.setHorizontalAlignment(ALIGN_CENTER);
       returnUpDateCell.setVerticalAlignment(ALIGN_MIDDLE);
 
       var totalHoursCell = new PdfPCell(new Paragraph("Total hours", tableHeaderFont));
-      totalHoursCell.setBackgroundColor(new BaseColor(234, 92, 82));
-      totalHoursCell.setBorderColor(new BaseColor(234, 92, 82));
-      totalHoursCell.setPadding(10);
+      totalHoursCell.setBackgroundColor(BASE_COLOR);
+      totalHoursCell.setBorderColor(BASE_COLOR);
+      totalHoursCell.setPadding(TEXT_PADDING);
       totalHoursCell.setHorizontalAlignment(ALIGN_CENTER);
       totalHoursCell.setVerticalAlignment(ALIGN_MIDDLE);
 
       var carValueCell = new PdfPCell(
           new Paragraph(String.format("%s %s", order.getCar().getModel().getBrand().getName(),
               order.getCar().getModel().getName())));
-      carValueCell.setBorderColor(new BaseColor(234, 92, 82));
-      carValueCell.setPadding(10);
+      carValueCell.setBorderColor(BASE_COLOR);
+      carValueCell.setPadding(TEXT_PADDING);
       carValueCell.setHorizontalAlignment(ALIGN_CENTER);
       carValueCell.setVerticalAlignment(ALIGN_MIDDLE);
 
       var carVinValueCell = new PdfPCell(new Paragraph(order.getCar().getVin()));
-      carVinValueCell.setBorderColor(new BaseColor(234, 92, 82));
-      carVinValueCell.setPadding(10);
+      carVinValueCell.setBorderColor(BASE_COLOR);
+      carVinValueCell.setPadding(TEXT_PADDING);
       carVinValueCell.setHorizontalAlignment(ALIGN_CENTER);
       carVinValueCell.setVerticalAlignment(ALIGN_MIDDLE);
 
       var pickUpDateValueCell = new PdfPCell(new Paragraph(
           order.getPickUpDate().format(DateTimeFormatter.ofPattern(ORDER_DATE_FORMAT_PATTERN))));
-      pickUpDateValueCell.setBorderColor(new BaseColor(234, 92, 82));
-      pickUpDateValueCell.setPadding(10);
+      pickUpDateValueCell.setBorderColor(BASE_COLOR);
+      pickUpDateValueCell.setPadding(TEXT_PADDING);
       pickUpDateValueCell.setHorizontalAlignment(ALIGN_CENTER);
       pickUpDateValueCell.setVerticalAlignment(ALIGN_MIDDLE);
 
       var returnUpDateValueCell = new PdfPCell(new Paragraph(
           order.getReturnDate().format(DateTimeFormatter.ofPattern(ORDER_DATE_FORMAT_PATTERN))));
-      returnUpDateValueCell.setBorderColor(new BaseColor(234, 92, 82));
-      returnUpDateValueCell.setPadding(10);
+      returnUpDateValueCell.setBorderColor(BASE_COLOR);
+      returnUpDateValueCell.setPadding(TEXT_PADDING);
       returnUpDateValueCell.setHorizontalAlignment(ALIGN_CENTER);
       returnUpDateValueCell.setVerticalAlignment(ALIGN_MIDDLE);
 
       var totalHoursValueCell = new PdfPCell(new Paragraph(String
           .valueOf(Duration.between(order.getPickUpDate(), order.getReturnDate()).toHours())));
-      totalHoursValueCell.setBorderColor(new BaseColor(234, 92, 82));
-      totalHoursValueCell.setPadding(10);
+      totalHoursValueCell.setBorderColor(BASE_COLOR);
+      totalHoursValueCell.setPadding(TEXT_PADDING);
       totalHoursValueCell.setHorizontalAlignment(ALIGN_CENTER);
       totalHoursValueCell.setVerticalAlignment(ALIGN_MIDDLE);
 
@@ -195,14 +199,16 @@ public class PDFServiceImpl implements PDFService {
       document.add(totalCostParagraph);
 
       document.close();
+      return new ByteArrayResource(byteArrayOutputStream.toByteArray());
     } catch (DocumentException e) {
-      e.printStackTrace();
-    }
-    try {
-      baos.close();
+      log.error("Printout for order {} not generated. Exception: {}", order.getId(),
+          e.getMessage());
+      throw new DocumentNotGeneratedException(String
+          .format("Printout for order %s not generated. Exception: %s", order.getId(),
+              e.getMessage()));
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("IOException: {}", e.getMessage());
+      throw new FontNotFoundException(String.format("IOException: %s", e.getMessage()));
     }
-    return new ByteArrayResource(baos.toByteArray());
   }
 }

@@ -40,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-  private final static Integer TIME_FOR_CONFIRMATION = 15;
+  private static final int TIME_FOR_CONFIRMATION = 15;
 
   private final UserRepository userRepository;
   private final BCryptPasswordEncoder passwordEncoder;
@@ -51,36 +51,107 @@ public class UserServiceImpl implements UserService {
   private final UserMapper userMapper;
 
   @Override
-  public Page<UserDataResponse> findAll(UserSearchRequest userSearchRequest) {
-    var usersPage = userCriteriaRepository.findUsers(userSearchRequest);
-    List<UserDataResponse> userDataResponse = new ArrayList<>();
-    usersPage.forEach(user -> userDataResponse.add(userMapper.userToUserDataResponse(user)));
-    return new PageImpl<>(userDataResponse, usersPage.getPageable(), usersPage.getTotalElements());
+  public UserProfileResponse getUserProfile() {
+    var email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+    if ("anonymousUser".equals(email)) {
+      log.error("User is not authenticated!");
+      throw new IllegalStateException("User is not authenticated!");
+    }
+
+    var user = findUserByEmail(email);
+    return userMapper.userToUserProfileResponse(user);
   }
 
   @Override
-  public User findById(Long id) {
-    var optionalUser = userRepository.findById(id);
-    if (optionalUser.isEmpty()) {
-      log.error("User with id {} does not exist", id);
-      throw new IllegalStateException(String.format("User with id %d does not exists", id));
-    }
-    return optionalUser.get();
-  }
+  public void sendEmailConfirmationMessage() {
+    var username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-  @Override
-  public String checkExistedEmail(String email) throws UsernameAlreadyTakenException {
-    var optionalUser = userRepository.findByEmail(email);
-    if (optionalUser.isPresent()) {
-      log.error("Email {} is already taken", email);
-      throw new UsernameAlreadyTakenException(String.format("Email %s is already taken", email));
+    if ("anonymousUser".equals(username)) {
+      log.error("User is not authenticated!");
+      throw new IllegalStateException("User is not authenticated!");
     }
-    return String.format("Email %s is free", email);
+
+    var user = findUserByEmail(username);
+
+    var token = UUID.randomUUID().toString();
+    UserConfirmationToken confirmationToken = UserConfirmationToken
+        .builder()
+        .token(token)
+        .creationTime(LocalDateTime.now())
+        .expirationTime(LocalDateTime.now().plusMinutes(TIME_FOR_CONFIRMATION))
+        .user(user)
+        .build();
+    userConfirmationTokenService.createUserConfirmationToken(confirmationToken);
+
+    var link = String.format("http://localhost:8080/users/email/confirm?token=%s", token);
+
+    var message = String.format("Click on link to confirm your email: %s", link);
+
+    emailService.sendEmail(user.getEmail(), message, "Email confirmation");
   }
 
   @Override
   @Transactional
-  public String create(UserRegistrationRequest userRegistrationRequest)
+  public void confirmEmail(String token) throws TokenExpireException {
+    var confirmationToken = userConfirmationTokenService
+        .getUserConfirmationTokenByToken(token);
+
+    if (confirmationToken.getConfirmationTime() != null) {
+      log.error("Email already confirmed");
+      throw new IllegalStateException("Email already confirmed");
+    }
+
+    LocalDateTime expirationTime = confirmationToken.getExpirationTime();
+
+    if (expirationTime.isBefore(LocalDateTime.now())) {
+      log.error("Token {} expired", token);
+      throw new TokenExpireException("Token expired!");
+    }
+
+    var user = findById(confirmationToken.getUser().getId());
+    user.setIsEmailConfirmed(true);
+    userRepository.save(user);
+
+    userConfirmationTokenService.updateUserConfirmationTokenConfirmedAt(token);
+  }
+
+  @Override
+  @Transactional
+  public void changePassword(UserChangePasswordRequest changePasswordRequest)
+      throws TokenExpireException {
+    var confirmationToken = userConfirmationTokenService
+        .getUserConfirmationTokenByToken(changePasswordRequest.getToken());
+
+    if (!changePasswordRequest.getPassword().equals(changePasswordRequest.getConfirmPassword())) {
+      log.error("Password mismatch");
+      throw new IllegalStateException("Password mismatch");
+    }
+
+    if (confirmationToken.getConfirmationTime() != null) {
+      log.error("Token already used!");
+      throw new TokenExpireException("Token already used!");
+    }
+
+    LocalDateTime expirationTime = confirmationToken.getExpirationTime();
+
+    if (expirationTime.isBefore(LocalDateTime.now())) {
+      log.error("Token {} expired", changePasswordRequest.getToken());
+      throw new TokenExpireException("Token expired");
+    }
+
+    userConfirmationTokenService
+        .updateUserConfirmationTokenConfirmedAt(changePasswordRequest.getToken());
+
+    var user = confirmationToken.getUser();
+    user.setPassword(passwordEncoder.encode(changePasswordRequest.getPassword()));
+    user.setChangedAt(LocalDateTime.now());
+    userRepository.save(user);
+  }
+
+  @Override
+  @Transactional
+  public void create(UserRegistrationRequest userRegistrationRequest)
       throws UsernameAlreadyTakenException {
     if (!userRegistrationRequest.getPassword()
         .equals(userRegistrationRequest.getConfirmPassword())) {
@@ -120,13 +191,19 @@ public class UserServiceImpl implements UserService {
     var message = String.format("Click on link to confirm your email: %s", link);
 
     emailService.sendEmail(user.getEmail(), message, "Email confirmation");
+  }
 
-    return "Success";
+  @Override
+  public Page<UserDataResponse> findAll(UserSearchRequest userSearchRequest) {
+    var usersPage = userCriteriaRepository.findUsers(userSearchRequest);
+    List<UserDataResponse> userDataResponse = new ArrayList<>();
+    usersPage.forEach(user -> userDataResponse.add(userMapper.userToUserDataResponse(user)));
+    return new PageImpl<>(userDataResponse, usersPage.getPageable(), usersPage.getTotalElements());
   }
 
   @Override
   @Transactional
-  public String forgotPassword(UserForgotPasswordRequest forgotPasswordRequest) {
+  public void forgotPassword(UserForgotPasswordRequest forgotPasswordRequest) {
     var user = findUserByEmail(forgotPasswordRequest.getEmail());
 
     var token = UUID.randomUUID().toString();
@@ -145,40 +222,11 @@ public class UserServiceImpl implements UserService {
     var message = String.format("Click on link to recover your password: %s", link);
 
     emailService.sendEmail(user.getEmail(), message, "Password recovery");
-
-    return "Success";
   }
 
   @Override
   @Transactional
-  public String confirmEmail(String token) throws TokenExpireException {
-    var confirmationToken = userConfirmationTokenService
-        .getUserConfirmationTokenByToken(token);
-
-    if (confirmationToken.getConfirmationTime() != null) {
-      log.error("Email already confirmed");
-      throw new IllegalStateException("Email already confirmed");
-    }
-
-    LocalDateTime expirationTime = confirmationToken.getExpirationTime();
-
-    if (expirationTime.isBefore(LocalDateTime.now())) {
-      log.error("Token {} expired", token);
-      throw new TokenExpireException("Token expired!");
-    }
-
-    var user = findById(confirmationToken.getUser().getId());
-    user.setIsEmailConfirmed(true);
-    userRepository.save(user);
-
-    userConfirmationTokenService.updateUserConfirmationTokenConfirmedAt(token);
-
-    return "Email confirmed!";
-  }
-
-  @Override
-  @Transactional
-  public String update(Long id, UserUpdateRequest userUpdateRequest)
+  public void update(Long id, UserUpdateRequest userUpdateRequest)
       throws UsernameAlreadyTakenException {
     var user = findById(id);
 
@@ -199,86 +247,58 @@ public class UserServiceImpl implements UserService {
     }
     user.setChangedAt(LocalDateTime.now());
     userRepository.save(user);
-
-    return "Success";
   }
 
   @Override
   @Transactional
-  public String changePassword(UserChangePasswordRequest changePasswordRequest)
-      throws TokenExpireException {
-    var confirmationToken = userConfirmationTokenService
-        .getUserConfirmationTokenByToken(changePasswordRequest.getToken());
-
-    if (!changePasswordRequest.getPassword().equals(changePasswordRequest.getConfirmPassword())) {
-      log.error("Password mismatch");
-      throw new IllegalStateException("Password mismatch");
-    }
-
-    if (confirmationToken.getConfirmationTime() != null) {
-      log.error("Token already used!");
-      throw new TokenExpireException("Token already used!");
-    }
-
-    LocalDateTime expirationTime = confirmationToken.getExpirationTime();
-
-    if (expirationTime.isBefore(LocalDateTime.now())) {
-      log.error("Token {} expired", changePasswordRequest.getToken());
-      throw new TokenExpireException("Token expired");
-    }
-
-    userConfirmationTokenService
-        .updateUserConfirmationTokenConfirmedAt(changePasswordRequest.getToken());
-
-    var user = confirmationToken.getUser();
-    user.setPassword(passwordEncoder.encode(changePasswordRequest.getPassword()));
-    user.setChangedAt(LocalDateTime.now());
+  public void updateUserRoleToAdmin(Long id) {
+    var user = findById(id);
+    var role = userRoleServiceService.findByRole("ADMIN");
+    user.setRole(role);
     userRepository.save(user);
-
-    return "Success";
   }
 
   @Override
-  public UserProfileResponse getUserProfile() {
-    var email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-    if ("anonymousUser".equals(email)) {
-      log.error("User is not authenticated!");
-      throw new IllegalStateException("User is not authenticated!");
-    }
-
-    var user = findUserByEmail(email);
-    return userMapper.userToUserProfileResponse(user);
+  @Transactional
+  public void updateUserRoleToUser(Long id) {
+    var user = findById(id);
+    var role = userRoleServiceService.findByRole("USER");
+    user.setRole(role);
+    userRepository.save(user);
   }
 
   @Override
-  public String sendEmailConfirmationMessage() {
-    var username = SecurityContextHolder.getContext().getAuthentication().getName();
+  @Transactional
+  public void updateUserStatus(Long id) {
+    var user = findById(id);
+    user.setLocked(!user.getLocked());
+    userRepository.save(user);
+  }
 
-    if ("anonymousUser".equals(username)) {
-      log.error("User is not authenticated!");
-      throw new IllegalStateException("User is not authenticated!");
+  @Override
+  public String checkExistedEmail(String email) throws UsernameAlreadyTakenException {
+    var optionalUser = userRepository.findByEmail(email);
+    if (optionalUser.isPresent()) {
+      log.error("Email {} is already taken", email);
+      throw new UsernameAlreadyTakenException(String.format("Email %s is already taken", email));
     }
+    return String.format("Email %s is free", email);
+  }
 
-    var user = findUserByEmail(username);
+  @Override
+  public User findById(Long id) {
+    var optionalUser = userRepository.findById(id);
+    if (optionalUser.isEmpty()) {
+      log.error("User with id {} does not exist", id);
+      throw new IllegalStateException(String.format("User with id %d does not exists", id));
+    }
+    return optionalUser.get();
+  }
 
-    var token = UUID.randomUUID().toString();
-    UserConfirmationToken confirmationToken = UserConfirmationToken
-        .builder()
-        .token(token)
-        .creationTime(LocalDateTime.now())
-        .expirationTime(LocalDateTime.now().plusMinutes(TIME_FOR_CONFIRMATION))
-        .user(user)
-        .build();
-    userConfirmationTokenService.createUserConfirmationToken(confirmationToken);
-
-    var link = String.format("http://localhost:8080/users/email/confirm?token=%s", token);
-
-    var message = String.format("Click on link to confirm your email: %s", link);
-
-    emailService.sendEmail(user.getEmail(), message, "Email confirmation");
-
-    return "Success";
+  @Override
+  public int findNewUsersAmountPerDay() {
+    return userRepository
+        .countAllByCreatedAtAfter(LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0)));
   }
 
   @Override
@@ -292,45 +312,10 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public String updateLastLoginDate(String email) {
+  @Transactional
+  public void updateLastLoginDate(String email) {
     var user = findUserByEmail(email);
     user.setLastLogin(LocalDateTime.now());
     userRepository.save(user);
-    return "Success";
-  }
-
-  @Override
-  @Transactional
-  public String updateUserStatus(Long id) {
-    var user = findById(id);
-    user.setLocked(!user.getLocked());
-    userRepository.save(user);
-    return "Success";
-  }
-
-  @Override
-  @Transactional
-  public String updateUserRoleToAdmin(Long id) {
-    var user = findById(id);
-    var role = userRoleServiceService.findByRole("ADMIN");
-    user.setRole(role);
-    userRepository.save(user);
-    return "Success";
-  }
-
-  @Override
-  @Transactional
-  public String updateUserRoleToUser(Long id) {
-    var user = findById(id);
-    var role = userRoleServiceService.findByRole("USER");
-    user.setRole(role);
-    userRepository.save(user);
-    return "Success";
-  }
-
-  @Override
-  public int findNewUsersAmountPerDay() {
-    return userRepository
-        .countAllByCreatedAtAfter(LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0)));
   }
 }

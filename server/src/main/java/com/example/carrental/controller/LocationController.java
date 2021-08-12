@@ -5,6 +5,7 @@ import com.example.carrental.controller.dto.location.LocationNameResponse;
 import com.example.carrental.controller.dto.location.LocationWithTranslationsResponse;
 import com.example.carrental.service.LocationService;
 import com.example.carrental.service.exceptions.EntityAlreadyExistsException;
+import com.example.carrental.service.exceptions.NoContentException;
 import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -32,43 +33,31 @@ public class LocationController {
 
   private final LocationService locationService;
 
+  @GetMapping(path = "/select")
+  public ResponseEntity<List<LocationNameResponse>> findAllForSelect(
+      @NotNull @CookieValue(name = "i18next") String language) throws NoContentException {
+    var locations = locationService.findAllForSelect(language);
+    return new ResponseEntity<>(locations, HttpStatus.OK);
+  }
+
   @GetMapping(path = "/paged")
   public ResponseEntity<Page<LocationWithTranslationsResponse>> findAllPaged(Pageable pageable) {
     var locations = locationService.findAllPaged(pageable);
     return new ResponseEntity<>(locations, HttpStatus.OK);
   }
 
-  @GetMapping(path = "/select")
-  public ResponseEntity<List<LocationNameResponse>> findAllForSelect(
-      @NotNull @CookieValue(name = "i18next") String language) {
-    var locations = locationService.findAllForSelect(language);
-    if (locations.isEmpty()) {
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-    return new ResponseEntity<>(locations, HttpStatus.OK);
-  }
-
   @PostMapping
-  public ResponseEntity<String> create(
-      @Valid @RequestBody CreateLocationRequest createLocationRequest) {
-    try {
-      var response = locationService.create(createLocationRequest);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (EntityAlreadyExistsException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+  public ResponseEntity<HttpStatus> create(
+      @Valid @RequestBody CreateLocationRequest createLocationRequest)
+      throws EntityAlreadyExistsException {
+    locationService.create(createLocationRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @PutMapping(path = "/{id}")
-  public ResponseEntity<String> update(@NotNull @Positive @PathVariable Long id,
+  public ResponseEntity<HttpStatus> update(@NotNull @Positive @PathVariable Long id,
       @Valid @RequestBody CreateLocationRequest createLocationRequest) {
-    try {
-      var response = locationService.update(id, createLocationRequest);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+    locationService.update(id, createLocationRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }

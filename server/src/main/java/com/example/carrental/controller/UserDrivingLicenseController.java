@@ -2,18 +2,20 @@ package com.example.carrental.controller;
 
 import com.example.carrental.controller.dto.user.CreateOrUpdateUserDrivingLicenseRequest;
 import com.example.carrental.controller.dto.user.UserDocumentsDownloadRequest;
+import com.example.carrental.controller.dto.user.UserDrivingLicenseConfirmationDataResponse;
+import com.example.carrental.controller.dto.user.UserDrivingLicenseDataResponse;
 import com.example.carrental.service.UserDrivingLicenseService;
-import com.example.carrental.service.exceptions.DocumentsNotConfirmedException;
-import com.example.carrental.service.exceptions.NoDrivingLicenseDataException;
+import com.example.carrental.service.exceptions.DrivingLicenseNotConfirmedException;
+import com.example.carrental.service.exceptions.NoContentException;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,50 +35,32 @@ public class UserDrivingLicenseController {
   private final UserDrivingLicenseService userDrivingLicenseService;
 
   @GetMapping(path = "/{id}")
-  public ResponseEntity<?> findDrivingLicenseById(@NotNull @Positive @PathVariable Long id) {
-    try {
-      var userPassportDataResponse = userDrivingLicenseService.findDrivingLicenseById(id);
-      return new ResponseEntity<>(userPassportDataResponse, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+  public ResponseEntity<UserDrivingLicenseConfirmationDataResponse> findDrivingLicenseById(
+      @NotNull @Positive @PathVariable Long id) {
+    var userPassportDataResponse = userDrivingLicenseService.findDrivingLicenseById(id);
+    return new ResponseEntity<>(userPassportDataResponse, HttpStatus.OK);
   }
 
   @GetMapping(path = "/data")
-  public ResponseEntity<?> getUserDrivingLicenseData() {
-    try {
-      var userDrivingLicenseDataResponse = userDrivingLicenseService.getUserDrivingLicenseData();
-      return new ResponseEntity<>(userDrivingLicenseDataResponse, HttpStatus.OK);
-    } catch (NoDrivingLicenseDataException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.NO_CONTENT);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+  public ResponseEntity<UserDrivingLicenseDataResponse> findUserDrivingLicenseData()
+      throws NoContentException {
+    var userDrivingLicenseDataResponse = userDrivingLicenseService.findUserDrivingLicenseData();
+    return new ResponseEntity<>(userDrivingLicenseDataResponse, HttpStatus.OK);
   }
 
   @PostMapping
-  public ResponseEntity<?> createOrUpdate(
-      @Valid @RequestBody CreateOrUpdateUserDrivingLicenseRequest createOrUpdateUserDrivingLicenseRequest) {
-    try {
-      var response = userDrivingLicenseService.createOrUpdate(
-          createOrUpdateUserDrivingLicenseRequest);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+  public ResponseEntity<HttpStatus> createOrUpdate(
+      @Valid @RequestBody CreateOrUpdateUserDrivingLicenseRequest
+          createOrUpdateUserDrivingLicenseRequest) {
+    userDrivingLicenseService.createOrUpdate(createOrUpdateUserDrivingLicenseRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @PutMapping(path = "/{id}/status")
-  public ResponseEntity<String> updateDrivingLicenseStatus(
-      @NotNull @Positive @PathVariable Long id) {
-    try {
-      var response = userDrivingLicenseService.updateDrivingLicenseStatus(id);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    } catch (DocumentsNotConfirmedException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.METHOD_NOT_ALLOWED);
-    }
+  public ResponseEntity<HttpStatus> updateDrivingLicenseStatus(
+      @NotNull @Positive @PathVariable Long id) throws DrivingLicenseNotConfirmedException {
+    userDrivingLicenseService.updateDrivingLicenseStatus(id);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @PostMapping(
@@ -84,27 +68,17 @@ public class UserDrivingLicenseController {
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE
   )
-  public ResponseEntity<String> uploadFile(
+  public ResponseEntity<HttpStatus> uploadFile(
       @NotNull @RequestParam MultipartFile drivingLicenseFile) {
-    try {
-      var response = userDrivingLicenseService.uploadFile(drivingLicenseFile);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+    userDrivingLicenseService.uploadFile(drivingLicenseFile);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @PutMapping(path = "/download")
-  public ResponseEntity<?> downloadFiles(
+  public ResponseEntity<ByteArrayResource> downloadFiles(
       @Valid @RequestBody UserDocumentsDownloadRequest userDocumentsDownloadRequest) {
-    try {
-      var response = userDrivingLicenseService.downloadFiles(userDocumentsDownloadRequest);
-      return ResponseEntity.ok()
-          .contentLength(response.getByteArray().length)
-          .contentType(MediaType.APPLICATION_OCTET_STREAM)
-          .body(response);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+    var response = userDrivingLicenseService.downloadFiles(userDocumentsDownloadRequest);
+    return ResponseEntity.ok().contentLength(response.getByteArray().length)
+        .contentType(MediaType.APPLICATION_OCTET_STREAM).body(response);
   }
 }

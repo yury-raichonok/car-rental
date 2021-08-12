@@ -114,14 +114,13 @@ public class RepairBillServiceImpl implements RepairBillService {
   }
 
   @Override
-  public String payBill(Long id) {
+  public void payBill(Long id) {
     var repairBill = findById(id);
     var order = repairBill.getOrder();
     repairBill.setPaymentDate(LocalDateTime.now());
     repairBillRepository.save(repairBill);
 
     orderService.updatePaymentDateAndStatusToPaid(order);
-    return "Success";
   }
 
   @Override

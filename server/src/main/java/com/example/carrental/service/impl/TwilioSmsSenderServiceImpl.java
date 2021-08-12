@@ -14,9 +14,8 @@ import org.springframework.stereotype.Service;
 public class TwilioSmsSenderServiceImpl implements SmsSenderService {
 
   @Override
-  public String sendSms(PhoneNumber to, PhoneNumber from, String token) {
+  public void sendSms(PhoneNumber to, PhoneNumber from, String token) {
     MessageCreator creator = Message.creator(to, from, token);
     creator.create();
-    return "Success";
   }
 }

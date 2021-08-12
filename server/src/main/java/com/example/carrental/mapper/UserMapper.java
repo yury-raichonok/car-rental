@@ -20,19 +20,27 @@ public interface UserMapper {
   @Mapping(target = "role", source = "user.role.roleDescription")
   @Mapping(target = "locked", source = "user.locked")
   @Mapping(target = "emailConfirmed", source = "user.isEmailConfirmed")
-  @Mapping(target = "phones", source = "user.phones", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS, qualifiedByName = "getPhones")
-  @Mapping(target = "passportId", source = "user.passport.id", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-  @Mapping(target = "passportStatus", source = "user.passport.status.status", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-  @Mapping(target = "drivingLicenseId", source = "user.drivingLicense.id", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-  @Mapping(target = "drivingLicenseStatus", source = "user.drivingLicense.status.status", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+  @Mapping(target = "phones", source = "user.phones",
+      nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS, qualifiedByName = "getPhones")
+  @Mapping(target = "passportId", source = "user.passport.id",
+      nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+  @Mapping(target = "passportStatus", source = "user.passport.status.status",
+      nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+  @Mapping(target = "drivingLicenseId", source = "user.drivingLicense.id",
+      nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+  @Mapping(target = "drivingLicenseStatus", source = "user.drivingLicense.status.status",
+      nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
   UserDataResponse userToUserDataResponse(User user);
 
   @Mapping(target = "id", source = "user.id")
   @Mapping(target = "email", source = "user.email")
-  @Mapping(target = "phones", source = "user.phones", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS, qualifiedByName = "getPhoneNumbers")
+  @Mapping(target = "phones", source = "user.phones",
+      nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS, qualifiedByName = "getPhoneNumbers")
   @Mapping(target = "isEmailConfirmed", source = "user.isEmailConfirmed")
-  @Mapping(target = "passportStatus", source = "user.passport.status", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-  @Mapping(target = "drivingLicenseStatus", source = "user.drivingLicense.status", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+  @Mapping(target = "passportStatus", source = "user.passport.status",
+      nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+  @Mapping(target = "drivingLicenseStatus", source = "user.drivingLicense.status",
+      nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
   UserProfileResponse userToUserProfileResponse(User user);
 
   @Named("getPhones")

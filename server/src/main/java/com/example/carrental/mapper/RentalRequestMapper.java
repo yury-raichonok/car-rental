@@ -18,26 +18,34 @@ public interface RentalRequestMapper {
   @Mapping(target = "id", source = "rentalRequest.id")
   @Mapping(target = "userEmail", source = "rentalRequest.user.email")
   @Mapping(target = "requestType", source = "rentalRequest.rentalRequestType")
-  @Mapping(target = "sentDate", source = "rentalRequest.sentDate", dateFormat = REQUEST_DATE_FORMAT_PATTERN)
+  @Mapping(target = "sentDate", source = "rentalRequest.sentDate",
+      dateFormat = REQUEST_DATE_FORMAT_PATTERN)
   @Mapping(target = "considered", source = "rentalRequest.considered")
-  @Mapping(target = "considerationDate", source = "rentalRequest.considerationDate", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS, dateFormat = REQUEST_DATE_FORMAT_PATTERN)
-  @Mapping(target = "comments", source = "rentalRequest.comments", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+  @Mapping(target = "considerationDate", source = "rentalRequest.considerationDate",
+      nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
+      dateFormat = REQUEST_DATE_FORMAT_PATTERN)
+  @Mapping(target = "comments", source = "rentalRequest.comments",
+      nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
   RentalAllRequestResponse rentalRequestToRentalAllRequestResponse(RentalRequest rentalRequest);
 
   @Mapping(target = "id", source = "rentalRequest.id")
   @Mapping(target = "userEmail", source = "rentalRequest.user.email")
   @Mapping(target = "requestType", source = "rentalRequest.rentalRequestType")
-  @Mapping(target = "sentDate", source = "rentalRequest.sentDate", dateFormat = REQUEST_DATE_FORMAT_PATTERN)
+  @Mapping(target = "sentDate", source = "rentalRequest.sentDate",
+      dateFormat = REQUEST_DATE_FORMAT_PATTERN)
   @Mapping(target = "considered", source = "rentalRequest.considered")
   RentalRequestResponse rentalRequestToRentalRequestResponse(RentalRequest rentalRequest);
 
   @Mapping(target = "firstName", source = "passport.firstName")
   @Mapping(target = "middleName", source = "passport.middleName")
   @Mapping(target = "lastName", source = "passport.lastName")
-  @Mapping(target = "dateOfBirth", source = "passport.dateOfBirth", dateFormat = REQUEST_DOCUMENTS_DATE_FORMAT_PATTERN)
+  @Mapping(target = "dateOfBirth", source = "passport.dateOfBirth",
+      dateFormat = REQUEST_DOCUMENTS_DATE_FORMAT_PATTERN)
   @Mapping(target = "passportSeries", source = "passport.passportSeries")
-  @Mapping(target = "dateOfIssue", source = "passport.dateOfIssue", dateFormat = REQUEST_DOCUMENTS_DATE_FORMAT_PATTERN)
-  @Mapping(target = "validityPeriod", source = "passport.validityPeriod", dateFormat = REQUEST_DOCUMENTS_DATE_FORMAT_PATTERN)
+  @Mapping(target = "dateOfIssue", source = "passport.dateOfIssue",
+      dateFormat = REQUEST_DOCUMENTS_DATE_FORMAT_PATTERN)
+  @Mapping(target = "validityPeriod", source = "passport.validityPeriod",
+      dateFormat = REQUEST_DOCUMENTS_DATE_FORMAT_PATTERN)
   @Mapping(target = "organizationThatIssued", source = "passport.organizationThatIssued")
   @Mapping(target = "documentsFileLink", source = "passport.documentsFileLink")
   UserPassportConfirmationDataResponse passportToUserPassportConfirmationDataResponse(

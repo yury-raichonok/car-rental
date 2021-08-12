@@ -16,9 +16,9 @@ public interface MessageService {
 
   Message findById(Long id);
 
-  String create(CreateMessageRequest createMessageRequest);
+  void create(CreateMessageRequest createMessageRequest);
 
-  String updateMessageAsRead(Long id);
+  void updateMessageAsRead(Long id);
 
   int findNewMessagesAmount();
 

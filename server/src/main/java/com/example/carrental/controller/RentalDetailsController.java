@@ -1,6 +1,10 @@
 package com.example.carrental.controller;
 
+import com.example.carrental.controller.dto.rentalDetails.RentalAdminDetailsStatisticResponse;
+import com.example.carrental.controller.dto.rentalDetails.RentalDetailsAndStatisticResponse;
+import com.example.carrental.controller.dto.rentalDetails.RentalDetailsContactInformationResponse;
 import com.example.carrental.controller.dto.rentalDetails.RentalDetailsUpdateRequest;
+import com.example.carrental.controller.dto.rentalDetails.RentalUserDetailsStatisticResponse;
 import com.example.carrental.service.RentalDetailsService;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -23,56 +27,36 @@ public class RentalDetailsController {
 
   private final RentalDetailsService rentalDetailsService;
 
-  @GetMapping
-  public ResponseEntity<?> getRentalDetailsAndStatistic(
-      @NotNull @CookieValue(name = "i18next") String language) {
-    try {
-      var informationResponse = rentalDetailsService.getRentalDetailsAndStatistic(language);
-      return new ResponseEntity<>(informationResponse, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+  @GetMapping(path = "/admin")
+  public ResponseEntity<RentalAdminDetailsStatisticResponse> getAdminDetailsStatistic() {
+    var informationResponse = rentalDetailsService.getAdminDetailsStatistic();
+    return new ResponseEntity<>(informationResponse, HttpStatus.OK);
   }
 
   @GetMapping(path = "/contacts")
-  public ResponseEntity<?> getContactInformation(
+  public ResponseEntity<RentalDetailsContactInformationResponse> getContactInformation(
       @NotNull @CookieValue(name = "i18next") String language) {
-    try {
-      var informationResponse = rentalDetailsService.getContactInformation(language);
-      return new ResponseEntity<>(informationResponse, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+    var informationResponse = rentalDetailsService.getContactInformation(language);
+    return new ResponseEntity<>(informationResponse, HttpStatus.OK);
   }
 
-  @PutMapping
-  public ResponseEntity<String> createOrUpdate(
-      @Valid @RequestBody RentalDetailsUpdateRequest rentalDetailsUpdateRequest) {
-    try {
-      var response = rentalDetailsService.createOrUpdate(rentalDetailsUpdateRequest);
-      return new ResponseEntity<>(response, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @GetMapping(path = "/admin")
-  public ResponseEntity<?> getAdminDetailsStatistic() {
-    try {
-      var informationResponse = rentalDetailsService.getAdminDetailsStatistic();
-      return new ResponseEntity<>(informationResponse, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+  @GetMapping
+  public ResponseEntity<RentalDetailsAndStatisticResponse> getRentalDetailsAndStatistic(
+      @NotNull @CookieValue(name = "i18next") String language) {
+    var informationResponse = rentalDetailsService.getRentalDetailsAndStatistic(language);
+    return new ResponseEntity<>(informationResponse, HttpStatus.OK);
   }
 
   @GetMapping(path = "/user")
-  public ResponseEntity<?> getUserDetailsStatistic() {
-    try {
-      var informationResponse = rentalDetailsService.getUserDetailsStatistic();
-      return new ResponseEntity<>(informationResponse, HttpStatus.OK);
-    } catch (IllegalStateException e) {
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+  public ResponseEntity<RentalUserDetailsStatisticResponse> getUserDetailsStatistic() {
+    var informationResponse = rentalDetailsService.getUserDetailsStatistic();
+    return new ResponseEntity<>(informationResponse, HttpStatus.OK);
+  }
+
+  @PutMapping
+  public ResponseEntity<HttpStatus> createOrUpdate(
+      @Valid @RequestBody RentalDetailsUpdateRequest rentalDetailsUpdateRequest) {
+    rentalDetailsService.createOrUpdate(rentalDetailsUpdateRequest);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }
