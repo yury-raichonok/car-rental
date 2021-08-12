@@ -344,7 +344,7 @@ const AdminCarsComponent = () => {
         <div>
           {dataIndex === "Hatchback" && ` ${t('hatchback')}`}
           {dataIndex === "Sedan" && ` ${t('sedan')}`}
-          {dataIndex === "MUV/SUV" && ` ${t('muv_suv')}`}
+          {dataIndex === "MUV" && ` ${t('muv_suv')}`}
           {dataIndex === "Coupe" && ` ${t('coupe')}`}
           {dataIndex === "Convertible" && ` ${t('convertible')}`}
           {dataIndex === "Wagon" && ` ${t('wagon')}`}

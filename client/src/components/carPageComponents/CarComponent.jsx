@@ -350,7 +350,7 @@ const CarComponent = (props) => {
                           <RightColumnContainer>
                             {data.bodyType === "Hatchback" && ` ${t('hatchback')}`}
                             {data.bodyType === "Sedan" && ` ${t('sedan')}`}
-                            {data.bodyType === "MUV/SUV" && ` ${t('muv_suv')}`}
+                            {data.bodyType === "MUV" && ` ${t('muv_suv')}`}
                             {data.bodyType === "Coupe" && ` ${t('coupe')}`}
                             {data.bodyType === "Convertible" && ` ${t('convertible')}`}
                             {data.bodyType === "Wagon" && ` ${t('wagon')}`}
