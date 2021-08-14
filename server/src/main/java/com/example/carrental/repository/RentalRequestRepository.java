@@ -1,6 +1,6 @@
 package com.example.carrental.repository;
 
-import com.example.carrental.entity.rentalDetails.RentalRequest;
+import com.example.carrental.entity.rentaldetails.RentalRequest;
 import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

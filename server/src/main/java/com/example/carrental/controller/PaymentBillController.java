@@ -53,6 +53,12 @@ public class PaymentBillController {
     return new ResponseEntity<>(paymentBills, HttpStatus.OK);
   }
 
+  @GetMapping(path = "/user/new/amount")
+  public ResponseEntity<Integer> findNewUserPaymentBillsAmount() {
+    var paymentBills = paymentBillService.findNewUserBillsAmount();
+    return new ResponseEntity<>(paymentBills, HttpStatus.OK);
+  }
+
   @PutMapping(path = "/{id}")
   public ResponseEntity<HttpStatus> approveWithoutPayment(@NotNull @Positive @PathVariable Long id) {
     paymentBillService.approveWithoutPayment(id);

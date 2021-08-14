@@ -1,5 +1,6 @@
 package com.example.carrental.service.impl;
 
+import com.example.carrental.config.ApplicationConfig;
 import com.example.carrental.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,17 +16,15 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
 
+  private final ApplicationConfig applicationConfig;
   private final JavaMailSender mailSender;
-
-  @Value("${spring.mail.username}")
-  private String email;
 
   @Override
   @Transactional
   public void sendEmail(String to, String body, String topic) {
     try {
       var simpleMailMessage = new SimpleMailMessage();
-      simpleMailMessage.setFrom(email);
+      simpleMailMessage.setFrom(applicationConfig.getRentalEmail());
       simpleMailMessage.setTo(to);
       simpleMailMessage.setSubject(topic);
       simpleMailMessage.setText(body);

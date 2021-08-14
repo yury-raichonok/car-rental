@@ -1,6 +1,7 @@
 package com.example.carrental.controller;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED;
 import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
@@ -12,6 +13,7 @@ import com.example.carrental.service.exceptions.EntityAlreadyExistsException;
 import com.example.carrental.service.exceptions.FontNotFoundException;
 import com.example.carrental.service.exceptions.NoContentException;
 import com.example.carrental.service.exceptions.OrderPeriodValidationException;
+import com.example.carrental.service.exceptions.PhoneNotSpecifiedException;
 import com.example.carrental.service.exceptions.TokenExpireException;
 import com.example.carrental.service.exceptions.UsernameAlreadyTakenException;
 import org.springframework.http.HttpStatus;
@@ -81,5 +83,10 @@ public class ExceptionController {
   public ResponseEntity<String> handleOrderPeriodValidationException(
       OrderPeriodValidationException e) {
     return new ResponseEntity<>(e.getLocalizedMessage(), NOT_ACCEPTABLE);
+  }
+
+  @ExceptionHandler(value = {PhoneNotSpecifiedException.class})
+  public ResponseEntity<String> handlePhoneNotSpecifiedException(PhoneNotSpecifiedException e) {
+    return new ResponseEntity<>(e.getLocalizedMessage(), FORBIDDEN);
   }
 }

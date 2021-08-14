@@ -1,5 +1,6 @@
 package com.example.carrental.service.impl;
 
+import static com.example.carrental.constants.ApplicationConstants.CAR_IMAGE;
 import static com.example.carrental.constants.ApplicationConstants.NO_CONTENT;
 import static com.example.carrental.service.util.MultipartFileUtil.validateMultipartImageFile;
 
@@ -21,7 +22,6 @@ import com.example.carrental.service.CarService;
 import com.example.carrental.service.FileStoreService;
 import com.example.carrental.service.LocationService;
 import com.example.carrental.service.LocationTranslationService;
-import com.example.carrental.service.RentalDetailsService;
 import com.example.carrental.service.exceptions.EntityAlreadyExistsException;
 import com.example.carrental.service.exceptions.NoContentException;
 import java.io.File;
@@ -35,8 +35,6 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -64,18 +62,6 @@ public class CarServiceImpl implements CarService {
   private final CarClassTranslationService carClassTranslationService;
   private final LocationTranslationService locationTranslationService;
   private final CarMapper carMapper;
-
-  private RentalDetailsService rentalDetailsService;
-
-  @Value("${amazon.region}")
-  private String region;
-  @Value("${amazon.car.images.bucket}")
-  private String carImagesBucket;
-
-  @Autowired
-  public void setRentalDetailsService(RentalDetailsService rentalDetailsService) {
-    this.rentalDetailsService = rentalDetailsService;
-  }
 
   @Override
   public List<CarProfitableOfferResponse> findAllProfitableOffers(String language)
@@ -117,14 +103,7 @@ public class CarServiceImpl implements CarService {
     var car = findByIdInRental(id);
     carClassTranslationService.setTranslation(car.getCarClass(), language);
     locationTranslationService.setTranslation(car.getLocation(), language);
-    var rentalDetails = rentalDetailsService.getRentalDetails();
-    var costPerHourUpToWeek = car.getCostPerHour()
-        .multiply(rentalDetails.getFromDayToWeekCoefficient());
-    var costPerHourMoreThanWeek = car.getCostPerHour()
-        .multiply(rentalDetails.getFromWeekCoefficient());
-
-    return carMapper
-        .carAndRentalDetailsToCarByIdResponse(car, costPerHourUpToWeek, costPerHourMoreThanWeek);
+    return carMapper.carAndRentalDetailsToCarByIdResponse(car);
   }
 
   @Override
@@ -190,23 +169,24 @@ public class CarServiceImpl implements CarService {
   @Transactional
   public void uploadCarImage(Long id, MultipartFile carFile) {
     validateMultipartImageFile(carFile);
+    String imageLink;
     var car = findById(id);
     var filename = String.format("%s/%s-%s", id, id, carFile.getOriginalFilename());
-    var imageLink = String.format("https://%s.s3.%s.amazonaws.com/%s",
-        carImagesBucket, region, filename);
-
     var file = new File(Objects.requireNonNull(carFile.getOriginalFilename()));
 
     try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
       fileOutputStream.write(carFile.getBytes());
-      fileStoreService.uploadPublicFile(carImagesBucket, filename, file);
-      Files.delete(Path.of(file.getPath()));
+      imageLink = fileStoreService.uploadPublicImage(CAR_IMAGE, filename, file);
     } catch (IOException e) {
       log.error("Error while uploading file to storage: {}", e.getMessage());
       throw new IllegalStateException(String.format("Error while uploading file to storage: %s",
           e.getMessage()));
     }
-
+    try {
+      Files.delete(Path.of(file.getPath()));
+    } catch (IOException e) {
+      log.warn("File was not deleted after upload. Exception: {}", e.getMessage());
+    }
     car.setCarImageLink(imageLink);
     car.setChangedAt(LocalDateTime.now());
     carRepository.save(car);

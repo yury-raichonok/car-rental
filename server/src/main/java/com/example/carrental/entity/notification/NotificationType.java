@@ -11,5 +11,5 @@ public enum NotificationType {
   DENY("Deny"),
   INFO("Info");
 
-  private final String notificationType;
+  private final String type;
 }

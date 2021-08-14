@@ -1,5 +1,6 @@
 package com.example.carrental.entity.user;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.persistence.CascadeType;
@@ -23,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 @Table(name = "driving_license")
-public class UserDrivingLicense {
+public class UserDrivingLicense implements Serializable {
 
   private static final long serialVersionUID = 1L;
 

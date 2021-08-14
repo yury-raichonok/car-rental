@@ -1,25 +1,19 @@
 package com.example.carrental.service;
 
-import com.example.carrental.controller.dto.rentalDetails.RentalAdminDetailsStatisticResponse;
-import com.example.carrental.controller.dto.rentalDetails.RentalDetailsAndStatisticResponse;
-import com.example.carrental.controller.dto.rentalDetails.RentalDetailsContactInformationResponse;
-import com.example.carrental.controller.dto.rentalDetails.RentalDetailsUpdateRequest;
-import com.example.carrental.controller.dto.rentalDetails.RentalUserDetailsStatisticResponse;
-import com.example.carrental.entity.rentalDetails.RentalDetails;
+import com.example.carrental.controller.dto.rentaldetails.RentalDetailsContactInformationResponse;
+import com.example.carrental.controller.dto.rentaldetails.RentalDetailsResponse;
+import com.example.carrental.controller.dto.rentaldetails.RentalDetailsUpdateRequest;
+import com.example.carrental.entity.rentaldetails.RentalDetails;
 import org.springframework.stereotype.Service;
 
 @Service
 public interface RentalDetailsService {
 
-  RentalAdminDetailsStatisticResponse getAdminDetailsStatistic();
-
   RentalDetailsContactInformationResponse getContactInformation(String language);
 
   RentalDetails getRentalDetails();
 
-  RentalDetailsAndStatisticResponse getRentalDetailsAndStatistic(String language);
-
-  RentalUserDetailsStatisticResponse getUserDetailsStatistic();
+  RentalDetailsResponse getRentalDetailsResponse();
 
   void createOrUpdate(RentalDetailsUpdateRequest rentalDetailsUpdateRequest);
 }

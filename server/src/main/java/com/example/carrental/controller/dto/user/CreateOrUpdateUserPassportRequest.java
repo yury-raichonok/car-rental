@@ -36,13 +36,13 @@ public class CreateOrUpdateUserPassportRequest {
   @NotBlank
   @Size(
       min = 1,
-      max = 255
+      max = 10
   )
   private String passportSeries;
   @NotBlank
   @Size(
       min = 1,
-      max = 255
+      max = 10
   )
   private String passportNumber;
   @NotNull

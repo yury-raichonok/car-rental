@@ -1,5 +1,6 @@
 package com.example.carrental.service.impl;
 
+import static com.example.carrental.constants.ApplicationConstants.BRAND_IMAGE;
 import static com.example.carrental.constants.ApplicationConstants.NO_CONTENT;
 import static com.example.carrental.service.util.MultipartFileUtil.validateMultipartImageFile;
 
@@ -23,7 +24,6 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -36,22 +36,15 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class CarBrandServiceImpl implements CarBrandService {
 
+  private final CarBrandMapper carBrandMapper;
   private final CarBrandRepository carBrandRepository;
   private final FileStoreService fileStoreService;
-  private final CarBrandMapper carBrandMapper;
-
-  @Value("${amazon.region}")
-  private String region;
-
-  @Value("${amazon.brand.images.bucket}")
-  private String brandImagesBucket;
 
   @Override
   public List<CarBrandResponse> findAll() throws NoContentException {
-    var carBrands = carBrandRepository.findAll();
+    var brands = carBrandRepository.findAll();
     List<CarBrandResponse> brandsResponse = new ArrayList<>();
-    carBrands
-        .forEach(brand -> brandsResponse.add(carBrandMapper.carBrandToCarBrandResponse(brand)));
+    brands.forEach(brand -> brandsResponse.add(carBrandMapper.carBrandToCarBrandResponse(brand)));
     if (brandsResponse.isEmpty()) {
       throw new NoContentException(NO_CONTENT);
     }
@@ -60,10 +53,9 @@ public class CarBrandServiceImpl implements CarBrandService {
 
   @Override
   public List<CarBrandResponse> findAllBrandsWithRentalOffers() throws NoContentException {
-    var carBrands = carBrandRepository.findAllWithRentalOffers();
+    var brands = carBrandRepository.findAllWithRentalOffers();
     List<CarBrandResponse> brandsResponse = new ArrayList<>();
-    carBrands
-        .forEach(brand -> brandsResponse.add(carBrandMapper.carBrandToCarBrandResponse(brand)));
+    brands.forEach(brand -> brandsResponse.add(carBrandMapper.carBrandToCarBrandResponse(brand)));
     if (brandsResponse.isEmpty()) {
       throw new NoContentException(NO_CONTENT);
     }
@@ -72,12 +64,10 @@ public class CarBrandServiceImpl implements CarBrandService {
 
   @Override
   public Page<CarBrandResponse> findAllPaged(Pageable pageable) {
-    var carBrandsPage = carBrandRepository.findAll(pageable);
+    var brands = carBrandRepository.findAll(pageable);
     List<CarBrandResponse> brandsResponse = new ArrayList<>();
-    carBrandsPage
-        .forEach(brand -> brandsResponse.add(carBrandMapper.carBrandToCarBrandResponse(brand)));
-    return new PageImpl<>(brandsResponse, carBrandsPage.getPageable(),
-        carBrandsPage.getTotalElements());
+    brands.forEach(brand -> brandsResponse.add(carBrandMapper.carBrandToCarBrandResponse(brand)));
+    return new PageImpl<>(brandsResponse, brands.getPageable(), brands.getTotalElements());
   }
 
   @Override
@@ -112,23 +102,24 @@ public class CarBrandServiceImpl implements CarBrandService {
   @Transactional
   public void uploadBrandImage(Long id, MultipartFile brandFile) {
     validateMultipartImageFile(brandFile);
+    String imageLink;
     var carBrand = findById(id);
     var filename = String.format("%s/%s-%s", id, id, brandFile.getOriginalFilename());
-    var imageLink = String.format("https://%s.s3.%s.amazonaws.com/%s",
-        brandImagesBucket, region, filename);
-
     var file = new File(Objects.requireNonNull(brandFile.getOriginalFilename()));
 
     try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
       fileOutputStream.write(brandFile.getBytes());
-      fileStoreService.uploadPublicFile(brandImagesBucket, filename, file);
-      Files.delete(Path.of(file.getPath()));
+      imageLink = fileStoreService.uploadPublicImage(BRAND_IMAGE, filename, file);
     } catch (IOException e) {
       log.error("Error while uploading file to storage: {}", e.getMessage());
       throw new IllegalStateException(String.format("Error while uploading file to storage: %s",
           e.getMessage()));
     }
-
+    try {
+      Files.delete(Path.of(file.getPath()));
+    } catch (IOException e) {
+      log.warn("File was not deleted after upload. Exception: {}", e.getMessage());
+    }
     carBrand.setBrandImageLink(imageLink);
     carBrand.setChangedAt(LocalDateTime.now());
     carBrandRepository.save(carBrand);

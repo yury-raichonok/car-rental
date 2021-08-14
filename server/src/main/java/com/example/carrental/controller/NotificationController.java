@@ -37,6 +37,12 @@ public class NotificationController {
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
+  @GetMapping(path = "/amount")
+  public ResponseEntity<Integer> findNewUserNotificationsAmount() {
+    var response = notificationService.findNewUserNotificationsAmount();
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
   @PutMapping(path = "/{id}")
   public ResponseEntity<HttpStatus> updateNotificationAsRead(@NotNull @Positive @PathVariable Long id) {
     notificationService.updateNotificationAsRead(id);

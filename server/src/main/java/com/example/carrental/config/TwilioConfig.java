@@ -1,22 +1,25 @@
 package com.example.carrental.config;
 
 import com.twilio.Twilio;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import javax.validation.constraints.NotBlank;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
 
 @Configuration
-@RequiredArgsConstructor
-@Slf4j
+@ConfigurationProperties("twilio")
+@Data
+@Validated
 public class TwilioConfig {
 
-  @Value("${twilio.account_sid}")
+  @NotBlank
   private String accountSid;
-
-  @Value("${twilio.auth_token}")
+  @NotBlank
   private String authToken;
+  @NotBlank
+  private String trialNumber;
 
   @Bean
   public void initTwilio() {

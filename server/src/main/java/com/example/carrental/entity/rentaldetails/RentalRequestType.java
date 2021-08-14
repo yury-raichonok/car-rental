@@ -1,4 +1,4 @@
-package com.example.carrental.entity.rentalDetails;
+package com.example.carrental.entity.rentaldetails;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

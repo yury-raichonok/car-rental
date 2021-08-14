@@ -1,17 +1,16 @@
 package com.example.carrental.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
+@RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-  @Value("${app.client.address}")
-  private String clientAddress;
-
+  private final ApplicationConfig applicationConfig;
 
   @Override
   public void addCorsMappings(CorsRegistry registry) {
@@ -21,7 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
             HttpMethod.POST.name(),
             HttpMethod.PUT.name(),
             HttpMethod.DELETE.name())
-        .allowedOrigins(clientAddress)
+        .allowedOrigins(applicationConfig.getClientAddress())
         .allowCredentials(true);
   }
 }

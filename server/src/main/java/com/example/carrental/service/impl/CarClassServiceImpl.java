@@ -31,8 +31,8 @@ public class CarClassServiceImpl implements CarClassService {
 
   private static final String SORT_BY_NAME = "name";
 
-  private final CarClassRepository carClassRepository;
   private final CarClassMapper carClassMapper;
+  private final CarClassRepository carClassRepository;
   private final CarClassTranslationService carClassTranslationService;
 
   @Override
@@ -51,12 +51,11 @@ public class CarClassServiceImpl implements CarClassService {
 
   @Override
   public Page<CarClassNameWithTranslationsResponse> findAllPaged(Pageable pageable) {
-    var carClassesPage = carClassRepository.findAll(pageable);
+    var classes = carClassRepository.findAll(pageable);
     List<CarClassNameWithTranslationsResponse> classesResponse = new ArrayList<>();
-    carClassesPage.forEach(carClass -> classesResponse
+    classes.forEach(carClass -> classesResponse
         .add(carClassMapper.carClassToCarClassNameWithTranslationsResponse(carClass)));
-    return new PageImpl<>(classesResponse, carClassesPage.getPageable(),
-        carClassesPage.getTotalElements());
+    return new PageImpl<>(classesResponse, classes.getPageable(), classes.getTotalElements());
   }
 
   @Override

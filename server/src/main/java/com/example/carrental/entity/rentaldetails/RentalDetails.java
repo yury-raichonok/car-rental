@@ -1,4 +1,4 @@
-package com.example.carrental.entity.rentalDetails;
+package com.example.carrental.entity.rentaldetails;
 
 import com.example.carrental.entity.location.Location;
 import java.io.Serializable;

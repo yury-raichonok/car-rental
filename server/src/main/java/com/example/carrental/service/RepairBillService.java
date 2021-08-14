@@ -23,7 +23,7 @@ public interface RepairBillService {
 
   void payBill(Long id);
 
-  int findNewUserBillsAmount(String email);
+  int findNewUserRepairBillsAmount();
 
   RepairBill findById(Long id);
 }

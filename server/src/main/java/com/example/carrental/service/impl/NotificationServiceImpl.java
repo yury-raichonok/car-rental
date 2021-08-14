@@ -22,8 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
-  private final NotificationRepository notificationRepository;
   private final NotificationMapper notificationMapper;
+  private final NotificationRepository notificationRepository;
   private final UserSecurityService userSecurityService;
 
   @Override
@@ -80,7 +80,8 @@ public class NotificationServiceImpl implements NotificationService {
   }
 
   @Override
-  public int findNewUserNotificationsAmount(String email) {
-    return notificationRepository.countAllByUser_EmailAndStatus(email, NotificationStatus.NEW);
+  public int findNewUserNotificationsAmount() {
+    var userEmail = userSecurityService.getUserEmailFromSecurityContext();
+    return notificationRepository.countAllByUser_EmailAndStatus(userEmail, NotificationStatus.NEW);
   }
 }

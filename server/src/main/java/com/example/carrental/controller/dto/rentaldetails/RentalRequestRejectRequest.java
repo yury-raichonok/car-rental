@@ -1,4 +1,4 @@
-package com.example.carrental.controller.dto.rentalDetails;
+package com.example.carrental.controller.dto.rentaldetails;
 
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;

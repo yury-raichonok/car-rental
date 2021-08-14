@@ -5,7 +5,6 @@ import styled from 'styled-components';
 import MessageDataService from '../../services/message/MessageDataService';
 import RequestDataService from '../../services/request/RequestDataService';
 import OrderDataService from '../../services/order/OrderDataService';
-import RentalDetailsDataService from '../../services/rentalDetails/RentalDetailsDataService';
 import { 
   CarFilled, 
   HomeFilled, 
@@ -76,17 +75,20 @@ const AdminMenuComponent = (props) => {
 
   const { t } = useTranslation();
 
-  const [data, setData] = useState({});
+  const [messages, setMessages] = useState();
+  const [orders, setOrders] = useState();
+  const [requests, setRequests] = useState();
 
   const fetchData = async () => {
 
-    const resp = await RentalDetailsDataService.getAdminDetailsStatistic().catch((err) => {
-      console.log("Error: ", err);
-    });
+    const messagesResp = await MessageDataService.findNewMessagesAmount();
+    const ordersResp = await OrderDataService.findNewOrdersAmount();
+    const requestsResp = await RequestDataService.findNewRequestsAmount();
 
-    if(resp) {
-      setData(resp.data);
-      console.log(resp);
+    if(messagesResp && ordersResp && requestsResp) {
+      setMessages(messagesResp.data);
+      setOrders(ordersResp.data);
+      setRequests(requestsResp.data);
     }
   }
 
@@ -132,7 +134,7 @@ const AdminMenuComponent = (props) => {
           <Row>
             {t('messages')}
             <Marginer direction="horizontal" margin={10} />
-            <Badge count={data.messagesAmt}/>
+            <Badge count={messages}/>
           </Row>
           }>
           <Menu.Item key="10">
@@ -141,14 +143,14 @@ const AdminMenuComponent = (props) => {
           <Menu.Item key="11">
             <Link to="/admin/messages/new"><div>{t('New_messages')}</div></Link>
             <Marginer direction="horizontal" margin={10} />
-            <Badge count={data.messagesAmt}/>
+            <Badge count={messages}/>
           </Menu.Item>
         </SubMenu>
         <SubMenu key="sub4" icon={<EditFilled />} title={
           <Row>
             {t('requests')}
             <Marginer direction="horizontal" margin={10} />
-            <Badge count={data.requests} />
+            <Badge count={requests} />
           </Row>
           }>
           <Menu.Item key="12">
@@ -157,14 +159,14 @@ const AdminMenuComponent = (props) => {
           <Menu.Item key="13">
             <Link to="/admin/requests/new"><div>{t('New_requests')}</div></Link>
             <Marginer direction="horizontal" margin={10} />
-            <Badge count={data.requests} />
+            <Badge count={requests} />
           </Menu.Item>
         </SubMenu>
         <SubMenu key="sub5" icon={<ReadFilled />} title={
           <Row>
             {t('orders')}
             <Marginer direction="horizontal" margin={10} />
-            <Badge count={data.orders} />
+            <Badge count={orders} />
           </Row>
         }>
           <Menu.Item key="14">
@@ -173,7 +175,7 @@ const AdminMenuComponent = (props) => {
           <Menu.Item key="15">
             <Link to="/admin/orders/new"><div>{t('New_orders')}</div></Link>
             <Marginer direction="horizontal" margin={10} />
-            <Badge count={data.orders} />
+            <Badge count={orders} />
           </Menu.Item>
           <Menu.Item key="16">
             <Link to="/admin/orders/current"><div>{t('current_orders')}</div></Link>

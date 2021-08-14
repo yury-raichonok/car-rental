@@ -15,6 +15,7 @@ import com.example.carrental.service.exceptions.DocumentNotGeneratedException;
 import com.example.carrental.service.exceptions.DocumentsNotConfirmedException;
 import com.example.carrental.service.exceptions.FontNotFoundException;
 import com.example.carrental.service.exceptions.OrderPeriodValidationException;
+import com.example.carrental.service.exceptions.PhoneNotSpecifiedException;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -78,6 +79,24 @@ public class OrderController {
     return new ResponseEntity<>(ordersPage, HttpStatus.OK);
   }
 
+  @GetMapping(path = "/amount")
+  public ResponseEntity<Integer> findNewOrdersAmount() {
+    var orders = orderService.findNewOrdersAmount();
+    return new ResponseEntity<>(orders, HttpStatus.OK);
+  }
+
+  @GetMapping(path = "/amount/day")
+  public ResponseEntity<Integer> findNewOrdersAmountPerDay() {
+    var orders = orderService.findNewOrdersAmountPerDay();
+    return new ResponseEntity<>(orders, HttpStatus.OK);
+  }
+
+  @GetMapping(path = "/user/amount")
+  public ResponseEntity<Integer> findUserOrdersAmount() {
+    var orders = orderService.findUserOrdersAmount();
+    return new ResponseEntity<>(orders, HttpStatus.OK);
+  }
+
   @PostMapping(path = "/calculate")
   public ResponseEntity<OrderTotalCostResponse> calculateTotalCost(
       @Valid @RequestBody OrderTotalCostRequest orderTotalCostRequest)
@@ -89,7 +108,8 @@ public class OrderController {
   @PostMapping
   public ResponseEntity<HttpStatus> create(
       @Valid @RequestBody CreateOrderRequest createOrderRequest)
-      throws DocumentsNotConfirmedException, OrderPeriodValidationException {
+      throws DocumentsNotConfirmedException, OrderPeriodValidationException,
+      PhoneNotSpecifiedException {
     orderService.create(createOrderRequest);
     return new ResponseEntity<>(HttpStatus.OK);
   }

@@ -1,5 +1,6 @@
 package com.example.carrental.controller.dto.bill;
 
+import com.example.carrental.entity.order.Order;
 import java.math.BigDecimal;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -27,5 +28,5 @@ public class CreateRepairBillRequest {
   private BigDecimal totalCost;
   @NotNull
   @Positive
-  private long orderId;
+  private Order order;
 }

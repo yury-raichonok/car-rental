@@ -2,7 +2,7 @@ import axios from 'axios';
 
 class RentalDetailsDataService {
 
-  findRentalDetailsAndStatistic() {
+  findRentalDetails() {
     return axios({
       'method':'GET',
       'url': "http://localhost:8080/details",

@@ -23,15 +23,16 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserAuthenticationServiceImpl implements UserAuthenticationService {
 
-  private final UserSecurityService userSecurityService;
-  private final UserService userService;
   private final AuthenticationManager authenticationManager;
   private final JwtTokenHelper jwtTokenHelper;
+  private final UserSecurityService userSecurityService;
+  private final UserService userService;
 
   @Override
   public UserInfoResponse getUserInfo(Principal user) {
     if (null == user) {
-      return null;
+      log.error("User is not authenticated");
+      throw new IllegalStateException("User is not authenticated");
     }
     var userObj = (User) userSecurityService.loadUserByUsername(user.getName());
     return UserInfoResponse

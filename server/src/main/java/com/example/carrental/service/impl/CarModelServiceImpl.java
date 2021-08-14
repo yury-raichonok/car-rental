@@ -29,9 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CarModelServiceImpl implements CarModelService {
 
-  private final CarModelRepository carModelRepository;
   private final CarBrandService carBrandService;
   private final CarModelMapper carModelMapper;
+  private final CarModelRepository carModelRepository;
 
   @Override
   public List<CarModelResponse> findAll() throws NoContentException {
@@ -46,11 +46,11 @@ public class CarModelServiceImpl implements CarModelService {
 
   @Override
   public Page<CarModelBrandNameResponse> findAllModelsWithBrandName(Pageable pageable) {
-    var modelsPage = carModelRepository.findAll(pageable);
+    var models = carModelRepository.findAll(pageable);
     List<CarModelBrandNameResponse> modelsResponse = new ArrayList<>();
-    modelsPage.forEach(model -> modelsResponse
+    models.forEach(model -> modelsResponse
         .add(carModelMapper.carModelToCarModelBrandNameResponse(model)));
-    return new PageImpl<>(modelsResponse, modelsPage.getPageable(), modelsPage.getTotalElements());
+    return new PageImpl<>(modelsResponse, models.getPageable(), models.getTotalElements());
   }
 
   @Override

@@ -28,9 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class LocationServiceImpl implements LocationService {
 
+  private final LocationMapper locationMapper;
   private final LocationRepository locationRepository;
   private final LocationTranslationService locationTranslationService;
-  private final LocationMapper locationMapper;
 
   @Override
   public List<LocationNameResponse> findAllForSelect(String language) throws NoContentException {

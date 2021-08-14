@@ -4,20 +4,20 @@ import static com.example.carrental.constants.ApplicationConstants.HOUR_OF_START
 import static com.example.carrental.constants.ApplicationConstants.MINUTES_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY;
 import static com.example.carrental.entity.notification.NotificationType.ACCEPT;
 import static com.example.carrental.entity.notification.NotificationType.DENY;
-import static com.example.carrental.entity.rentalDetails.RentalRequestType.DRIVING_LICENSE_CONFIRMATION_REQUEST;
-import static com.example.carrental.entity.rentalDetails.RentalRequestType.PASSPORT_CONFIRMATION_REQUEST;
+import static com.example.carrental.entity.rentaldetails.RentalRequestType.DRIVING_LICENSE_CONFIRMATION_REQUEST;
+import static com.example.carrental.entity.rentaldetails.RentalRequestType.PASSPORT_CONFIRMATION_REQUEST;
 import static com.example.carrental.entity.user.UserDocumentStatus.CONFIRMED;
 import static com.example.carrental.entity.user.UserDocumentStatus.UNDER_CONSIDERATION;
 
-import com.example.carrental.controller.dto.rentalDetails.CreateRentalRequestRequest;
-import com.example.carrental.controller.dto.rentalDetails.RentalAllRequestResponse;
-import com.example.carrental.controller.dto.rentalDetails.RentalRequestRejectRequest;
-import com.example.carrental.controller.dto.rentalDetails.RentalRequestResponse;
+import com.example.carrental.controller.dto.rentaldetails.CreateRentalRequestRequest;
+import com.example.carrental.controller.dto.rentaldetails.RentalAllRequestResponse;
+import com.example.carrental.controller.dto.rentaldetails.RentalRequestRejectRequest;
+import com.example.carrental.controller.dto.rentaldetails.RentalRequestResponse;
 import com.example.carrental.controller.dto.user.UserDrivingLicenseConfirmationDataResponse;
 import com.example.carrental.controller.dto.user.UserPassportConfirmationDataResponse;
 import com.example.carrental.entity.notification.Notification;
 import com.example.carrental.entity.notification.NotificationStatus;
-import com.example.carrental.entity.rentalDetails.RentalRequest;
+import com.example.carrental.entity.rentaldetails.RentalRequest;
 import com.example.carrental.entity.user.UserDocumentStatus;
 import com.example.carrental.mapper.RentalRequestMapper;
 import com.example.carrental.mapper.UserDrivingLicenseMapper;
@@ -47,18 +47,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class RentalRequestServiceImpl implements RentalRequestService {
 
-  private static final String PASSPORT_REQUEST_APPROVED = "Your application for passport confirmation has been approved.";
   private static final String DRIVING_LICENSE_REQUEST_APPROVED = "Your driving license confirmation application is approved.";
+  private static final String PASSPORT_REQUEST_APPROVED = "Your application for passport confirmation has been approved.";
   private static final String REQUEST_ACCEPTED = "Accepted";
 
-  private final RentalRequestRepository rentalRequestRepository;
-  private final UserService userService;
   private final NotificationService notificationService;
-  private final UserPassportService userPassportService;
-  private final UserDrivingLicenseService userDrivingLicenseService;
   private final RentalRequestMapper rentalRequestMapper;
+  private final RentalRequestRepository rentalRequestRepository;
   private final UserDrivingLicenseMapper userDrivingLicenseMapper;
+  private final UserDrivingLicenseService userDrivingLicenseService;
   private final UserSecurityService userSecurityService;
+  private final UserService userService;
+  private final UserPassportService userPassportService;
 
   @Override
   public Page<RentalAllRequestResponse> findAll(Pageable pageable) {
@@ -227,7 +227,7 @@ public class RentalRequestServiceImpl implements RentalRequestService {
 
   @Override
   public int findNewRequestsAmountPerDay() {
-    return rentalRequestRepository
+    return   rentalRequestRepository
         .countAllBySentDateAfter(LocalDateTime.of(LocalDate.now(),
             LocalTime.of(HOUR_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY,
                 MINUTES_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY)));

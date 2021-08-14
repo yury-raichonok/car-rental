@@ -21,5 +21,5 @@ public interface NotificationService {
 
   void delete(Long id);
 
-  int findNewUserNotificationsAmount(String email);
+  int findNewUserNotificationsAmount();
 }

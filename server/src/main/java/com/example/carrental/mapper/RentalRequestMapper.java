@@ -3,10 +3,10 @@ package com.example.carrental.mapper;
 import static com.example.carrental.constants.ApplicationConstants.RESPONSE_DATE_FORMAT_PATTERN;
 import static com.example.carrental.constants.ApplicationConstants.RESPONSE_DATE_TIME_FORMAT_PATTERN;
 
-import com.example.carrental.controller.dto.rentalDetails.RentalAllRequestResponse;
-import com.example.carrental.controller.dto.rentalDetails.RentalRequestResponse;
+import com.example.carrental.controller.dto.rentaldetails.RentalAllRequestResponse;
+import com.example.carrental.controller.dto.rentaldetails.RentalRequestResponse;
 import com.example.carrental.controller.dto.user.UserPassportConfirmationDataResponse;
-import com.example.carrental.entity.rentalDetails.RentalRequest;
+import com.example.carrental.entity.rentaldetails.RentalRequest;
 import com.example.carrental.entity.user.UserPassport;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

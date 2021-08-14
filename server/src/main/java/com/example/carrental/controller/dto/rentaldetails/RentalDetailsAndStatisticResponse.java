@@ -1,6 +1,7 @@
-package com.example.carrental.controller.dto.rentalDetails;
+package com.example.carrental.controller.dto.rentaldetails;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RentalDetailsContactInformationResponse {
+public class RentalDetailsAndStatisticResponse {
 
   @NotNull
   @Email
@@ -25,20 +26,31 @@ public class RentalDetailsContactInformationResponse {
   private String email;
   @NotNull
   @Pattern(regexp = "^\\+375[0-9]{9}$")
-  private String phone;
+  private String phoneNumber;
+  @NotNull
+  @Positive
+  private long locationId;
   @NotNull
   @Size(
       min = 1,
       max = 255
   )
-  private String locationName;
+  private String location;
   @NotNull
-  @Positive
-  private double locationCoordinateX;
+  @Min(0)
+  private double fromDayToWeekCoefficient;
   @NotNull
-  @Positive
-  private double locationCoordinateY;
+  @Min(0)
+  private double fromWeekCoefficient;
   @NotNull
-  @Positive
-  private int zoom;
+  @Min(0)
+  private int billValidityPeriod;
+  @NotNull
+  private int newMessages;
+  @NotNull
+  private int newOrders;
+  @NotNull
+  private int newUsers;
+  @NotNull
+  private int newRequests;
 }

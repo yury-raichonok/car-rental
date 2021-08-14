@@ -68,6 +68,5 @@ public class LocationTranslationServiceImpl implements LocationTranslationServic
           .findFirst()
           .ifPresent(locationTranslation -> location.setName(locationTranslation.getName()));
     }
-
   }
 }

@@ -1,10 +1,8 @@
 package com.example.carrental.service.impl;
 
-import static com.example.carrental.constants.ApplicationConstants.DAY_HOURS;
 import static com.example.carrental.constants.ApplicationConstants.HOUR_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY;
 import static com.example.carrental.constants.ApplicationConstants.MINUTES_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY;
 import static com.example.carrental.constants.ApplicationConstants.RESPONSE_DATE_TIME_FORMAT_PATTERN;
-import static com.example.carrental.constants.ApplicationConstants.WEEK_HOURS;
 import static com.example.carrental.entity.notification.NotificationStatus.NEW;
 import static com.example.carrental.entity.notification.NotificationType.ACCEPT;
 import static com.example.carrental.entity.notification.NotificationType.INFO;
@@ -18,6 +16,7 @@ import static com.example.carrental.entity.order.OrderRentalStatus.NOT_STARTED;
 import static com.example.carrental.entity.user.UserDocumentStatus.CONFIRMED;
 import static java.math.MathContext.DECIMAL64;
 
+import com.example.carrental.config.ApplicationConfig;
 import com.example.carrental.controller.dto.bill.CreateRepairBillRequest;
 import com.example.carrental.controller.dto.order.CreateOrderRequest;
 import com.example.carrental.controller.dto.order.OrderCompleteWithPenaltyRequest;
@@ -43,7 +42,6 @@ import com.example.carrental.service.NotificationService;
 import com.example.carrental.service.OrderService;
 import com.example.carrental.service.PDFService;
 import com.example.carrental.service.PaymentBillService;
-import com.example.carrental.service.RentalDetailsService;
 import com.example.carrental.service.RepairBillService;
 import com.example.carrental.service.UserSecurityService;
 import com.example.carrental.service.UserService;
@@ -51,6 +49,8 @@ import com.example.carrental.service.exceptions.DocumentNotGeneratedException;
 import com.example.carrental.service.exceptions.DocumentsNotConfirmedException;
 import com.example.carrental.service.exceptions.FontNotFoundException;
 import com.example.carrental.service.exceptions.OrderPeriodValidationException;
+import com.example.carrental.service.exceptions.PhoneNotSpecifiedException;
+import io.jsonwebtoken.lang.Collections;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -62,7 +62,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -79,35 +78,19 @@ public class OrderServiceImpl implements OrderService {
   private static final String ORDER_REQUEST_EMAIL_TOPIC = "Order request for car rental";
   private static final String ORDER_REQUEST_REJECTED_EMAIL_TOPIC = "Order request rejected";
 
-  private final OrderRepository orderRepository;
-  private final NotificationService notificationService;
-  private final UserService userService;
-  private final OrderCriteriaRepository orderCriteriaRepository;
+  private final ApplicationConfig applicationConfig;
   private final CarService carService;
-  private final OrderMapper orderMapper;
-  private final PDFService pdfService;
-  private final LocationTranslationService locationTranslationService;
-  private final UserSecurityService userSecurityService;
   private final EmailService emailService;
-
-  private PaymentBillService paymentBillService;
-  private RepairBillService repairBillService;
-  private RentalDetailsService rentalDetailsService;
-
-  @Autowired
-  public void setPaymentBillService(PaymentBillService paymentBillService) {
-    this.paymentBillService = paymentBillService;
-  }
-
-  @Autowired
-  public void setRepairBillService(RepairBillService repairBillService) {
-    this.repairBillService = repairBillService;
-  }
-
-  @Autowired
-  public void setRentalDetailsService(RentalDetailsService rentalDetailsService) {
-    this.rentalDetailsService = rentalDetailsService;
-  }
+  private final LocationTranslationService locationTranslationService;
+  private final NotificationService notificationService;
+  private final OrderCriteriaRepository orderCriteriaRepository;
+  private final OrderMapper orderMapper;
+  private final OrderRepository orderRepository;
+  private final PaymentBillService paymentBillService;
+  private final PDFService pdfService;
+  private final RepairBillService repairBillService;
+  private final UserSecurityService userSecurityService;
+  private final UserService userService;
 
   @Override
   public Page<OrderInformationResponse> findAllCurrent(Pageable pageable, String language) {
@@ -185,7 +168,6 @@ public class OrderServiceImpl implements OrderService {
     }
     double totalCost;
     double costPerHour = orderTotalCostRequest.getCostPerHour();
-    var orderCostDetails = rentalDetailsService.getRentalDetails();
     var duration = Duration.between(orderTotalCostRequest.getPickUpDate(),
         orderTotalCostRequest.getReturnDate()).toHours();
 
@@ -193,22 +175,15 @@ public class OrderServiceImpl implements OrderService {
       log.error("Invalid order total cost calculation request. Rental period 0 hours");
       throw new OrderPeriodValidationException(
           "Invalid order total cost calculation request. Rental period 0 hours");
-    } else if (duration < DAY_HOURS) {
-      totalCost = costPerHour * (duration);
-    } else if (duration < WEEK_HOURS) {
-      totalCost = costPerHour * duration * orderCostDetails.getFromDayToWeekCoefficient()
-          .doubleValue();
     } else {
-      totalCost = costPerHour * duration * orderCostDetails.getFromWeekCoefficient()
-          .doubleValue();
+      totalCost = costPerHour * duration;
     }
     return new OrderTotalCostResponse(BigDecimal.valueOf(totalCost).round(DECIMAL64));
   }
 
   @Override
   @Transactional
-  public void create(CreateOrderRequest createOrderRequest) throws DocumentsNotConfirmedException,
-      OrderPeriodValidationException {
+  public void create(CreateOrderRequest createOrderRequest) {
     var car = carService.findById(createOrderRequest.getCarId());
     var location = car.getLocation();
     var userEmail = userSecurityService.getUserEmailFromSecurityContext();
@@ -224,9 +199,11 @@ public class OrderServiceImpl implements OrderService {
       throw new DocumentsNotConfirmedException(
           String.format("Documents of user %s are not confirmed", userEmail));
     }
-    if (Optional.ofNullable(user.getPhones()).isEmpty()) {
+
+    if (Collections.isEmpty(user.getPhones())) {
       log.error("Phones of user {} are not specified", user.getEmail());
-      throw new DocumentsNotConfirmedException("Your phone number is not specified");
+      throw new PhoneNotSpecifiedException(String.format("Phones of user %s are not specified",
+          user.getEmail()));
     }
 
     var totalCost = calculateTotalCost(OrderTotalCostRequest
@@ -265,17 +242,15 @@ public class OrderServiceImpl implements OrderService {
   @Transactional
   public void approveOrder(Long id) {
     var order = findById(id);
-    var orderDetails = rentalDetailsService.getRentalDetails();
-
-    paymentBillService.create(orderMapper.orderToCreatePaymentBillRequest(order));
+    paymentBillService.create(order);
 
     var message = String.format(
         "Order №%d for renting a %s %s has been accepted. "
             + "You have %d minutes to pay for your order in the \"Bills\" tab. "
             + "At %s the car reservation will be canceled", order.getId(),
         order.getCar().getModel().getBrand().getName(), order.getCar().getModel().getName(),
-        orderDetails.getPaymentBillValidityPeriodInMinutes(),
-        LocalDateTime.now().plusMinutes(orderDetails.getPaymentBillValidityPeriodInMinutes())
+        applicationConfig.getBillValidityPeriodInMinutes(),
+        LocalDateTime.now().plusMinutes(applicationConfig.getBillValidityPeriodInMinutes())
             .format(DateTimeFormatter.ofPattern(RESPONSE_DATE_TIME_FORMAT_PATTERN)));
 
     var notification = Notification
@@ -363,7 +338,7 @@ public class OrderServiceImpl implements OrderService {
         .builder()
         .message(orderCompleteWithPenaltyRequest.getMessage())
         .totalCost(BigDecimal.valueOf(orderCompleteWithPenaltyRequest.getTotalCost()))
-        .orderId(order.getId())
+        .order(order)
         .build());
   }
 
@@ -415,8 +390,7 @@ public class OrderServiceImpl implements OrderService {
   public ByteArrayResource exportOrderToPDF(Long id)
       throws FontNotFoundException, DocumentNotGeneratedException {
     var order = findById(id);
-    var rentalDetails = rentalDetailsService.getRentalDetails();
-    return pdfService.exportOrderToPDF(order, rentalDetails);
+    return pdfService.exportOrderToPDF(order);
   }
 
   @Override
@@ -440,15 +414,9 @@ public class OrderServiceImpl implements OrderService {
   }
 
   @Override
-  public int findNewUserOrdersAmount(String email) {
-    return orderRepository.countAllByUser_EmailAndRentalStatusAndPaymentStatus(email, NOT_STARTED,
-        PAID);
-  }
-
-  @Override
-  public void updatePaymentDateAndStatusToPaid(Order order) {
-    order.setPaymentDate(LocalDateTime.now());
-    order.setPaymentStatus(PAID);
-    orderRepository.save(order);
+  public int findUserOrdersAmount() {
+    var userEmail = userSecurityService.getUserEmailFromSecurityContext();
+    return orderRepository.countAllByUser_EmailAndRentalStatusAndPaymentStatus(userEmail,
+        NOT_STARTED, PAID);
   }
 }

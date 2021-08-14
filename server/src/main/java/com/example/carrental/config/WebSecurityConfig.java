@@ -20,7 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-  public static final String ADMIN = "ADMIN";
+  private static final String ADMIN = "ADMIN";
 
   private final UserSecurityService userSecurityService;
   private final AuthenticationEntryPoint authenticationEntryPoint;

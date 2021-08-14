@@ -1,9 +1,9 @@
 package com.example.carrental.controller;
 
-import com.example.carrental.controller.dto.rentalDetails.CreateRentalRequestRequest;
-import com.example.carrental.controller.dto.rentalDetails.RentalAllRequestResponse;
-import com.example.carrental.controller.dto.rentalDetails.RentalRequestRejectRequest;
-import com.example.carrental.controller.dto.rentalDetails.RentalRequestResponse;
+import com.example.carrental.controller.dto.rentaldetails.CreateRentalRequestRequest;
+import com.example.carrental.controller.dto.rentaldetails.RentalAllRequestResponse;
+import com.example.carrental.controller.dto.rentaldetails.RentalRequestRejectRequest;
+import com.example.carrental.controller.dto.rentaldetails.RentalRequestResponse;
 import com.example.carrental.controller.dto.user.UserDrivingLicenseConfirmationDataResponse;
 import com.example.carrental.controller.dto.user.UserPassportConfirmationDataResponse;
 import com.example.carrental.service.RentalRequestService;
@@ -55,6 +55,18 @@ public class RentalRequestController {
   public ResponseEntity<UserPassportConfirmationDataResponse> findRequestPassportData(
       @NotNull @Positive @PathVariable Long id) {
     var response = rentalRequestService.findRequestPassportData(id);
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
+  @GetMapping(path = "/new/amount")
+  public ResponseEntity<Integer> findNewRequestsAmount() {
+    var response = rentalRequestService.findNewRequestsAmount();
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
+  @GetMapping(path = "/new/amount/day")
+  public ResponseEntity<Integer> findNewRequestsAmountPerDay() {
+    var response = rentalRequestService.findNewRequestsAmountPerDay();
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 

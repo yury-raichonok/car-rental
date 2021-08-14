@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom';
 import { Menu, Badge } from 'antd';
 import styled from 'styled-components';
 import RentalDetailsDataService from '../../services/rentalDetails/RentalDetailsDataService';
+import OrderDataService from '../../services/order/OrderDataService';
+import NotificationDataService from '../../services/notification/NotificationDataService';
+import PaymentBillDataService from '../../services/bill/PaymentBillDataService';
+import RepairBillDataService from '../../services/bill/RepairBillDataService';
 import { 
   HomeFilled, 
   CreditCardFilled, 
@@ -67,17 +71,23 @@ const ProfileMenuComponent = () => {
 
   const { t } = useTranslation();
 
-  const [data, setData] = useState({});
+  const [orders, setOrders] = useState();
+  const [notifications, setNotifications] = useState();
+  const [paymentBills, setPaymentBills] = useState();
+  const [repairBills, setRepairBills] = useState();
 
   const fetchData = async () => {
 
-    const resp = await RentalDetailsDataService.getUserDetailsStatistic().catch((err) => {
-      console.log("Error: ", err);
-    });
+    const ordersResp = await OrderDataService.findUserOrdersAmount();
+    const notificationsResp = await NotificationDataService.findUserNotificationsAmount();
+    const paymentBillsResp = await PaymentBillDataService.findUserPaymentBillsAmount();
+    const repairBillsResp = await RepairBillDataService.findUserRepairBillsAmount();
 
-    if(resp) {
-      setData(resp.data);
-      console.log(resp);
+    if(ordersResp && notificationsResp && paymentBillsResp && repairBillsResp) {
+      setOrders(ordersResp.data);
+      setNotifications(notificationsResp.data);
+      setPaymentBills(paymentBillsResp.data);
+      setRepairBills(repairBillsResp.data);
     }
   }
 
@@ -95,19 +105,19 @@ const ProfileMenuComponent = () => {
             <Row>
               {t('bills')}
               <Marginer direction="horizontal" margin={10} />
-              <Badge count={data.paymentBills}/>
-              <Badge style={{background: "rgb(40 156 255 / 70%)"}} count={data.repairBills}/>
+              <Badge count={paymentBills}/>
+              <Badge style={{background: "rgb(40 156 255 / 70%)"}} count={repairBills}/>
             </Row>
           }>
           <Menu.Item key="2">
             <Link to="/profile/paymentbills"><div>{t('payment_bills')}</div></Link>
             <Marginer direction="horizontal" margin={10} />
-            <Badge count={data.paymentBills}/>
+            <Badge count={paymentBills}/>
           </Menu.Item>
           <Menu.Item key="3">
             <Link to="/profile/repairbills"><div>{t('repair_bills')}</div></Link>
             <Marginer direction="horizontal" margin={10} />
-            <Badge count={data.repairBills} style={{background: "rgb(40 156 255 / 70%)"}}/>
+            <Badge count={repairBills} style={{background: "rgb(40 156 255 / 70%)"}}/>
           </Menu.Item>
           <Menu.Item key="4">
             <Link to="/profile/paymentbills/history"><div>{t('payment_bills_history')}</div></Link>
@@ -120,13 +130,13 @@ const ProfileMenuComponent = () => {
             <Row>
               {t('orders')}
               <Marginer direction="horizontal" margin={10} />
-              <Badge count={data.orders}/>
+              <Badge count={orders}/>
             </Row>
           }>
           <Menu.Item key="6">
             <Link to="/profile/orders"><div>{t('orders')}</div></Link>
             <Marginer direction="horizontal" margin={10} />
-            <Badge count={data.orders}/>
+            <Badge count={orders}/>
           </Menu.Item>
           <Menu.Item key="7">
             <Link to="/profile/orders/history"><div>{t('orders_history')}</div></Link>
@@ -136,13 +146,13 @@ const ProfileMenuComponent = () => {
             <Row>
               {t('notifications')}
               <Marginer direction="horizontal" margin={10} />
-              <Badge count={data.notifications}/>
+              <Badge count={notifications}/>
             </Row>
           }>
           <Menu.Item key="8">
             <Link to="/profile/notifications"><div>{t('notifications')}</div></Link>
             <Marginer direction="horizontal" margin={10} />
-            <Badge count={data.notifications}/>
+            <Badge count={notifications}/>
           </Menu.Item>
           <Menu.Item key="9">
             <Link to="/profile/notifications/history"><div>{t('notifications_history')}</div></Link>

@@ -1,20 +1,21 @@
 package com.example.carrental.service.impl;
 
-import com.example.carrental.controller.dto.bill.CreatePaymentBillRequest;
+import static com.example.carrental.entity.order.OrderPaymentStatus.PAID;
+
+import com.example.carrental.config.ApplicationConfig;
 import com.example.carrental.controller.dto.bill.PaymentBillResponse;
 import com.example.carrental.controller.dto.bill.PaymentBillSearchRequest;
 import com.example.carrental.controller.dto.bill.UserNewPaymentBillsResponse;
 import com.example.carrental.controller.dto.bill.UserPaymentBillsResponse;
 import com.example.carrental.entity.bill.PaymentBill;
+import com.example.carrental.entity.order.Order;
 import com.example.carrental.entity.order.OrderPaymentStatus;
 import com.example.carrental.entity.order.OrderRentalStatus;
 import com.example.carrental.mapper.PaymentBillMapper;
 import com.example.carrental.repository.PaymentBillCriteriaRepository;
 import com.example.carrental.repository.PaymentBillRepository;
 import com.example.carrental.service.LocationTranslationService;
-import com.example.carrental.service.OrderService;
 import com.example.carrental.service.PaymentBillService;
-import com.example.carrental.service.RentalDetailsService;
 import com.example.carrental.service.UserSecurityService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -34,24 +34,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class PaymentBillServiceImpl implements PaymentBillService {
 
+  private final ApplicationConfig applicationConfig;
   private final PaymentBillRepository paymentBillRepository;
   private final PaymentBillCriteriaRepository paymentBillCriteriaRepository;
   private final PaymentBillMapper paymentBillMapper;
   private final LocationTranslationService locationTranslationService;
   private final UserSecurityService userSecurityService;
-
-  private OrderService orderService;
-  private RentalDetailsService rentalDetailsService;
-
-  @Autowired
-  public void setOrderService(OrderService orderService) {
-    this.orderService = orderService;
-  }
-
-  @Autowired
-  public void setRentalDetailsService(RentalDetailsService rentalDetailsService) {
-    this.rentalDetailsService = rentalDetailsService;
-  }
 
   @Override
   public Page<PaymentBillResponse> findAll(PaymentBillSearchRequest paymentBillSearchRequest,
@@ -109,9 +97,10 @@ public class PaymentBillServiceImpl implements PaymentBillService {
       throw new IllegalStateException(String.format("Bill with id %s already expires", id));
     }
     paymentBill.setPaymentDate(LocalDateTime.now());
-
+    order.setRentalStatus(OrderRentalStatus.NOT_STARTED);
+    order.setPaymentDate(LocalDateTime.now());
+    order.setPaymentStatus(PAID);
     paymentBillRepository.save(paymentBill);
-    orderService.updatePaymentDateAndStatusToPaid(order);
   }
 
   @Override
@@ -120,24 +109,21 @@ public class PaymentBillServiceImpl implements PaymentBillService {
     var paymentBill = findById(id);
     var order = paymentBill.getOrder();
     paymentBill.setPaymentDate(LocalDateTime.now());
-    paymentBillRepository.save(paymentBill);
-
     order.setRentalStatus(OrderRentalStatus.NOT_STARTED);
-    orderService.updatePaymentDateAndStatusToPaid(order);
+    order.setPaymentDate(LocalDateTime.now());
+    order.setPaymentStatus(PAID);
+    paymentBillRepository.save(paymentBill);
   }
 
   @Override
   @Transactional
-  public void create(CreatePaymentBillRequest createPaymentBillRequest) {
-    var order = orderService.findById(createPaymentBillRequest.getOrderId());
-    var orderDetails = rentalDetailsService.getRentalDetails();
-
+  public void create(Order order) {
     paymentBillRepository.save(PaymentBill
         .builder()
         .totalCost(order.getTotalCost())
         .sentDate(LocalDateTime.now())
         .expirationTime(
-            LocalDateTime.now().plusMinutes(orderDetails.getPaymentBillValidityPeriodInMinutes()))
+            LocalDateTime.now().plusMinutes(applicationConfig.getBillValidityPeriodInMinutes()))
         .order(order)
         .build());
   }
@@ -151,9 +137,10 @@ public class PaymentBillServiceImpl implements PaymentBillService {
   }
 
   @Override
-  public int findNewUserBillsAmount(String email) {
+  public int findNewUserBillsAmount() {
+    var userEmail = userSecurityService.getUserEmailFromSecurityContext();
     return paymentBillRepository
         .countAllByExpirationTimeIsAfterAndOrder_UserEmailAndOrder_PaymentStatus(
-            LocalDateTime.now(), email, OrderPaymentStatus.NOT_PAID);
+            LocalDateTime.now(), userEmail, OrderPaymentStatus.NOT_PAID);
   }
 }

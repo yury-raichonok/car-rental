@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,14 +25,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserPhoneServiceImpl implements UserPhoneService {
 
+  private static final int MINUTES_TO_CONFIRM_PHONE = 2;
+
   private final SmsSenderService smsSenderService;
   private final UserConfirmationTokenService userConfirmationTokenService;
-  private final UserService userService;
   private final UserPhoneRepository userPhoneRepository;
   private final UserSecurityService userSecurityService;
-
-  @Value("${twilio.trial_number}")
-  private String twilioTrialNumber;
+  private final UserService userService;
 
   @Override
   public UserPhone findById(Long id) {
@@ -79,14 +77,14 @@ public class UserPhoneServiceImpl implements UserPhoneService {
         .builder()
         .token(String.valueOf(token))
         .creationTime(LocalDateTime.now())
-        .expirationTime(LocalDateTime.now().plusMinutes(1))
+        .expirationTime(LocalDateTime.now().plusMinutes(MINUTES_TO_CONFIRM_PHONE))
         .user(user)
         .build();
 
     userConfirmationTokenService.createUserConfirmationToken(confirmationToken);
 
     smsSenderService.sendSms(new PhoneNumber(String.format("+%s", userSmsRequest.getPhoneNumber())),
-        new PhoneNumber(twilioTrialNumber), String.valueOf(token));
+        String.valueOf(token));
   }
 
   @Override

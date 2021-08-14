@@ -1,5 +1,7 @@
 package com.example.carrental.service.impl;
 
+import static com.example.carrental.entity.order.OrderPaymentStatus.PAID;
+
 import com.example.carrental.controller.dto.bill.CreateRepairBillRequest;
 import com.example.carrental.controller.dto.bill.RepairBillHistoryResponse;
 import com.example.carrental.controller.dto.bill.RepairBillNewResponse;
@@ -10,7 +12,6 @@ import com.example.carrental.mapper.RepairBillMapper;
 import com.example.carrental.repository.RepairBillCriteriaRepository;
 import com.example.carrental.repository.RepairBillRepository;
 import com.example.carrental.service.LocationTranslationService;
-import com.example.carrental.service.OrderService;
 import com.example.carrental.service.RepairBillService;
 import com.example.carrental.service.UserSecurityService;
 import java.time.LocalDateTime;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -36,13 +36,6 @@ public class RepairBillServiceImpl implements RepairBillService {
   private final LocationTranslationService locationTranslationService;
   private final UserSecurityService userSecurityService;
 
-  private OrderService orderService;
-
-  @Autowired
-  public void setOrderService(OrderService orderService) {
-    this.orderService = orderService;
-  }
-
   @Override
   public Page<RepairBillResponse> findAll(RepairBillSearchRequest repairBillSearchRequest,
       String language) {
@@ -58,13 +51,12 @@ public class RepairBillServiceImpl implements RepairBillService {
   @Override
   @Transactional
   public void create(CreateRepairBillRequest createRepairBillRequest) {
-    var order = orderService.findById(createRepairBillRequest.getOrderId());
     repairBillRepository.save(RepairBill
         .builder()
         .totalCost(createRepairBillRequest.getTotalCost())
         .sentDate(LocalDateTime.now())
         .message(createRepairBillRequest.getMessage())
-        .order(order)
+        .order(createRepairBillRequest.getOrder())
         .build());
   }
 
@@ -100,13 +92,15 @@ public class RepairBillServiceImpl implements RepairBillService {
     var repairBill = findById(id);
     var order = repairBill.getOrder();
     repairBill.setPaymentDate(LocalDateTime.now());
+    order.setPaymentDate(LocalDateTime.now());
+    order.setPaymentStatus(PAID);
     repairBillRepository.save(repairBill);
-    orderService.updatePaymentDateAndStatusToPaid(order);
   }
 
   @Override
-  public int findNewUserBillsAmount(String email) {
-    return repairBillRepository.countAllByOrder_UserEmailAndPaymentDateNull(email);
+  public int findNewUserRepairBillsAmount() {
+    var userEmail = userSecurityService.getUserEmailFromSecurityContext();
+    return repairBillRepository.countAllByOrder_UserEmailAndPaymentDateNull(userEmail);
   }
 
   @Override

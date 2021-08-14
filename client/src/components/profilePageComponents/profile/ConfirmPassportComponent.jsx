@@ -79,7 +79,7 @@ const ConfirmPassportComponent = (props) => {
 
   return (
     <ContentContainer>
-      <TextContainer>
+      <TextContainer >
         {t('upload_files_to_verify_your_passport_data')}
       </TextContainer>
       <TextContainer>

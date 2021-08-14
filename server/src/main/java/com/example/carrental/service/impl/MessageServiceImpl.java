@@ -27,8 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
 
-  private final MessageRepository messageRepository;
   private final MessageMapper messageMapper;
+  private final MessageRepository messageRepository;
 
   @Override
   public Page<MessageResponse> findAll(Pageable pageable) {

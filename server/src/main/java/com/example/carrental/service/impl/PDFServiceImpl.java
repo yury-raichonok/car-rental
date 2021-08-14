@@ -9,8 +9,9 @@ import static com.itextpdf.text.Font.NORMAL;
 import static com.itextpdf.text.pdf.BaseFont.EMBEDDED;
 import static com.itextpdf.text.pdf.BaseFont.IDENTITY_H;
 
+import com.example.carrental.config.ApplicationConfig;
 import com.example.carrental.entity.order.Order;
-import com.example.carrental.entity.rentalDetails.RentalDetails;
+import com.example.carrental.entity.rentaldetails.RentalDetails;
 import com.example.carrental.service.PDFService;
 import com.example.carrental.service.exceptions.DocumentNotGeneratedException;
 import com.example.carrental.service.exceptions.FontNotFoundException;
@@ -47,7 +48,10 @@ public class PDFServiceImpl implements PDFService {
   private static final int TABLE_COLUMNS_AMOUNT = 5;
   private static final BaseColor BASE_COLOR = new BaseColor(234, 92, 82);
 
-  public ByteArrayResource exportOrderToPDF(Order order, RentalDetails rentalDetails)
+  private final ApplicationConfig applicationConfig;
+  private final RentalDetails rentalDetails;
+
+  public ByteArrayResource exportOrderToPDF(Order order)
       throws FontNotFoundException, DocumentNotGeneratedException {
     try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
       var document = new Document();
@@ -65,12 +69,12 @@ public class PDFServiceImpl implements PDFService {
       document.add(titleParagraph);
 
       var rentalAddressParagraph = new Paragraph(String.format("Address: %s",
-          rentalDetails.getLocation().getName()), textFont);
+          order.getCar().getLocation().getName()), textFont);
       rentalAddressParagraph.setAlignment(ALIGN_RIGHT);
       document.add(rentalAddressParagraph);
 
       var rentalEmailParagraph = new Paragraph(String.format("Email: %s",
-          rentalDetails.getEmail()), textFont);
+          applicationConfig.getRentalEmail()), textFont);
       rentalEmailParagraph.setAlignment(ALIGN_RIGHT);
       document.add(rentalEmailParagraph);
 

@@ -11,6 +11,10 @@ import LocationDataService from '../../../services/location/LocationDataService'
 import RentalDetailsDataService from '../../../services/rentalDetails/RentalDetailsDataService';
 import { useTranslation } from 'react-i18next';
 import cookies from 'js-cookie';
+import MessageDataService from '../../../services/message/MessageDataService';
+import OrderDataService from '../../../services/order/OrderDataService';
+import UserDataService from '../../../services/user/UserDataService';
+import RequestDataService from '../../../services/request/RequestDataService';
 
 const { Option } = Select;
 
@@ -338,7 +342,7 @@ const CardStatisticDescription = styled.div`
   text-align: left;
 `;
 
-const CardFooter = styled.a`
+const CardFooter = styled.div`
   background-color: rgba(0,0,0,.1);
   text-align: center;
   text-decoration: none;
@@ -417,6 +421,10 @@ const AdminDashboardComponent = () => {
   const { t } = useTranslation();
 
   const [rentalDetails, setRentalDetails] = useState();
+  const [messages, setMessages] = useState();
+  const [orders, setOrders] = useState();
+  const [users, setUsers] = useState();
+  const [requests, setRequests] = useState();
   const [editRentalDetails, setEditRentalDetails] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -431,15 +439,23 @@ const AdminDashboardComponent = () => {
   const fetchRentalDetailsData = async () => {
     setIsLoading(true);
 
-    const resp = await RentalDetailsDataService.findRentalDetailsAndStatistic().catch((err) => {
+    const rentalDetailsResp = await RentalDetailsDataService.findRentalDetails();
+    const messagesResp = await MessageDataService.findNewMessagesAmountPerDay();
+    const ordersResp = await OrderDataService.findNewOrdersAmountPerDay();
+    const usersResp = await UserDataService.findNewUsersAmountPerDay();    
+    const requestsResp = await RequestDataService.findNewRequestsAmountPerDay();
+
+    if(rentalDetailsResp && messagesResp && ordersResp && usersResp && requestsResp) {
+      setRentalDetails(rentalDetailsResp.data);
+      setMessages(messagesResp.data);
+      setOrders(ordersResp.data);
+      setUsers(usersResp.data);
+      setRequests(requestsResp.data);
+      setIsLoading(false);
+    } else {
       notification.error({
         message: `${t('error_when_fetching_rental_details')}`,
       });
-      setIsLoading(false);
-    });
-
-    if(resp) {
-      setRentalDetails(resp.data);
       setIsLoading(false);
     }
   }
@@ -503,7 +519,7 @@ const AdminDashboardComponent = () => {
           <CardStatistic>
             <div>
               <CardStatisticNumber>
-                {rentalDetails ? rentalDetails.newOrders : "0"}
+                {orders ? orders : "0"}
               </CardStatisticNumber>
               <CardStatisticDescription>
                 {t('new_orders')}
@@ -522,7 +538,7 @@ const AdminDashboardComponent = () => {
           <CardStatistic>
             <div>
               <CardStatisticNumber>
-                {rentalDetails ? rentalDetails.newRequests : "0"}
+                {requests ? requests : "0"}
               </CardStatisticNumber>
               <CardStatisticDescription>
                 {t('new_requests')}
@@ -541,7 +557,7 @@ const AdminDashboardComponent = () => {
           <CardStatistic>
             <div>
               <CardStatisticNumber>
-                {rentalDetails ? rentalDetails.newMessages : "0"}
+                {messages ? messages : "0"}
               </CardStatisticNumber>
               <CardStatisticDescription>
                 {t('new_messages')}
@@ -560,7 +576,7 @@ const AdminDashboardComponent = () => {
           <CardStatistic>
             <div>
               <CardStatisticNumber>
-                {rentalDetails ? rentalDetails.newUsers : "0"}
+                {users ? users : "0"}
               </CardStatisticNumber>
               <CardStatisticDescription>
                 {t('new_users')}

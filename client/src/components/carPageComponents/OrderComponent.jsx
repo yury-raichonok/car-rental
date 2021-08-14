@@ -258,14 +258,20 @@ const OrderComponent = (props) => {
           switch(err.response.status){
             case 400:
               notification.error({
-                message: `${t('oops')}`,
-                description: `${t('your_documents_are_not_confirmed')}`,
+                message: `${t('your_documents_are_not_confirmed')}`,
+                description: `${t('go_to_your_personal_profile_to_provide_the_necessary_information')}`,
               });
               break;
             case 401:
               notification.error({
                 message: `${t('oops')}`,
                 description: `${t('you_need_to_log_in_to_place_an_order')}`,
+              });
+              break;
+            case 403:
+              notification.error({
+                message: `${t('you_have_not_provided_any_contact_phone_numbers')}`,
+                description: `${t('go_to_your_personal_profile_to_provide_the_necessary_information')}`,
               });
               break;
             case 405:

@@ -1,6 +1,6 @@
-package com.example.carrental.controller.dto.rentalDetails;
+package com.example.carrental.controller.dto.rentaldetails;
 
-import com.example.carrental.entity.rentalDetails.RentalRequestType;
+import com.example.carrental.entity.rentaldetails.RentalRequestType;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

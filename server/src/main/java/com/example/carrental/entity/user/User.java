@@ -2,7 +2,7 @@ package com.example.carrental.entity.user;
 
 import com.example.carrental.entity.notification.Notification;
 import com.example.carrental.entity.order.Order;
-import com.example.carrental.entity.rentalDetails.RentalRequest;
+import com.example.carrental.entity.rentaldetails.RentalRequest;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Collection;

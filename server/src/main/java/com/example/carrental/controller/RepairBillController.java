@@ -52,6 +52,12 @@ public class RepairBillController {
     return new ResponseEntity<>(paymentBills, HttpStatus.OK);
   }
 
+  @GetMapping(path = "/user/new/amount")
+  public ResponseEntity<Integer> findUserRepairBillsAmount() {
+    var paymentBills = repairBillService.findNewUserRepairBillsAmount();
+    return new ResponseEntity<>(paymentBills, HttpStatus.OK);
+  }
+
   @PostMapping("/pay/{id}")
   public ResponseEntity<HttpStatus> payBill(@NotNull @Positive @PathVariable Long id) {
     repairBillService.payBill(id);

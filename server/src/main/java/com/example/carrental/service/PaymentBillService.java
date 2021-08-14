@@ -1,11 +1,11 @@
 package com.example.carrental.service;
 
-import com.example.carrental.controller.dto.bill.CreatePaymentBillRequest;
 import com.example.carrental.controller.dto.bill.PaymentBillResponse;
 import com.example.carrental.controller.dto.bill.PaymentBillSearchRequest;
 import com.example.carrental.controller.dto.bill.UserNewPaymentBillsResponse;
 import com.example.carrental.controller.dto.bill.UserPaymentBillsResponse;
 import com.example.carrental.entity.bill.PaymentBill;
+import com.example.carrental.entity.order.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,9 +24,9 @@ public interface PaymentBillService {
 
   void payBill(Long id);
 
-  void create(CreatePaymentBillRequest createPaymentBillRequest);
+  void create(Order order);
 
   PaymentBill findById(long id);
 
-  int findNewUserBillsAmount(String email);
+  int findNewUserBillsAmount();
 }

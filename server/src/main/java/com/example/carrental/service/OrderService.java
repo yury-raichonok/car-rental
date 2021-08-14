@@ -15,6 +15,7 @@ import com.example.carrental.service.exceptions.DocumentNotGeneratedException;
 import com.example.carrental.service.exceptions.DocumentsNotConfirmedException;
 import com.example.carrental.service.exceptions.FontNotFoundException;
 import com.example.carrental.service.exceptions.OrderPeriodValidationException;
+import com.example.carrental.service.exceptions.PhoneNotSpecifiedException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,8 +37,8 @@ public interface OrderService {
   OrderTotalCostResponse calculateTotalCost(OrderTotalCostRequest orderTotalCostRequest)
       throws OrderPeriodValidationException;
 
-  void create(CreateOrderRequest createOrderRequest)
-      throws DocumentsNotConfirmedException, OrderPeriodValidationException;
+  void create(CreateOrderRequest createOrderRequest) throws DocumentsNotConfirmedException,
+      OrderPeriodValidationException, PhoneNotSpecifiedException;
 
   Page<OrderResponse> findAll(OrderSearchRequest orderSearchRequest, String language);
 
@@ -65,7 +66,5 @@ public interface OrderService {
 
   int findNewOrdersAmountPerDay();
 
-  int findNewUserOrdersAmount(String email);
-
-  void updatePaymentDateAndStatusToPaid(Order order);
+  int findUserOrdersAmount();
 }

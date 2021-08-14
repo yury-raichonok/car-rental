@@ -83,12 +83,6 @@ public class CarByIdResponse {
   @Min(0)
   private BigDecimal costPerHour;
   @NotNull
-  @Min(0)
-  private BigDecimal costPerHourUpToWeek;
-  @NotNull
-  @Min(0)
-  private BigDecimal costPerHourMoreThanWeek;
-  @NotNull
   @Size(
       min = 1,
       max = 255

@@ -2,7 +2,7 @@ package com.example.carrental.entity.location;
 
 import com.example.carrental.entity.car.Car;
 import com.example.carrental.entity.order.Order;
-import com.example.carrental.entity.rentalDetails.RentalDetails;
+import com.example.carrental.entity.rentaldetails.RentalDetails;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;

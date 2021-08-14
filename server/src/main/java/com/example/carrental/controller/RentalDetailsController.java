@@ -1,10 +1,8 @@
 package com.example.carrental.controller;
 
-import com.example.carrental.controller.dto.rentalDetails.RentalAdminDetailsStatisticResponse;
-import com.example.carrental.controller.dto.rentalDetails.RentalDetailsAndStatisticResponse;
-import com.example.carrental.controller.dto.rentalDetails.RentalDetailsContactInformationResponse;
-import com.example.carrental.controller.dto.rentalDetails.RentalDetailsUpdateRequest;
-import com.example.carrental.controller.dto.rentalDetails.RentalUserDetailsStatisticResponse;
+import com.example.carrental.controller.dto.rentaldetails.RentalDetailsContactInformationResponse;
+import com.example.carrental.controller.dto.rentaldetails.RentalDetailsResponse;
+import com.example.carrental.controller.dto.rentaldetails.RentalDetailsUpdateRequest;
 import com.example.carrental.service.RentalDetailsService;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -27,12 +25,6 @@ public class RentalDetailsController {
 
   private final RentalDetailsService rentalDetailsService;
 
-  @GetMapping(path = "/admin")
-  public ResponseEntity<RentalAdminDetailsStatisticResponse> getAdminDetailsStatistic() {
-    var informationResponse = rentalDetailsService.getAdminDetailsStatistic();
-    return new ResponseEntity<>(informationResponse, HttpStatus.OK);
-  }
-
   @GetMapping(path = "/contacts")
   public ResponseEntity<RentalDetailsContactInformationResponse> getContactInformation(
       @NotNull @CookieValue(name = "i18next") String language) {
@@ -41,15 +33,8 @@ public class RentalDetailsController {
   }
 
   @GetMapping
-  public ResponseEntity<RentalDetailsAndStatisticResponse> getRentalDetailsAndStatistic(
-      @NotNull @CookieValue(name = "i18next") String language) {
-    var informationResponse = rentalDetailsService.getRentalDetailsAndStatistic(language);
-    return new ResponseEntity<>(informationResponse, HttpStatus.OK);
-  }
-
-  @GetMapping(path = "/user")
-  public ResponseEntity<RentalUserDetailsStatisticResponse> getUserDetailsStatistic() {
-    var informationResponse = rentalDetailsService.getUserDetailsStatistic();
+  public ResponseEntity<RentalDetailsResponse> getRentalDetailsResponse() {
+    var informationResponse = rentalDetailsService.getRentalDetailsResponse();
     return new ResponseEntity<>(informationResponse, HttpStatus.OK);
   }
 

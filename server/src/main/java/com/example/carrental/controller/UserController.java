@@ -67,6 +67,12 @@ public class UserController {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  @GetMapping("/amount")
+  public ResponseEntity<Integer> findNewUsersAmountPerDay() {
+    var userInfoResponse = userService.findNewUsersAmountPerDay();
+    return new ResponseEntity<>(userInfoResponse, HttpStatus.OK);
+  }
+
   @PostMapping("/auth/forgot/reset")
   public ResponseEntity<HttpStatus> changePassword(
       @Valid @RequestBody UserChangePasswordRequest changePasswordRequest)

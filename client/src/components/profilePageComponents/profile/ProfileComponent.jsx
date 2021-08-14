@@ -926,7 +926,7 @@ const ProfileComponent = (props) => {
               <RowTitle>{t('phone_numbers')}:&ensp;</RowTitle>
               <PhonesContainer>
                 {!isDataEmpty && !isLoading && data.phones.length > 0 ? (data.phones.map((phone) => (
-                  <Popconfirm title={t('lock_phone')} onConfirm={() => updatePhoneStatus(phone.id)}>
+                  <Popconfirm key={phone} title={t('lock_phone')} onConfirm={() => updatePhoneStatus(phone.id)}>
                     <PhoneNumberContainer key={phone}>+ {phone}</PhoneNumberContainer>
                   </Popconfirm>
                 ))) : (
@@ -1159,6 +1159,10 @@ const ProfileComponent = (props) => {
                               whitespace: true,
                               message: `${t('please_enter_first_name')}`,
                             },
+                            {
+                              max: 255,
+                              message: `${t('value_is_too_long')}`,
+                            },
                           ]}
                         >
                           <Input autoComplete="off" type="text" placeholder={t('enter_first_name')}/>
@@ -1175,6 +1179,10 @@ const ProfileComponent = (props) => {
                             {
                               whitespace: true,
                               message: `${t('please_enter_first_name')}`,
+                            },
+                            {
+                              max: 255,
+                              message: `${t('value_is_too_long')}`,
                             },
                           ]}
                         >
@@ -1245,6 +1253,10 @@ const ProfileComponent = (props) => {
                               whitespace: true,
                               message: `${t('last_name_can_not_be_empty')}`,
                             },
+                            {
+                              max: 255,
+                              message: `${t('value_is_too_long')}`,
+                            },
                           ]}
                         >
                           <Input autoComplete="off" type="text" placeholder={t('enter_last_name')}/>
@@ -1261,6 +1273,10 @@ const ProfileComponent = (props) => {
                             {
                               whitespace: true,
                               message: `${t('last_name_can_not_be_empty')}`,
+                            },
+                            {
+                              max: 255,
+                              message: `${t('value_is_too_long')}`,
                             },
                           ]}
                         >
@@ -1331,6 +1347,10 @@ const ProfileComponent = (props) => {
                               whitespace: true,
                               message: `${t('passport_series_can_not_be_empty')}`,
                             },
+                            {
+                              max: 10,
+                              message: `${t('value_is_too_long')}`,
+                            },
                           ]}
                         >
                           <Input autoComplete="off" type="text" placeholder={t('enter_passport_series')}/>
@@ -1347,6 +1367,10 @@ const ProfileComponent = (props) => {
                             {
                               whitespace: true,
                               message: `${t('passport_series_can_not_be_empty')}`,
+                            },
+                            {
+                              max: 10,
+                              message: `${t('value_is_too_long')}`,
                             },
                           ]}
                         >
@@ -1379,8 +1403,8 @@ const ProfileComponent = (props) => {
                               message: `${t('passport_number_can_not_be_empty')}`,
                             },
                             {
-                              pattern: "[0-9]",
-                              message: `${t('incorrect_input')}`,
+                              max: 10,
+                              message: `${t('value_is_too_long')}`,
                             },
                           ]}
                         >
@@ -1400,8 +1424,8 @@ const ProfileComponent = (props) => {
                               message: `${t('passport_number_can_not_be_empty')}`,
                             },
                             {
-                              pattern: "[0-9]",
-                              message: `${t('incorrect_input')}`,
+                              max: 10,
+                              message: `${t('value_is_too_long')}`,
                             },
                           ]}
                         >
@@ -1511,6 +1535,10 @@ const ProfileComponent = (props) => {
                               whitespace: true,
                               message: `${t('organization_name_can_not_be_empty')}`,
                             },
+                            {
+                              max: 255,
+                              message: `${t('value_is_too_long')}`,
+                            },
                           ]}
                         >
                           <Input autoComplete="off" type="text" placeholder={t('enter_organization_that_issued')}/>
@@ -1527,6 +1555,10 @@ const ProfileComponent = (props) => {
                             {
                               whitespace: true,
                               message: `${t('organization_name_can_not_be_empty')}`,
+                            },
+                            {
+                              max: 255,
+                              message: `${t('value_is_too_long')}`,
                             },
                           ]}
                         >
@@ -1749,7 +1781,7 @@ const ProfileComponent = (props) => {
                 )}
                 {drivingLicense && !editDrivingLicense ? (
                   <>
-                    {(data && data.drivingLicenseStatus == "NOT_CONFIRMED") && (
+                    {(data && data.drivingLicenseStatus === "NOT_CONFIRMED") && (
                       <ButtonContainer>
                         <button className="btn" type="button" onClick={handleConfirmDrivingLicenseInfo}>{t('confirm_driving_license_info')}</button>
                       </ButtonContainer>
@@ -1766,6 +1798,7 @@ const ProfileComponent = (props) => {
         )}
       </DrivingLicenseInformationContainer>
       <Modal
+        
         width="600px"
         visible={showConfirmPassportInfo}
         title={t('passport_data_confirmation')}
@@ -1777,6 +1810,7 @@ const ProfileComponent = (props) => {
         <ConfirmPassportComponent />
       </Modal>
       <Modal
+        
         width="600px"
         visible={showConfirmDrivingLicenseInfo}
         title={t('driving_license_data_confirmation')}

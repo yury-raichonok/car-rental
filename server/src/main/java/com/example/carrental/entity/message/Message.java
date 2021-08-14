@@ -30,8 +30,8 @@ public class Message implements Serializable {
   private String email;
   @Column(nullable = false)
   private String phone;
-  @Column(nullable = false)
-  private String message;
+  @Column(name = "message", nullable = false)
+  private String messageText;
   @Column(name = "sent_date", nullable = false)
   private LocalDateTime sentDate;
   @Column(name = "readed", nullable = false)

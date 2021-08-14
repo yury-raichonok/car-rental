@@ -16,7 +16,6 @@ import com.example.carrental.service.exceptions.NoContentException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,9 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class FaqServiceImpl implements FaqService {
 
+  private final FaqMapper faqMapper;
   private final FaqRepository faqRepository;
   private final FaqTranslationService faqTranslationService;
-  private final FaqMapper faqMapper;
 
   @Override
   public List<FaqResponse> findAll(String language) throws NoContentException {

@@ -1,27 +1,17 @@
 package com.example.carrental.service.impl;
 
-import com.example.carrental.controller.dto.rentalDetails.RentalAdminDetailsStatisticResponse;
-import com.example.carrental.controller.dto.rentalDetails.RentalDetailsAndStatisticResponse;
-import com.example.carrental.controller.dto.rentalDetails.RentalDetailsContactInformationResponse;
-import com.example.carrental.controller.dto.rentalDetails.RentalDetailsUpdateRequest;
-import com.example.carrental.controller.dto.rentalDetails.RentalUserDetailsStatisticResponse;
-import com.example.carrental.entity.rentalDetails.RentalDetails;
+import com.example.carrental.controller.dto.rentaldetails.RentalDetailsContactInformationResponse;
+import com.example.carrental.controller.dto.rentaldetails.RentalDetailsResponse;
+import com.example.carrental.controller.dto.rentaldetails.RentalDetailsUpdateRequest;
+import com.example.carrental.entity.rentaldetails.RentalDetails;
+import com.example.carrental.mapper.RentalDetailsMapper;
 import com.example.carrental.repository.RentalDetailsRepository;
 import com.example.carrental.service.LocationService;
 import com.example.carrental.service.LocationTranslationService;
-import com.example.carrental.service.MessageService;
-import com.example.carrental.service.NotificationService;
-import com.example.carrental.service.OrderService;
-import com.example.carrental.service.PaymentBillService;
 import com.example.carrental.service.RentalDetailsService;
-import com.example.carrental.service.RentalRequestService;
-import com.example.carrental.service.RepairBillService;
-import com.example.carrental.service.UserSecurityService;
-import com.example.carrental.service.UserService;
 import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,48 +19,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RentalDetailsServiceImpl implements RentalDetailsService {
 
-  private static final Long RENTAL_DETAILS_ID = 1L;
+  private static final long RENTAL_DETAILS_ID = 1L;
+  private static final String DETAILS_DOES_NOT_SET = "Rental details does not set";
 
-  private final RentalDetailsRepository rentalDetailsRepository;
-  private final MessageService messageService;
-  private final UserService userService;
-  private final RentalRequestService rentalRequestService;
   private final LocationService locationService;
   private final LocationTranslationService locationTranslationService;
-  private final NotificationService notificationService;
-  private final UserSecurityService userSecurityService;
-
-  private OrderService orderService;
-  private PaymentBillService paymentBillService;
-  private RepairBillService repairBillService;
-
-  @Autowired
-  public void setOrderService(OrderService orderService) {
-    this.orderService = orderService;
-  }
-
-  @Autowired
-  public void setPaymentBillService(PaymentBillService paymentBillService) {
-    this.paymentBillService = paymentBillService;
-  }
-
-  @Autowired
-  public void setRepairBillService(RepairBillService repairBillService) {
-    this.repairBillService = repairBillService;
-  }
-
-  @Override
-  public RentalAdminDetailsStatisticResponse getAdminDetailsStatistic() {
-    int messagesAmt = messageService.findNewMessagesAmount();
-    int requests = rentalRequestService.findNewRequestsAmount();
-    int orders = orderService.findNewOrdersAmount();
-    return RentalAdminDetailsStatisticResponse
-        .builder()
-        .messagesAmt(messagesAmt)
-        .requests(requests)
-        .orders(orders)
-        .build();
-  }
+  private final RentalDetailsRepository rentalDetailsRepository;
+  private final RentalDetailsMapper rentalDetailsMapper;
 
   @Override
   public RentalDetailsContactInformationResponse getContactInformation(String language) {
@@ -92,52 +47,19 @@ public class RentalDetailsServiceImpl implements RentalDetailsService {
   @Override
   public RentalDetails getRentalDetails() {
     return rentalDetailsRepository.findById(RENTAL_DETAILS_ID).orElseThrow(() -> {
-      log.error("Rental details does not set");
-      throw new IllegalStateException("Rental details does not set");
+      log.error(DETAILS_DOES_NOT_SET);
+      throw new IllegalStateException(DETAILS_DOES_NOT_SET);
     });
   }
 
   @Override
-  public RentalDetailsAndStatisticResponse getRentalDetailsAndStatistic(String language) {
-    var rentalDetails = getRentalDetails();
-    var newMessagesPerDay = messageService.findNewMessagesAmountPerDay();
-    var newOrdersPerDay = orderService.findNewOrdersAmountPerDay();
-    var newUsersPerDay = userService.findNewUsersAmountPerDay();
-    var newRequestsPerDay = rentalRequestService.findNewRequestsAmountPerDay();
-    var location = rentalDetails.getLocation();
-    locationTranslationService.setTranslation(location, language);
-
-    return RentalDetailsAndStatisticResponse
-        .builder()
-        .email(rentalDetails.getEmail())
-        .phoneNumber(rentalDetails.getPhone())
-        .locationId(rentalDetails.getLocation().getId())
-        .location(location.getName())
-        .fromDayToWeekCoefficient(rentalDetails.getFromDayToWeekCoefficient().doubleValue())
-        .fromWeekCoefficient(rentalDetails.getFromWeekCoefficient().doubleValue())
-        .billValidityPeriod(rentalDetails.getPaymentBillValidityPeriodInMinutes())
-        .newMessages(newMessagesPerDay)
-        .newOrders(newOrdersPerDay)
-        .newUsers(newUsersPerDay)
-        .newRequests(newRequestsPerDay)
-        .build();
-  }
-
-  @Override
-  public RentalUserDetailsStatisticResponse getUserDetailsStatistic() {
-    var userEmail = userSecurityService.getUserEmailFromSecurityContext();
-    int paymentBills = paymentBillService.findNewUserBillsAmount(userEmail);
-    int repairBills = repairBillService.findNewUserBillsAmount(userEmail);
-    int orders = orderService.findNewUserOrdersAmount(userEmail);
-    int notifications = notificationService.findNewUserNotificationsAmount(userEmail);
-
-    return RentalUserDetailsStatisticResponse
-        .builder()
-        .paymentBills(paymentBills)
-        .repairBills(repairBills)
-        .orders(orders)
-        .notifications(notifications)
-        .build();
+  public RentalDetailsResponse getRentalDetailsResponse() {
+    var rentalDetailsResponse = rentalDetailsRepository.findById(RENTAL_DETAILS_ID)
+        .orElseThrow(() -> {
+          log.error(DETAILS_DOES_NOT_SET);
+          throw new IllegalStateException(DETAILS_DOES_NOT_SET);
+        });
+    return rentalDetailsMapper.rentalDetailsToRentalDetailsResponse(rentalDetailsResponse);
   }
 
   @Override

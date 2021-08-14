@@ -5,21 +5,40 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import org.springframework.beans.factory.annotation.Value;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
 
 @Configuration
+@ConfigurationProperties("amazon")
+@RequiredArgsConstructor
+@Data
+@Validated
 public class AmazonConfig {
 
-  @Value("${amazon.access.key}")
+  @NotBlank
   private String accessKey;
-
-  @Value("${amazon.secret.key}")
+  @NotBlank
   private String secretKey;
-
-  @Value("${amazon.region}")
+  @NotBlank
+  private String canonicalId;
+  @NotBlank
   private String region;
+  @Email
+  private String email;
+  @NotBlank
+  private String carImagesBucket;
+  @NotBlank
+  private String brandImagesBucket;
+  @NotBlank
+  private String passportFilesBucket;
+  @NotBlank
+  private String drivingLicenseFilesBucket;
 
   @Bean
   public AmazonS3 s3() {

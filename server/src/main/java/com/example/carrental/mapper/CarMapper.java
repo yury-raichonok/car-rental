@@ -5,7 +5,6 @@ import com.example.carrental.controller.dto.car.CarByIdResponse;
 import com.example.carrental.controller.dto.car.CarProfitableOfferResponse;
 import com.example.carrental.controller.dto.car.CarSearchResponse;
 import com.example.carrental.entity.car.Car;
-import java.math.BigDecimal;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -43,14 +42,11 @@ public interface CarMapper {
   @Mapping(target = "baggageAmt", source = "car.baggageAmt")
   @Mapping(target = "hasConditioner", source = "car.hasConditioner")
   @Mapping(target = "costPerHour", source = "car.costPerHour")
-  @Mapping(target = "costPerHourUpToWeek", source = "costPerHourUpToWeek")
-  @Mapping(target = "costPerHourMoreThanWeek", source = "costPerHourMoreThanWeek")
   @Mapping(target = "locationName", source = "car.location.name")
   @Mapping(target = "locationCoordinateX", source = "car.location.coordinateX")
   @Mapping(target = "locationCoordinateY", source = "car.location.coordinateY")
   @Mapping(target = "carImageLink", source = "car.carImageLink")
-  CarByIdResponse carAndRentalDetailsToCarByIdResponse(Car car, BigDecimal costPerHourUpToWeek,
-      BigDecimal costPerHourMoreThanWeek);
+  CarByIdResponse carAndRentalDetailsToCarByIdResponse(Car car);
 
   @Mapping(target = "id", source = "car.id")
   @Mapping(target = "brand", source = "car.model.brand.name")

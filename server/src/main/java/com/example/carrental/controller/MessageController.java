@@ -40,6 +40,18 @@ public class MessageController {
     return new ResponseEntity<>(messages, HttpStatus.OK);
   }
 
+  @GetMapping(path = "/new/amount")
+  public ResponseEntity<Integer> findNewMessagesAmount() {
+    var messages = messageService.findNewMessagesAmount();
+    return new ResponseEntity<>(messages, HttpStatus.OK);
+  }
+
+  @GetMapping(path = "/new/amount/day")
+  public ResponseEntity<Integer> findNewMessagesAmountPerDay() {
+    var messages = messageService.findNewMessagesAmountPerDay();
+    return new ResponseEntity<>(messages, HttpStatus.OK);
+  }
+
   @PostMapping
   public ResponseEntity<HttpStatus> create(
       @Valid @RequestBody CreateMessageRequest createMessageRequest) {

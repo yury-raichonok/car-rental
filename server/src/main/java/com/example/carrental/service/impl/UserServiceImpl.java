@@ -3,6 +3,7 @@ package com.example.carrental.service.impl;
 import static com.example.carrental.constants.ApplicationConstants.HOUR_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY;
 import static com.example.carrental.constants.ApplicationConstants.MINUTES_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY;
 
+import com.example.carrental.config.ApplicationConfig;
 import com.example.carrental.controller.dto.user.UserChangePasswordRequest;
 import com.example.carrental.controller.dto.user.UserDataResponse;
 import com.example.carrental.controller.dto.user.UserForgotPasswordRequest;
@@ -31,7 +32,6 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -44,27 +44,22 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-  private static final String PASSWORD_MISMATCH = "Password mismatch";
+  private static final int TIME_FOR_CONFIRMATION = 15;
+  private static final String ADMIN_ROLE = "ADMIN";
   private static final String EMAIL_ALREADY_CONFIRMED = "Email already confirmed";
+  private static final String PASSWORD_MISMATCH = "Password mismatch";
   private static final String TOKEN_EXPIRED = "Token expired!";
   private static final String USER_ROLE = "USER";
-  private static final String ADMIN_ROLE = "ADMIN";
-  private static final int TIME_FOR_CONFIRMATION = 15;
 
-  private final UserRepository userRepository;
+  private final ApplicationConfig applicationConfig;
   private final BCryptPasswordEncoder passwordEncoder;
-  private final UserRoleService userRoleServiceService;
-  private final UserConfirmationTokenService userConfirmationTokenService;
   private final EmailService emailService;
+  private final UserConfirmationTokenService userConfirmationTokenService;
   private final UserCriteriaRepository userCriteriaRepository;
   private final UserMapper userMapper;
+  private final UserRepository userRepository;
+  private final UserRoleService userRoleServiceService;
   private final UserSecurityService userSecurityService;
-
-  @Value("${app.email.confirmation.link}")
-  private String emailConfirmationLink;
-
-  @Value("${app.email.restoration.link}")
-  private String emailRestorationLink;
 
   @Override
   public UserProfileResponse getUserProfile() {
@@ -87,7 +82,7 @@ public class UserServiceImpl implements UserService {
         .build();
     userConfirmationTokenService.createUserConfirmationToken(confirmationToken);
 
-    var link = String.format(emailConfirmationLink, token);
+    var link = String.format(applicationConfig.getEmailConfirmationLink(), token);
     var message = String.format("Click on link to confirm your email: %s", link);
 
     emailService.sendEmail(user.getEmail(), message, "Email confirmation");
@@ -181,7 +176,7 @@ public class UserServiceImpl implements UserService {
         .build();
     userConfirmationTokenService.createUserConfirmationToken(confirmationToken);
 
-    var link = String.format(emailConfirmationLink, token);
+    var link = String.format(applicationConfig.getEmailConfirmationLink(), token);
     var message = String.format("Click on link to confirm your email: %s", link);
     emailService.sendEmail(user.getEmail(), message, "Email confirmation");
   }
@@ -209,7 +204,7 @@ public class UserServiceImpl implements UserService {
         .build();
     userConfirmationTokenService.createUserConfirmationToken(confirmationToken);
 
-    var link = String.format(emailRestorationLink, token);
+    var link = String.format(applicationConfig.getEmailRestorationLink(), token);
     var message = String.format("Click on link to recover your password: %s", link);
     emailService.sendEmail(user.getEmail(), message, "Password recovery");
   }

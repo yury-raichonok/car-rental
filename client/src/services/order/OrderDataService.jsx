@@ -38,7 +38,7 @@ class OrderDataService {
   findNewOrdersAmount() {
     return axios({
       'method':'GET',
-      'url':"http://localhost:8080/orders/new/amount",
+      'url':"http://localhost:8080/orders/amount",
       'headers' : {
         "Content-type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -47,7 +47,36 @@ class OrderDataService {
         "Access-Control-Allow-Credentials": "true",
         'Authorization':'Bearer '+ localStorage.getItem('token')
       },
-      withCredentials: true,
+    })
+  }
+
+  findUserOrdersAmount() {
+    return axios({
+      'method':'GET',
+      'url':"http://localhost:8080/orders/user/amount",
+      'headers' : {
+        "Content-type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE",
+        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
+        "Access-Control-Allow-Credentials": "true",
+        'Authorization':'Bearer '+ localStorage.getItem('token')
+      },
+    })
+  }
+
+  findNewOrdersAmountPerDay() {
+    return axios({
+      'method':'GET',
+      'url':`http://localhost:8080/orders/amount/day`,
+      'headers' : {
+        "Content-type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE",
+        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
+        "Access-Control-Allow-Credentials": "true",
+        'Authorization':'Bearer '+ localStorage.getItem('token')
+      }
     })
   }
 

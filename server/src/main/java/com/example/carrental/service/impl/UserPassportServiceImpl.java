@@ -1,7 +1,7 @@
 package com.example.carrental.service.impl;
 
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.amazonaws.util.IOUtils;
+import static com.example.carrental.constants.ApplicationConstants.PASSPORT_FILE;
+
 import com.example.carrental.controller.dto.user.CreateOrUpdateUserPassportRequest;
 import com.example.carrental.controller.dto.user.UserDocumentsDownloadRequest;
 import com.example.carrental.controller.dto.user.UserPassportConfirmationDataResponse;
@@ -16,7 +16,6 @@ import com.example.carrental.service.UserSecurityService;
 import com.example.carrental.service.UserService;
 import com.example.carrental.service.exceptions.NoContentException;
 import com.example.carrental.service.exceptions.PassportNotConfirmedException;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,11 +24,8 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,25 +36,20 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class UserPassportServiceImpl implements UserPassportService {
 
-  private final UserPassportRepository userPassportRepository;
-  private final UserService userService;
-  private final UserPassportMapper userPassportMapper;
   private final FileStoreService fileStoreService;
+  private final UserPassportMapper userPassportMapper;
+  private final UserPassportRepository userPassportRepository;
   private final UserSecurityService userSecurityService;
-
-  @Value("${amazon.passport.files.bucket}")
-  private String passportFilesBucket;
+  private final UserService userService;
 
   @Override
   public UserPassportDataResponse getUserPassportData() throws NoContentException {
     var userEmail = userSecurityService.getUserEmailFromSecurityContext();
     var user = userService.findUserByEmail(userEmail);
-    var optionalPassport = Optional.ofNullable(user.getPassport());
-    if (optionalPassport.isEmpty()) {
+    var passport = Optional.ofNullable(user.getPassport()).orElseThrow(() -> {
       log.error("Passport of user {}  is not specified!", userEmail);
       throw new NoContentException("Passport data is not specified!");
-    }
-    var passport = optionalPassport.get();
+    });
     return userPassportMapper.userPassportToUserPassportDataResponse(passport);
   }
 
@@ -166,32 +157,8 @@ public class UserPassportServiceImpl implements UserPassportService {
   @Override
   public ByteArrayResource downloadFiles(
       UserDocumentsDownloadRequest userDocumentsDownloadRequest) {
-    var objects = fileStoreService.downloadFiles(passportFilesBucket,
-        userDocumentsDownloadRequest.getDirectory());
-
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    try (ZipOutputStream zos = new ZipOutputStream(byteArrayOutputStream)) {
-      objects.forEach(object -> {
-        try (S3ObjectInputStream inputStream = object.getObjectContent()) {
-          byte[] content = IOUtils.toByteArray(inputStream);
-          ZipEntry entry = new ZipEntry(object.getKey());
-          entry.setSize(content.length);
-          zos.putNextEntry(entry);
-          zos.write(content);
-        } catch (IOException e) {
-          log.error("Error when packing passport files of user with id = {}. Message: {}",
-              object.getKey(), e.getMessage());
-          throw new IllegalStateException(String
-              .format("Error when packing passport files of user with id = %s. Message: %s",
-                  object.getKey(), e.getMessage()));
-        }
-      });
-    } catch (IOException e) {
-      log.error("Error when downloading driving license files. Message: {}", e.getMessage());
-      throw new IllegalStateException(String
-          .format("Error when downloading driving license files. Message: %s", e.getMessage()));
-    }
-    return new ByteArrayResource(byteArrayOutputStream.toByteArray());
+    return new ByteArrayResource(fileStoreService.downloadZippedFiles(PASSPORT_FILE,
+        userDocumentsDownloadRequest.getDirectory()).toByteArray());
   }
 
   @Override
@@ -205,13 +172,11 @@ public class UserPassportServiceImpl implements UserPassportService {
 
     var userEmail = userSecurityService.getUserEmailFromSecurityContext();
     var user = userService.findUserByEmail(userEmail);
-    var optionalPassport = Optional.ofNullable(user.getPassport());
-    if (optionalPassport.isEmpty()) {
+    var passport = Optional.ofNullable(user.getPassport()).orElseThrow(() -> {
       log.error("Passport of user {} is not specified!", user.getEmail());
       throw new IllegalStateException(String.format("Passport of user %s is not specified!",
           user.getEmail()));
-    }
-    var passport = optionalPassport.get();
+    });
 
     var filename = String.format("%s/%s-%s", passport.getId(), passport.getId(),
         passportFile.getOriginalFilename());
@@ -220,14 +185,17 @@ public class UserPassportServiceImpl implements UserPassportService {
     File file = new File(Objects.requireNonNull(passportFile.getOriginalFilename()));
     try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
       fileOutputStream.write(passportFile.getBytes());
-      fileStoreService.uploadFile(passportFilesBucket, filename, file);
-      Files.delete(Path.of(file.getPath()));
+      fileStoreService.uploadFile(PASSPORT_FILE, filename, file);
     } catch (IOException e) {
       log.error("Error while uploading file to storage: {}", e.getMessage());
       throw new IllegalStateException(String.format("Error while uploading file to storage: %s",
           e.getMessage()));
     }
-
+    try {
+      Files.delete(Path.of(file.getPath()));
+    } catch (IOException e) {
+      log.warn("File was not deleted after upload. Exception: {}", e.getMessage());
+    }
     passport.setDocumentsFileLink(filesLink);
     passport.setChangedAt(LocalDateTime.now());
     userPassportRepository.save(passport);
