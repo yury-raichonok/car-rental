@@ -1,6 +1,5 @@
 package com.example.carrental.service.impl;
 
-import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
 import com.example.carrental.controller.dto.user.CreateOrUpdateUserDrivingLicenseRequest;
@@ -13,6 +12,7 @@ import com.example.carrental.mapper.UserDrivingLicenseMapper;
 import com.example.carrental.repository.UserDrivingLicenseRepository;
 import com.example.carrental.service.FileStoreService;
 import com.example.carrental.service.UserDrivingLicenseService;
+import com.example.carrental.service.UserSecurityService;
 import com.example.carrental.service.UserService;
 import com.example.carrental.service.exceptions.DrivingLicenseNotConfirmedException;
 import com.example.carrental.service.exceptions.NoContentException;
@@ -20,8 +20,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
@@ -30,7 +31,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,6 +44,7 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
   private final UserService userService;
   private final UserDrivingLicenseMapper userDrivingLicenseMapper;
   private final FileStoreService fileStoreService;
+  private final UserSecurityService userSecurityService;
 
   @Value("${amazon.drivinglicense.files.bucket}")
   private String drivingLicenseFilesBucket;
@@ -56,55 +57,39 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
   }
 
   @Override
-  public UserDrivingLicenseDataResponse findUserDrivingLicenseData()
-      throws NoContentException {
-    var username = SecurityContextHolder.getContext().getAuthentication().getName();
-    if ("anonymousUser".equals(username)) {
-      log.error("User is not authenticated!");
-      throw new IllegalStateException("User is not authenticated!");
-    }
-
-    var user = userService.findUserByEmail(username);
-    Optional<UserDrivingLicense> optionalDrivingLicense = Optional
-        .ofNullable(user.getDrivingLicense());
-
+  public UserDrivingLicenseDataResponse findUserDrivingLicenseData() throws NoContentException {
+    var userEmail = userSecurityService.getUserEmailFromSecurityContext();
+    var user = userService.findUserByEmail(userEmail);
+    var optionalDrivingLicense = Optional.ofNullable(user.getDrivingLicense());
     if (optionalDrivingLicense.isEmpty()) {
-      log.error("Driving license of user {}  is not specified!", username);
+      log.error("Driving license of user {}  is not specified!", userEmail);
       throw new NoContentException("Driving license data is not specified!");
     }
-
-    var passport = optionalDrivingLicense.get();
+    var drivingLicense = optionalDrivingLicense.get();
 
     return UserDrivingLicenseDataResponse
         .builder()
-        .dateOfIssue(passport.getDateOfIssue())
-        .validityPeriod(passport.getValidityPeriod())
-        .organizationThatIssued(passport.getOrganizationThatIssued())
+        .dateOfIssue(drivingLicense.getDateOfIssue())
+        .validityPeriod(drivingLicense.getValidityPeriod())
+        .organizationThatIssued(drivingLicense.getOrganizationThatIssued())
         .build();
   }
 
   @Override
   public UserDrivingLicense findById(Long id) {
-    var optionalDrivingLicense = userDrivingLicenseRepository.findById(id);
-    if (optionalDrivingLicense.isEmpty()) {
+    return userDrivingLicenseRepository.findById(id).orElseThrow(() -> {
       log.error("User driving license with id {} does not exist", id);
       throw new IllegalStateException(
           String.format("User driving license with id %d does not exists", id));
-    }
-    return optionalDrivingLicense.get();
+    });
   }
 
   @Override
   @Transactional
   public void createOrUpdate(
       CreateOrUpdateUserDrivingLicenseRequest createOrUpdateUserDrivingLicenseRequest) {
-    var username = SecurityContextHolder.getContext().getAuthentication().getName();
-    if ("anonymousUser".equals(username)) {
-      log.error("User is not authenticated!");
-      throw new IllegalStateException("User is not authenticated!");
-    }
-
-    var user = userService.findUserByEmail(username);
+    var userEmail = userSecurityService.getUserEmailFromSecurityContext();
+    var user = userService.findUserByEmail(userEmail);
     var drivingLicense = user.getDrivingLicense();
 
     if (Optional.ofNullable(drivingLicense).isPresent()) {
@@ -176,35 +161,25 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
           drivingLicenseFile.getSize()));
     }
 
-    var username = SecurityContextHolder.getContext().getAuthentication().getName();
-    if ("anonymousUser".equals(username)) {
-      log.error("User is not authenticated!");
-      throw new IllegalStateException("User is not authenticated!");
-    }
-    var user = userService.findUserByEmail(username);
-
+    var userEmail = userSecurityService.getUserEmailFromSecurityContext();
+    var user = userService.findUserByEmail(userEmail);
     var optionalDrivingLicense = Optional.ofNullable(user.getDrivingLicense());
     if (optionalDrivingLicense.isEmpty()) {
       log.error("Driving license of user {} is not specified!", user.getEmail());
       throw new IllegalStateException(String.format("Driving license of user %s is not specified!",
           user.getEmail()));
     }
-
     var drivingLicense = optionalDrivingLicense.get();
 
-    String filename = String.format("%s/%s-%s", drivingLicense.getId(), drivingLicense.getId(),
+    var filename = String.format("%s/%s-%s", drivingLicense.getId(), drivingLicense.getId(),
         drivingLicenseFile.getOriginalFilename());
-    String filesLink = String.valueOf(drivingLicense.getId());
+    var filesLink = String.valueOf(drivingLicense.getId());
 
-    try {
-      File file = new File(Objects.requireNonNull(drivingLicenseFile.getOriginalFilename()));
-      FileOutputStream fileOutputStream = new FileOutputStream(file);
+    var file = new File(Objects.requireNonNull(drivingLicenseFile.getOriginalFilename()));
+    try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
       fileOutputStream.write(drivingLicenseFile.getBytes());
-      fileOutputStream.close();
-
       fileStoreService.uploadFile(drivingLicenseFilesBucket, filename, file);
-
-      file.delete();
+      Files.delete(Path.of(file.getPath()));
     } catch (IOException e) {
       log.error("Error while uploading file to storage: {}", e.getMessage());
       throw new IllegalStateException(String.format("Error while uploading file to storage: %s",
@@ -219,34 +194,29 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
   @Override
   public ByteArrayResource downloadFiles(
       UserDocumentsDownloadRequest userDocumentsDownloadRequest) {
-    List<S3Object> objects = fileStoreService
-        .downloadFiles(drivingLicenseFilesBucket, userDocumentsDownloadRequest.getDirectory());
-
+    var objects = fileStoreService.downloadFiles(drivingLicenseFilesBucket,
+        userDocumentsDownloadRequest.getDirectory());
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    ZipOutputStream zos = new ZipOutputStream(byteArrayOutputStream);
-
-    objects.forEach(object -> {
-      try {
-        S3ObjectInputStream inputStream = object.getObjectContent();
-        byte[] content = IOUtils.toByteArray(inputStream);
-        ZipEntry entry = new ZipEntry(object.getKey());
-        entry.setSize(content.length);
-        zos.putNextEntry(entry);
-        zos.write(content);
-        inputStream.close();
-      } catch (IOException e) {
-        log.error("Error when packing driving license files of user with id = {}. Message: {}",
-            object.getKey(), e.getMessage());
-        throw new IllegalStateException(String
-            .format("Error when packing driving license files of user with id = %s. Message: %s",
-                object.getKey(), e.getMessage()));
-      }
-    });
-    try {
-      zos.closeEntry();
-      zos.close();
+    try (ZipOutputStream zos = new ZipOutputStream(byteArrayOutputStream)) {
+      objects.forEach(object -> {
+        try (S3ObjectInputStream inputStream = object.getObjectContent()) {
+          byte[] content = IOUtils.toByteArray(inputStream);
+          ZipEntry entry = new ZipEntry(object.getKey());
+          entry.setSize(content.length);
+          zos.putNextEntry(entry);
+          zos.write(content);
+        } catch (IOException e) {
+          log.error("Error when packing driving license files of user with id = {}. Message: {}",
+              object.getKey(), e.getMessage());
+          throw new IllegalStateException(String
+              .format("Error when packing driving license files of user with id = %s. Message: %s",
+                  object.getKey(), e.getMessage()));
+        }
+      });
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error when downloading driving license files. Message: {}", e.getMessage());
+      throw new IllegalStateException(String
+          .format("Error when downloading driving license files. Message: %s", e.getMessage()));
     }
     return new ByteArrayResource(byteArrayOutputStream.toByteArray());
   }

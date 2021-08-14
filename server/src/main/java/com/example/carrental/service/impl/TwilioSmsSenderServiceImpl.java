@@ -15,7 +15,7 @@ public class TwilioSmsSenderServiceImpl implements SmsSenderService {
 
   @Override
   public void sendSms(PhoneNumber to, PhoneNumber from, String token) {
-    MessageCreator creator = Message.creator(to, from, token);
+    var creator = Message.creator(to, from, token);
     creator.create();
   }
 }

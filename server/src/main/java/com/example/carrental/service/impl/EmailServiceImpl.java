@@ -31,8 +31,7 @@ public class EmailServiceImpl implements EmailService {
       simpleMailMessage.setText(body);
       mailSender.send(simpleMailMessage);
     } catch (MailSendException e) {
-      log.error("Email was not sent to the mail {}", to);
-      throw new MailSendException(String.format("Email was not sent to the mail %s", to));
+      log.error("Email was not sent to the mail {}. Exception: {}", to, e.getMessage());
     }
   }
 }

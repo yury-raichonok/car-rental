@@ -1,9 +1,8 @@
 package com.example.carrental.service.impl;
 
-import com.example.carrental.repository.UserRoleRepository;
 import com.example.carrental.entity.user.UserRole;
+import com.example.carrental.repository.UserRoleRepository;
 import com.example.carrental.service.UserRoleService;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,22 +16,18 @@ public class UserRoleServiceImpl implements UserRoleService {
 
   @Override
   public UserRole findById(Long id) {
-    Optional<UserRole> optionalRole = userRoleRepository.findById(id);
-    if (optionalRole.isEmpty()) {
+    return userRoleRepository.findById(id).orElseThrow(() -> {
       log.error("User role with id {} does not exists", id);
       throw new IllegalStateException(String.format("User role with id %d does not exists", id));
-    }
-    return optionalRole.get();
+    });
   }
 
   @Override
   public UserRole findByRole(String role) {
-    Optional<UserRole> optionalRole = userRoleRepository.findByRole(role);
-    if (optionalRole.isEmpty()) {
+    return userRoleRepository.findByRole(role).orElseThrow(() -> {
       log.error("User role with role name {} does not exists", role);
-      throw new IllegalStateException(
-          String.format("User role with role name %s does not exists", role));
-    }
-    return optionalRole.get();
+      throw new IllegalStateException(String.format("User role with role name %s does not exists",
+          role));
+    });
   }
 }

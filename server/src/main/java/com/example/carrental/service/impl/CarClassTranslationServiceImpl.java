@@ -1,5 +1,9 @@
 package com.example.carrental.service.impl;
 
+import static com.example.carrental.constants.ApplicationConstants.BELORUSSIAN;
+import static com.example.carrental.constants.ApplicationConstants.ENGLISH;
+import static com.example.carrental.constants.ApplicationConstants.RUSSIAN;
+
 import com.example.carrental.controller.dto.car.CreateCarClassRequest;
 import com.example.carrental.entity.car.CarClass;
 import com.example.carrental.entity.car.CarClassTranslation;
@@ -15,10 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class CarClassTranslationServiceImpl implements CarClassTranslationService {
-
-  public static final String BELORUSSIAN = "be";
-  public static final String RUSSIAN = "ru";
-  public static final String ENGLISH = "en";
 
   private final CarClassTranslationRepository carClassTranslationRepository;
 

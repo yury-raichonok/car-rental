@@ -1,4 +1,4 @@
-import { useState, createRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Form, Spin, DatePicker, notification } from 'antd';
 import moment from 'moment';
@@ -273,6 +273,11 @@ const OrderComponent = (props) => {
                 message: `${t('this_car_has_already_been_booked_for_the_ates_indicated')}`
               });
               break;
+            case 406:
+              notification.error({
+                message: `${t('the_rental_period_is_incorrect')}`
+              });
+              break;  
             default:
               notification.error({
                 message: `${t('oops')}`,
@@ -292,8 +297,26 @@ const OrderComponent = (props) => {
   const calculateTotalCost = async () => {
     setLoading(true);
     const resp = await OrderDataService.calculateTotalCost(data).catch((err) => {
-        console.log(err)
-      })
+      if(err && err.response){
+        switch(err.response.status){
+          case 406:
+            notification.error({
+              message: `${t('the_rental_period_is_incorrect')}`
+            });
+            break;  
+          default:
+            notification.error({
+              message: `${t('oops')}`,
+              description: `${t('something_wrong_please_try_again')}`,
+            });
+        }
+      } else{
+        notification.error({
+          message: `${t('oops')}`,
+          description: `${t('something_wrong_please_try_again')}`,
+        });
+      }
+    })
 
     if(resp) {
       setTotalcost(resp.data.totalCost)

@@ -1,6 +1,6 @@
 package com.example.carrental.service.impl;
 
-import static com.example.carrental.service.impl.CarBrandServiceImpl.NO_CONTENT;
+import static com.example.carrental.constants.ApplicationConstants.NO_CONTENT;
 
 import com.example.carrental.controller.dto.car.CarClassNameResponse;
 import com.example.carrental.controller.dto.car.CarClassNameWithTranslationsResponse;
@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CarClassServiceImpl implements CarClassService {
 
-  public static final String SORT_BY_NAME = "name";
+  private static final String SORT_BY_NAME = "name";
 
   private final CarClassRepository carClassRepository;
   private final CarClassMapper carClassMapper;

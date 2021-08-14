@@ -6,7 +6,6 @@ import com.example.carrental.controller.dto.rentalDetails.RentalDetailsContactIn
 import com.example.carrental.controller.dto.rentalDetails.RentalDetailsUpdateRequest;
 import com.example.carrental.controller.dto.rentalDetails.RentalUserDetailsStatisticResponse;
 import com.example.carrental.entity.rentalDetails.RentalDetails;
-import com.example.carrental.entity.user.User;
 import com.example.carrental.repository.RentalDetailsRepository;
 import com.example.carrental.service.LocationService;
 import com.example.carrental.service.LocationTranslationService;
@@ -17,19 +16,20 @@ import com.example.carrental.service.PaymentBillService;
 import com.example.carrental.service.RentalDetailsService;
 import com.example.carrental.service.RentalRequestService;
 import com.example.carrental.service.RepairBillService;
+import com.example.carrental.service.UserSecurityService;
 import com.example.carrental.service.UserService;
 import java.math.BigDecimal;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class RentalDetailsServiceImpl implements RentalDetailsService {
+
+  private static final Long RENTAL_DETAILS_ID = 1L;
 
   private final RentalDetailsRepository rentalDetailsRepository;
   private final MessageService messageService;
@@ -38,6 +38,7 @@ public class RentalDetailsServiceImpl implements RentalDetailsService {
   private final LocationService locationService;
   private final LocationTranslationService locationTranslationService;
   private final NotificationService notificationService;
+  private final UserSecurityService userSecurityService;
 
   private OrderService orderService;
   private PaymentBillService paymentBillService;
@@ -75,10 +76,7 @@ public class RentalDetailsServiceImpl implements RentalDetailsService {
   public RentalDetailsContactInformationResponse getContactInformation(String language) {
     var rentalDetails = getRentalDetails();
     var location = rentalDetails.getLocation();
-
-    if (!"en".equals(language)) {
-      locationTranslationService.setTranslation(location, language);
-    }
+    locationTranslationService.setTranslation(location, language);
 
     return RentalDetailsContactInformationResponse
         .builder()
@@ -93,12 +91,10 @@ public class RentalDetailsServiceImpl implements RentalDetailsService {
 
   @Override
   public RentalDetails getRentalDetails() {
-    Optional<RentalDetails> optionalDetails = rentalDetailsRepository.findById(1L);
-    if (optionalDetails.isEmpty()) {
+    return rentalDetailsRepository.findById(RENTAL_DETAILS_ID).orElseThrow(() -> {
       log.error("Rental details does not set");
       throw new IllegalStateException("Rental details does not set");
-    }
-    return optionalDetails.get();
+    });
   }
 
   @Override
@@ -109,10 +105,7 @@ public class RentalDetailsServiceImpl implements RentalDetailsService {
     var newUsersPerDay = userService.findNewUsersAmountPerDay();
     var newRequestsPerDay = rentalRequestService.findNewRequestsAmountPerDay();
     var location = rentalDetails.getLocation();
-
-    if (!"en".equals(language)) {
-      locationTranslationService.setTranslation(location, language);
-    }
+    locationTranslationService.setTranslation(location, language);
 
     return RentalDetailsAndStatisticResponse
         .builder()
@@ -132,16 +125,12 @@ public class RentalDetailsServiceImpl implements RentalDetailsService {
 
   @Override
   public RentalUserDetailsStatisticResponse getUserDetailsStatistic() {
-    var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    if (Optional.ofNullable(user).isEmpty()) {
-      log.error("User not authenticated!");
-      throw new IllegalStateException("User not authenticated");
-    }
+    var userEmail = userSecurityService.getUserEmailFromSecurityContext();
+    int paymentBills = paymentBillService.findNewUserBillsAmount(userEmail);
+    int repairBills = repairBillService.findNewUserBillsAmount(userEmail);
+    int orders = orderService.findNewUserOrdersAmount(userEmail);
+    int notifications = notificationService.findNewUserNotificationsAmount(userEmail);
 
-    int paymentBills = paymentBillService.findNewUserBillsAmount(user.getEmail());
-    int repairBills = repairBillService.findNewUserBillsAmount(user.getEmail());
-    int orders = orderService.findNewUserOrdersAmount(user.getEmail());
-    int notifications = notificationService.findNewUserNotificationsAmount(user.getEmail());
     return RentalUserDetailsStatisticResponse
         .builder()
         .paymentBills(paymentBills)
@@ -154,7 +143,7 @@ public class RentalDetailsServiceImpl implements RentalDetailsService {
   @Override
   public void createOrUpdate(RentalDetailsUpdateRequest rentalDetailsUpdateRequest) {
     var location = locationService.findById(rentalDetailsUpdateRequest.getLocation());
-    rentalDetailsRepository.findById(1L).ifPresentOrElse(
+    rentalDetailsRepository.findById(RENTAL_DETAILS_ID).ifPresentOrElse(
         details -> {
           details.setEmail(rentalDetailsUpdateRequest.getEmail());
           details.setPhone(rentalDetailsUpdateRequest.getPhoneNumber());

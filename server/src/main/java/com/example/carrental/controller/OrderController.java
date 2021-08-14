@@ -11,10 +11,10 @@ import com.example.carrental.controller.dto.order.OrderTotalCostRequest;
 import com.example.carrental.controller.dto.order.OrderTotalCostResponse;
 import com.example.carrental.controller.dto.order.UserOrderResponse;
 import com.example.carrental.service.OrderService;
-import com.example.carrental.service.exceptions.CarAlreadyBookedException;
 import com.example.carrental.service.exceptions.DocumentNotGeneratedException;
 import com.example.carrental.service.exceptions.DocumentsNotConfirmedException;
 import com.example.carrental.service.exceptions.FontNotFoundException;
+import com.example.carrental.service.exceptions.OrderPeriodValidationException;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -80,14 +80,16 @@ public class OrderController {
 
   @PostMapping(path = "/calculate")
   public ResponseEntity<OrderTotalCostResponse> calculateTotalCost(
-      @RequestBody OrderTotalCostRequest orderTotalCostRequest) {
+      @Valid @RequestBody OrderTotalCostRequest orderTotalCostRequest)
+      throws OrderPeriodValidationException {
     var totalCost = orderService.calculateTotalCost(orderTotalCostRequest);
     return new ResponseEntity<>(totalCost, HttpStatus.OK);
   }
 
   @PostMapping
-  public ResponseEntity<HttpStatus> create(@RequestBody CreateOrderRequest createOrderRequest)
-      throws CarAlreadyBookedException, DocumentsNotConfirmedException {
+  public ResponseEntity<HttpStatus> create(
+      @Valid @RequestBody CreateOrderRequest createOrderRequest)
+      throws DocumentsNotConfirmedException, OrderPeriodValidationException {
     orderService.create(createOrderRequest);
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -109,7 +111,7 @@ public class OrderController {
   @PutMapping(path = "/cancel/{id}")
   public ResponseEntity<HttpStatus> cancelOrderAfterPayment(
       @NotNull @Positive @PathVariable Long id,
-      @RequestBody OrderRejectRequest orderRejectRequest) {
+      @Valid @RequestBody OrderRejectRequest orderRejectRequest) {
     orderService.cancelOrderAfterPayment(id, orderRejectRequest);
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -130,7 +132,7 @@ public class OrderController {
 
   @PutMapping(path = "/reject/{id}")
   public ResponseEntity<HttpStatus> rejectOrder(@NotNull @Positive @PathVariable Long id,
-      @RequestBody OrderRejectRequest orderRejectRequest) {
+      @Valid @RequestBody OrderRejectRequest orderRejectRequest) {
     orderService.rejectOrder(id, orderRejectRequest);
     return new ResponseEntity<>(HttpStatus.OK);
   }

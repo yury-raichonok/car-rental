@@ -24,12 +24,10 @@ public class UserConfirmationTokenServiceImpl implements UserConfirmationTokenSe
 
   @Override
   public UserConfirmationToken getUserConfirmationTokenByToken(String token) {
-    var optionalUserConfirmationToken = userConfirmationTokenRepository.findByToken(token);
-    if (optionalUserConfirmationToken.isEmpty()) {
+    return userConfirmationTokenRepository.findByToken(token).orElseThrow(() -> {
       log.error("User confirmation token with token {} does not exist", token);
       throw new IllegalStateException("Confirmation token does not exist");
-    }
-    return optionalUserConfirmationToken.get();
+    });
   }
 
   @Override

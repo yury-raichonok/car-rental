@@ -13,7 +13,6 @@ import com.example.carrental.controller.dto.user.UserUpdateRequest;
 import com.example.carrental.service.UserAuthenticationService;
 import com.example.carrental.service.UserService;
 import com.example.carrental.service.exceptions.TokenExpireException;
-import com.example.carrental.service.exceptions.UserNotAuthenticatedException;
 import com.example.carrental.service.exceptions.UsernameAlreadyTakenException;
 import java.security.Principal;
 import javax.validation.Valid;
@@ -44,8 +43,7 @@ public class UserController {
   private final UserAuthenticationService userAuthenticationService;
 
   @GetMapping("/auth/userinfo")
-  public ResponseEntity<UserInfoResponse> getUserInfo(Principal user)
-      throws UserNotAuthenticatedException {
+  public ResponseEntity<UserInfoResponse> getUserInfo(Principal user) {
     var userInfoResponse = userAuthenticationService.getUserInfo(user);
     return new ResponseEntity<>(userInfoResponse, HttpStatus.OK);
   }
@@ -87,7 +85,7 @@ public class UserController {
 
   @PostMapping
   public ResponseEntity<Page<UserDataResponse>> findAll(
-      @RequestBody UserSearchRequest userSearchRequest) {
+      @Valid @RequestBody UserSearchRequest userSearchRequest) {
     var users = userService.findAll(userSearchRequest);
     return new ResponseEntity<>(users, HttpStatus.OK);
   }

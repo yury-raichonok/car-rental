@@ -9,8 +9,6 @@ const ContentContainer = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
-
-  
 `;
 
 const TextContainer = styled.div`
@@ -26,8 +24,8 @@ const DropZoneContentWrapper = styled.div`
   align-items: center;
   justify-content: center;
   cursor: pointer;
-    font-size: 16px;
-    font-weight: 500;
+  font-size: 16px;
+  font-weight: 500;
 `;
 
 const EditBrandImageComponent = (props) => {

@@ -1,7 +1,14 @@
 package com.example.carrental.service.impl;
 
+import static com.example.carrental.constants.ApplicationConstants.DAY_HOURS;
+import static com.example.carrental.constants.ApplicationConstants.HOUR_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY;
+import static com.example.carrental.constants.ApplicationConstants.MINUTES_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY;
+import static com.example.carrental.constants.ApplicationConstants.RESPONSE_DATE_TIME_FORMAT_PATTERN;
+import static com.example.carrental.constants.ApplicationConstants.WEEK_HOURS;
 import static com.example.carrental.entity.notification.NotificationStatus.NEW;
+import static com.example.carrental.entity.notification.NotificationType.ACCEPT;
 import static com.example.carrental.entity.notification.NotificationType.INFO;
+import static com.example.carrental.entity.order.OrderPaymentStatus.NOT_PAID;
 import static com.example.carrental.entity.order.OrderPaymentStatus.PAID;
 import static com.example.carrental.entity.order.OrderRentalStatus.CANCELED;
 import static com.example.carrental.entity.order.OrderRentalStatus.FINISHED;
@@ -9,6 +16,7 @@ import static com.example.carrental.entity.order.OrderRentalStatus.FINISHED_WITH
 import static com.example.carrental.entity.order.OrderRentalStatus.IN_PROCESS;
 import static com.example.carrental.entity.order.OrderRentalStatus.NOT_STARTED;
 import static com.example.carrental.entity.user.UserDocumentStatus.CONFIRMED;
+import static java.math.MathContext.DECIMAL64;
 
 import com.example.carrental.controller.dto.bill.CreateRepairBillRequest;
 import com.example.carrental.controller.dto.order.CreateOrderRequest;
@@ -24,13 +32,12 @@ import com.example.carrental.controller.dto.order.UserOrderResponse;
 import com.example.carrental.entity.notification.Notification;
 import com.example.carrental.entity.notification.NotificationType;
 import com.example.carrental.entity.order.Order;
-import com.example.carrental.entity.order.OrderPaymentStatus;
 import com.example.carrental.entity.order.OrderRentalStatus;
-import com.example.carrental.entity.user.User;
 import com.example.carrental.mapper.OrderMapper;
 import com.example.carrental.repository.OrderCriteriaRepository;
 import com.example.carrental.repository.OrderRepository;
 import com.example.carrental.service.CarService;
+import com.example.carrental.service.EmailService;
 import com.example.carrental.service.LocationTranslationService;
 import com.example.carrental.service.NotificationService;
 import com.example.carrental.service.OrderService;
@@ -38,13 +45,13 @@ import com.example.carrental.service.PDFService;
 import com.example.carrental.service.PaymentBillService;
 import com.example.carrental.service.RentalDetailsService;
 import com.example.carrental.service.RepairBillService;
+import com.example.carrental.service.UserSecurityService;
 import com.example.carrental.service.UserService;
-import com.example.carrental.service.exceptions.CarAlreadyBookedException;
 import com.example.carrental.service.exceptions.DocumentNotGeneratedException;
 import com.example.carrental.service.exceptions.DocumentsNotConfirmedException;
 import com.example.carrental.service.exceptions.FontNotFoundException;
+import com.example.carrental.service.exceptions.OrderPeriodValidationException;
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -60,7 +67,6 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,6 +74,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
+
+  private static final String ORDER_CANCELED_EMAIL_TOPIC = "Order canceled";
+  private static final String ORDER_REQUEST_EMAIL_TOPIC = "Order request for car rental";
+  private static final String ORDER_REQUEST_REJECTED_EMAIL_TOPIC = "Order request rejected";
 
   private final OrderRepository orderRepository;
   private final NotificationService notificationService;
@@ -77,11 +87,12 @@ public class OrderServiceImpl implements OrderService {
   private final OrderMapper orderMapper;
   private final PDFService pdfService;
   private final LocationTranslationService locationTranslationService;
+  private final UserSecurityService userSecurityService;
+  private final EmailService emailService;
 
   private PaymentBillService paymentBillService;
   private RepairBillService repairBillService;
   private RentalDetailsService rentalDetailsService;
-
 
   @Autowired
   public void setPaymentBillService(PaymentBillService paymentBillService) {
@@ -101,167 +112,121 @@ public class OrderServiceImpl implements OrderService {
   @Override
   public Page<OrderInformationResponse> findAllCurrent(Pageable pageable, String language) {
     var ordersPage = orderRepository.findAllByRentalStatus(IN_PROCESS, pageable);
-    List<OrderInformationResponse> ordersList = new ArrayList<>();
+    List<OrderInformationResponse> ordersResponse = new ArrayList<>();
     ordersPage.forEach(order -> {
-      if (!"en".equals(language)) {
-        locationTranslationService.setTranslation(order.getLocation(), language);
-      }
-      ordersList.add(orderMapper.orderToOrderInformationResponse(order));
+      locationTranslationService.setTranslation(order.getLocation(), language);
+      ordersResponse.add(orderMapper.orderToOrderInformationResponse(order));
     });
 
-    return new PageImpl<>(ordersList, ordersPage.getPageable(), ordersPage.getTotalElements());
+    return new PageImpl<>(ordersResponse, ordersPage.getPageable(), ordersPage.getTotalElements());
   }
 
   @Override
   public Page<OrderInformationResponse> findAllFuture(Pageable pageable, String language) {
     var ordersPage = orderRepository.findAllByRentalStatusAndPaymentStatus(NOT_STARTED, PAID,
         pageable);
-    List<OrderInformationResponse> ordersList = new ArrayList<>();
+    List<OrderInformationResponse> ordersResponse = new ArrayList<>();
     ordersPage.forEach(order -> {
-      if (!"en".equals(language)) {
-        locationTranslationService.setTranslation(order.getLocation(), language);
-      }
-      ordersList.add(orderMapper.orderToOrderInformationResponse(order));
+      locationTranslationService.setTranslation(order.getLocation(), language);
+      ordersResponse.add(orderMapper.orderToOrderInformationResponse(order));
     });
 
-    return new PageImpl<>(ordersList, ordersPage.getPageable(), ordersPage.getTotalElements());
+    return new PageImpl<>(ordersResponse, ordersPage.getPageable(), ordersPage.getTotalElements());
   }
 
   @Override
   public Page<OrderNewResponse> findAllNew(Pageable pageable, String language) {
     var ordersPage = orderRepository.findAllByRentalStatus(OrderRentalStatus.NEW, pageable);
-    List<OrderNewResponse> ordersList = new ArrayList<>();
+    List<OrderNewResponse> ordersResponse = new ArrayList<>();
     ordersPage.forEach(order -> {
-      if (!"en".equals(language)) {
-        locationTranslationService.setTranslation(order.getLocation(), language);
-      }
-      ordersList.add(orderMapper.orderToOrderNewResponse(order));
+      locationTranslationService.setTranslation(order.getLocation(), language);
+      ordersResponse.add(orderMapper.orderToOrderNewResponse(order));
     });
-    return new PageImpl<>(ordersList, ordersPage.getPageable(), ordersPage.getTotalElements());
+    return new PageImpl<>(ordersResponse, ordersPage.getPageable(), ordersPage.getTotalElements());
   }
 
   @Override
   public Page<UserOrderResponse> findAllNewUserOrders(Pageable pageable, String language) {
-    var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    if (Optional.ofNullable(user).isEmpty()) {
-      log.error("User not authenticated!");
-      throw new IllegalStateException("User not authenticated");
-    }
-
+    var userEmail = userSecurityService.getUserEmailFromSecurityContext();
     var orderPage = orderRepository.findAllByRentalStatusAndUser_EmailAndPaymentStatus(NOT_STARTED,
-        user.getEmail(), PAID, pageable);
+        userEmail, PAID, pageable);
 
-    List<UserOrderResponse> responses = new ArrayList<>();
+    List<UserOrderResponse> ordersResponse = new ArrayList<>();
     orderPage.forEach(order -> {
-      if (!"en".equals(language)) {
-        locationTranslationService.setTranslation(order.getLocation(), language);
-      }
-      responses.add(orderMapper.orderToNewUserOrderResponse(order));
+      locationTranslationService.setTranslation(order.getLocation(), language);
+      ordersResponse.add(orderMapper.orderToNewUserOrderResponse(order));
     });
-    return new PageImpl<>(responses, orderPage.getPageable(), orderPage.getTotalElements());
+    return new PageImpl<>(ordersResponse, orderPage.getPageable(), orderPage.getTotalElements());
   }
 
   @Override
   public Page<UserOrderResponse> findAllUserOrdersHistory(Pageable pageable, String language) {
-    var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    if (Optional.ofNullable(user).isEmpty()) {
-      log.error("User not authenticated!");
-      throw new IllegalStateException("User not authenticated");
-    }
-
+    var userEmail = userSecurityService.getUserEmailFromSecurityContext();
     var orderPage = orderRepository.findAllByRentalStatusOrRentalStatusAndUser_Email(FINISHED,
-        FINISHED_WITH_PENALTY, user.getEmail(), pageable);
-    List<UserOrderResponse> responses = new ArrayList<>();
+        FINISHED_WITH_PENALTY, userEmail, pageable);
+
+    List<UserOrderResponse> ordersResponse = new ArrayList<>();
     orderPage.forEach(order -> {
-      if (!"en".equals(language)) {
-        locationTranslationService.setTranslation(order.getLocation(), language);
-      }
-      responses.add(orderMapper.orderToNewUserOrderResponse(order));
+      locationTranslationService.setTranslation(order.getLocation(), language);
+      ordersResponse.add(orderMapper.orderToNewUserOrderResponse(order));
     });
-    return new PageImpl<>(responses, orderPage.getPageable(), orderPage.getTotalElements());
+    return new PageImpl<>(ordersResponse, orderPage.getPageable(), orderPage.getTotalElements());
   }
 
   @Override
-  public OrderTotalCostResponse calculateTotalCost(OrderTotalCostRequest orderTotalCostRequest) {
-    int dayHours = 24;
-    int weekHours = 24 * 7;
+  public OrderTotalCostResponse calculateTotalCost(OrderTotalCostRequest orderTotalCostRequest)
+      throws OrderPeriodValidationException {
+    if (orderTotalCostRequest.getPickUpDate().isAfter(orderTotalCostRequest.getReturnDate())) {
+      log.error("Invalid order total cost calculation request. Pick-up date: {}, return date: {}",
+          orderTotalCostRequest.getPickUpDate(), orderTotalCostRequest.getReturnDate());
+      throw new OrderPeriodValidationException(String
+          .format("Invalid order total cost calculation request. Pick-up date: %s, return date: %s",
+              orderTotalCostRequest.getPickUpDate(), orderTotalCostRequest.getReturnDate()));
+    }
     double totalCost;
     double costPerHour = orderTotalCostRequest.getCostPerHour();
     var orderCostDetails = rentalDetailsService.getRentalDetails();
+    var duration = Duration.between(orderTotalCostRequest.getPickUpDate(),
+        orderTotalCostRequest.getReturnDate()).toHours();
 
-    var duration = Duration
-        .between(orderTotalCostRequest.getPickUpDate(), orderTotalCostRequest.getReturnDate())
-        .toHours();
-
-    if (duration < dayHours) {
-      totalCost = costPerHour * (duration + 1);
-    } else if (duration < weekHours) {
+    if (duration == 0) {
+      log.error("Invalid order total cost calculation request. Rental period 0 hours");
+      throw new OrderPeriodValidationException(
+          "Invalid order total cost calculation request. Rental period 0 hours");
+    } else if (duration < DAY_HOURS) {
+      totalCost = costPerHour * (duration);
+    } else if (duration < WEEK_HOURS) {
       totalCost = costPerHour * duration * orderCostDetails.getFromDayToWeekCoefficient()
           .doubleValue();
     } else {
       totalCost = costPerHour * duration * orderCostDetails.getFromWeekCoefficient()
           .doubleValue();
     }
-
-    return new OrderTotalCostResponse(BigDecimal.valueOf(totalCost).round(MathContext.DECIMAL64));
+    return new OrderTotalCostResponse(BigDecimal.valueOf(totalCost).round(DECIMAL64));
   }
 
   @Override
   @Transactional
-  public void create(CreateOrderRequest createOrderRequest)
-      throws DocumentsNotConfirmedException, CarAlreadyBookedException {
-
+  public void create(CreateOrderRequest createOrderRequest) throws DocumentsNotConfirmedException,
+      OrderPeriodValidationException {
     var car = carService.findById(createOrderRequest.getCarId());
     var location = car.getLocation();
-    var username = SecurityContextHolder.getContext().getAuthentication().getName();
-    var user = userService.findUserByEmail(username);
+    var userEmail = userSecurityService.getUserEmailFromSecurityContext();
+    var user = userService.findUserByEmail(userEmail);
 
-    boolean isPassportConfirmed = Optional.ofNullable(user.getPassport()).isPresent() &&
-        user.getPassport().getStatus().equals(CONFIRMED);
-    boolean isDrivingLicenseConfirmed = Optional.ofNullable(user.getDrivingLicense()).isPresent() &&
-        user.getDrivingLicense().getStatus().equals(CONFIRMED);
+    var passportNotConfirmed = Optional.ofNullable(user.getPassport()).isEmpty() ||
+        !user.getPassport().getStatus().equals(CONFIRMED);
+    var drivingLicenseNotConfirmed = Optional.ofNullable(user.getDrivingLicense()).isEmpty() ||
+        !user.getDrivingLicense().getStatus().equals(CONFIRMED);
 
-    if (!isPassportConfirmed && !isDrivingLicenseConfirmed) {
-      log.error("Passport and driving license of user {} is not confirmed", user.getEmail());
+    if (passportNotConfirmed || drivingLicenseNotConfirmed) {
+      log.error("Documents of user {} are not confirmed", userEmail);
       throw new DocumentsNotConfirmedException(
-          "Your passport and driving license are not confirmed!");
-    } else if (!isPassportConfirmed) {
-      log.error("Passport of user {} is not confirmed", user.getEmail());
-      throw new DocumentsNotConfirmedException("Your passport is not confirmed!");
-    } else if (!isDrivingLicenseConfirmed) {
-      log.error("Driving license of user {} is not confirmed", user.getEmail());
-      throw new DocumentsNotConfirmedException("Your driving license is not confirmed!");
+          String.format("Documents of user %s are not confirmed", userEmail));
     }
     if (Optional.ofNullable(user.getPhones()).isEmpty()) {
-      log.error("Phone number of user {} is not specified", user.getEmail());
+      log.error("Phones of user {} are not specified", user.getEmail());
       throw new DocumentsNotConfirmedException("Your phone number is not specified");
-    }
-
-    var activeOrders = orderRepository
-        .getAllByRentalStatusOrRentalStatusAndCar_Vin(NOT_STARTED, IN_PROCESS, car.getVin());
-
-    for (Order order : activeOrders) {
-      if (NOT_STARTED.equals(order.getRentalStatus()) && order.getPaymentBill().getExpirationTime()
-          .isBefore(LocalDateTime.now()) && (
-          (createOrderRequest.getPickUpDate().isAfter(order.getPickUpDate()) && createOrderRequest
-              .getPickUpDate().isBefore(createOrderRequest.getReturnDate())) || (
-              createOrderRequest.getReturnDate().isAfter(order.getPickUpDate())
-                  && createOrderRequest.getReturnDate()
-                  .isBefore(createOrderRequest.getReturnDate())))) {
-        log.error("Car with VIN {} already booked", car.getVin());
-        throw new CarAlreadyBookedException(String.format("Car with VIN %s already booked",
-            car.getVin()));
-      }
-      if (IN_PROCESS.equals(order.getRentalStatus()) &&
-          (createOrderRequest.getPickUpDate().isAfter(order.getPickUpDate()) && createOrderRequest
-              .getPickUpDate().isBefore(createOrderRequest.getReturnDate())) || (
-          createOrderRequest.getReturnDate().isAfter(order.getPickUpDate())
-              && createOrderRequest.getReturnDate()
-              .isBefore(createOrderRequest.getReturnDate()))) {
-        log.error("Car with VIN {} already booked", car.getVin());
-        throw new CarAlreadyBookedException(String.format("Car with VIN %s already booked",
-            car.getVin()));
-      }
     }
 
     var totalCost = calculateTotalCost(OrderTotalCostRequest
@@ -276,7 +241,7 @@ public class OrderServiceImpl implements OrderService {
         .pickUpDate(createOrderRequest.getPickUpDate())
         .returnDate(createOrderRequest.getReturnDate())
         .totalCost(totalCost.getTotalCost())
-        .paymentStatus(OrderPaymentStatus.NOT_PAID)
+        .paymentStatus(NOT_PAID)
         .sentDate(LocalDateTime.now())
         .rentalStatus(OrderRentalStatus.NEW)
         .car(car)
@@ -288,15 +253,12 @@ public class OrderServiceImpl implements OrderService {
   @Override
   public Page<OrderResponse> findAll(OrderSearchRequest orderSearchRequest, String language) {
     var ordersPage = orderCriteriaRepository.findAll(orderSearchRequest);
-    List<OrderResponse> ordersList = new ArrayList<>();
+    List<OrderResponse> ordersResponse = new ArrayList<>();
     ordersPage.forEach(order -> {
-      if (!"en".equals(language)) {
-        locationTranslationService.setTranslation(order.getLocation(), language);
-      }
-      ordersList.add(orderMapper.orderToOrderResponse(order));
+      locationTranslationService.setTranslation(order.getLocation(), language);
+      ordersResponse.add(orderMapper.orderToOrderResponse(order));
     });
-
-    return new PageImpl<>(ordersList, ordersPage.getPageable(), ordersPage.getTotalElements());
+    return new PageImpl<>(ordersResponse, ordersPage.getPageable(), ordersPage.getTotalElements());
   }
 
   @Override
@@ -307,22 +269,25 @@ public class OrderServiceImpl implements OrderService {
 
     paymentBillService.create(orderMapper.orderToCreatePaymentBillRequest(order));
 
+    var message = String.format(
+        "Order №%d for renting a %s %s has been accepted. "
+            + "You have %d minutes to pay for your order in the \"Bills\" tab. "
+            + "At %s the car reservation will be canceled", order.getId(),
+        order.getCar().getModel().getBrand().getName(), order.getCar().getModel().getName(),
+        orderDetails.getPaymentBillValidityPeriodInMinutes(),
+        LocalDateTime.now().plusMinutes(orderDetails.getPaymentBillValidityPeriodInMinutes())
+            .format(DateTimeFormatter.ofPattern(RESPONSE_DATE_TIME_FORMAT_PATTERN)));
+
     var notification = Notification
         .builder()
-        .message(String.format(
-            "Order №%d for renting a %s %s has been accepted. "
-                + "You have %d minutes to pay for your order in the \"Bills\" tab. "
-                + "At %s the car reservation will be canceled", order.getId(),
-            order.getCar().getModel().getBrand().getName(), order.getCar().getModel().getName(),
-            orderDetails.getPaymentBillValidityPeriodInMinutes(),
-            LocalDateTime.now().plusMinutes(orderDetails.getPaymentBillValidityPeriodInMinutes())
-                .format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))))
-        .notificationType(NotificationType.ACCEPT)
+        .message(message)
+        .notificationType(ACCEPT)
         .sentDate(LocalDateTime.now())
         .status(NEW)
         .user(order.getUser())
         .build();
     notificationService.sendNotification(notification);
+    emailService.sendEmail(order.getUser().getEmail(), message, ORDER_REQUEST_EMAIL_TOPIC);
 
     order.setRentalStatus(NOT_STARTED);
     orderRepository.save(order);
@@ -336,19 +301,22 @@ public class OrderServiceImpl implements OrderService {
     order.setRentalStatus(CANCELED);
     orderRepository.save(order);
 
+    var message = String.format(
+        "Your order №%d for a %s %s has been canceled. "
+            + "For a refund, contact the administration by e-mail, "
+            + "or the phone number listed on the website.", order.getId(),
+        order.getCar().getModel().getBrand().getName(), order.getCar().getModel().getName());
+
     var notification = Notification
         .builder()
-        .message(String.format(
-            "Your order №%d for a %s %s has been canceled. "
-                + "For a refund, contact the administration by e-mail, "
-                + "or the phone number listed on the website.", order.getId(),
-            order.getCar().getModel().getBrand().getName(), order.getCar().getModel().getName()))
+        .message(message)
         .notificationType(INFO)
         .sentDate(LocalDateTime.now())
         .status(NEW)
         .user(order.getUser())
         .build();
     notificationService.sendNotification(notification);
+    emailService.sendEmail(order.getUser().getEmail(), message, ORDER_CANCELED_EMAIL_TOPIC);
   }
 
   @Override
@@ -417,6 +385,8 @@ public class OrderServiceImpl implements OrderService {
         .status(NEW)
         .build();
     notificationService.sendNotification(notification);
+    emailService.sendEmail(order.getUser().getEmail(), orderRejectRequest.getComments(),
+        ORDER_REQUEST_REJECTED_EMAIL_TOPIC);
   }
 
   @Override
@@ -451,12 +421,10 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   public Order findById(Long id) {
-    Optional<Order> optionalOrder = orderRepository.findById(id);
-    if (optionalOrder.isEmpty()) {
+    return orderRepository.findById(id).orElseThrow(() -> {
       log.error("Order with id {} does not exists", id);
       throw new IllegalStateException(String.format("Order with id %d does not exists", id));
-    }
-    return optionalOrder.get();
+    });
   }
 
   @Override
@@ -466,8 +434,9 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   public int findNewOrdersAmountPerDay() {
-    return orderRepository
-        .countAllBySentDateAfter(LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0)));
+    return orderRepository.countAllBySentDateAfter(LocalDateTime.of(LocalDate.now(),
+        LocalTime.of(HOUR_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY,
+            MINUTES_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY)));
   }
 
   @Override

@@ -11,10 +11,10 @@ import com.example.carrental.controller.dto.order.OrderTotalCostRequest;
 import com.example.carrental.controller.dto.order.OrderTotalCostResponse;
 import com.example.carrental.controller.dto.order.UserOrderResponse;
 import com.example.carrental.entity.order.Order;
-import com.example.carrental.service.exceptions.CarAlreadyBookedException;
 import com.example.carrental.service.exceptions.DocumentNotGeneratedException;
 import com.example.carrental.service.exceptions.DocumentsNotConfirmedException;
 import com.example.carrental.service.exceptions.FontNotFoundException;
+import com.example.carrental.service.exceptions.OrderPeriodValidationException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,10 +33,11 @@ public interface OrderService {
 
   Page<UserOrderResponse> findAllUserOrdersHistory(Pageable pageable, String language);
 
-  OrderTotalCostResponse calculateTotalCost(OrderTotalCostRequest orderTotalCostRequest);
+  OrderTotalCostResponse calculateTotalCost(OrderTotalCostRequest orderTotalCostRequest)
+      throws OrderPeriodValidationException;
 
   void create(CreateOrderRequest createOrderRequest)
-      throws DocumentsNotConfirmedException, CarAlreadyBookedException;
+      throws DocumentsNotConfirmedException, OrderPeriodValidationException;
 
   Page<OrderResponse> findAll(OrderSearchRequest orderSearchRequest, String language);
 

@@ -1,6 +1,7 @@
 package com.example.carrental.mapper;
 
-import static com.example.carrental.mapper.PaymentBillMapper.BILL_DATE_FORMAT_PATTERN;
+import static com.example.carrental.constants.ApplicationConstants.RESPONSE_DATE_FORMAT_PATTERN;
+import static com.example.carrental.constants.ApplicationConstants.RESPONSE_DATE_TIME_FORMAT_PATTERN;
 
 import com.example.carrental.controller.dto.bill.RepairBillHistoryResponse;
 import com.example.carrental.controller.dto.bill.RepairBillNewResponse;
@@ -14,12 +15,10 @@ import org.mapstruct.NullValueCheckStrategy;
 @Mapper(componentModel = "spring")
 public interface RepairBillMapper {
 
-  String REPAIR_BILL_DATE_FORMAT_PATTERN = "dd.MM.yyyy";
-
   @Mapping(target = "id", source = "repairBill.id")
   @Mapping(target = "userEmail", source = "repairBill.order.user.email")
   @Mapping(target = "sentDate", source = "repairBill.sentDate",
-      dateFormat = REPAIR_BILL_DATE_FORMAT_PATTERN)
+      dateFormat = RESPONSE_DATE_FORMAT_PATTERN)
   @Mapping(target = "totalCost", source = "repairBill.totalCost")
   @Mapping(target = "message", source = "repairBill.message")
   @Mapping(target = "orderId", source = "repairBill.order.id")
@@ -28,12 +27,13 @@ public interface RepairBillMapper {
   @Mapping(target = "carVin", source = "repairBill.order.car.vin")
   @Mapping(target = "locationName", source = "repairBill.order.location.name")
   @Mapping(target = "paymentDate", source = "repairBill.paymentDate",
-      nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS, dateFormat = BILL_DATE_FORMAT_PATTERN)
+      nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
+      dateFormat = RESPONSE_DATE_TIME_FORMAT_PATTERN)
   RepairBillResponse repairBillToRepairBillResponse(RepairBill repairBill);
 
   @Mapping(target = "id", source = "repairBill.id")
   @Mapping(target = "sentDate", source = "repairBill.sentDate",
-      dateFormat = REPAIR_BILL_DATE_FORMAT_PATTERN)
+      dateFormat = RESPONSE_DATE_FORMAT_PATTERN)
   @Mapping(target = "totalCost", source = "repairBill.totalCost")
   @Mapping(target = "message", source = "repairBill.message")
   @Mapping(target = "orderId", source = "repairBill.order.id")
@@ -44,7 +44,7 @@ public interface RepairBillMapper {
 
   @Mapping(target = "id", source = "repairBill.id")
   @Mapping(target = "sentDate", source = "repairBill.sentDate",
-      dateFormat = REPAIR_BILL_DATE_FORMAT_PATTERN)
+      dateFormat = RESPONSE_DATE_FORMAT_PATTERN)
   @Mapping(target = "totalCost", source = "repairBill.totalCost")
   @Mapping(target = "message", source = "repairBill.message")
   @Mapping(target = "orderId", source = "repairBill.order.id")
@@ -52,7 +52,8 @@ public interface RepairBillMapper {
   @Mapping(target = "carVin", source = "repairBill.order.car.vin")
   @Mapping(target = "locationName", source = "repairBill.order.location.name")
   @Mapping(target = "paymentDate", source = "repairBill.paymentDate",
-      nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS, dateFormat = BILL_DATE_FORMAT_PATTERN)
+      nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
+      dateFormat = RESPONSE_DATE_TIME_FORMAT_PATTERN)
   RepairBillHistoryResponse repairBillToRepairBillHistoryResponse(RepairBill repairBill);
 
   @Named("formatCarBrandModel")

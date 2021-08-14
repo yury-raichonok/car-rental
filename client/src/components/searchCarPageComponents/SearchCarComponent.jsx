@@ -559,30 +559,27 @@ const fetchModels = async (value) => {
             {isCarsEmpty && !isLoading && (<WarningText>{t('no_results')}</WarningText>)}
             { isLoading &&  (<WarningText>{t('loading')} . . . <Spin /></WarningText>)}
             {!isCarsEmpty && !isLoading && cars.map((car) => (
-              <>
-                <BigCarCard
-                  key = {car.id}
-                  id = {car.id}
-                  brand = {car.brand}
-                  model = {car.model}
-                  carClass = {car.carClass}
-                  yearOfIssue = {car.yearOfIssue}
-                  bodyType = {car.bodyType}
-                  transmissionType = {car.automaticTransmission}
-                  color = {car.color}
-                  engineType = {car.engineType}
-                  enginePower = {car.enginePower}
-                  passengersAmt = {car.passengersAmt}
-                  baggageAmt = {car.baggageAmt}
-                  hasConditioner = {car.hasConditioner}
-                  costPerHour = {car.costPerHour}
-                  locationName = {car.locationName}
-                  carImageLink = {car.carImageLink}
-                  pickUpDateTime = {state.pickUpDateTime}
-                  returnDateTime = {state.returnDateTime}
-                />
-                <Marginer direction="vertical" margin={17} />
-              </>
+              <BigCarCard
+                key = {car.id}
+                id = {car.id}
+                brand = {car.brand}
+                model = {car.model}
+                carClass = {car.carClass}
+                yearOfIssue = {car.yearOfIssue}
+                bodyType = {car.bodyType}
+                transmissionType = {car.automaticTransmission}
+                color = {car.color}
+                engineType = {car.engineType}
+                enginePower = {car.enginePower}
+                passengersAmt = {car.passengersAmt}
+                baggageAmt = {car.baggageAmt}
+                hasConditioner = {car.hasConditioner}
+                costPerHour = {car.costPerHour}
+                locationName = {car.locationName}
+                carImageLink = {car.carImageLink}
+                pickUpDateTime = {state.pickUpDateTime}
+                returnDateTime = {state.returnDateTime}
+              />
             ))}
             <Pagination
               showSizeChanger

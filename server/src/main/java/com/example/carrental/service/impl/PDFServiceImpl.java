@@ -1,6 +1,6 @@
 package com.example.carrental.service.impl;
 
-import static com.example.carrental.mapper.OrderMapper.ORDER_DATE_FORMAT_PATTERN;
+import static com.example.carrental.constants.ApplicationConstants.RESPONSE_DATE_TIME_FORMAT_PATTERN;
 import static com.itextpdf.text.BaseColor.WHITE;
 import static com.itextpdf.text.Element.ALIGN_CENTER;
 import static com.itextpdf.text.Element.ALIGN_MIDDLE;
@@ -39,13 +39,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PDFServiceImpl implements PDFService {
 
-  public static final String ARIAL_FONT_PATH = "./src/main/resources/fonts/arial.ttf";
-  public static final int FONT_SIZE = 14;
-  public static final int TITLE_FONT_SIZE = 20;
-  public static final int TEXT_PADDING = 10;
-  public static final int TABLE_WIDTH_PERCENTS = 100;
-  public static final int TABLE_COLUMNS_AMOUNT = 5;
-  public static final BaseColor BASE_COLOR = new BaseColor(234, 92, 82);
+  private static final String ARIAL_FONT_PATH = "./src/main/resources/fonts/arial.ttf";
+  private static final int FONT_SIZE = 14;
+  private static final int TITLE_FONT_SIZE = 20;
+  private static final int TEXT_PADDING = 10;
+  private static final int TABLE_WIDTH_PERCENTS = 100;
+  private static final int TABLE_COLUMNS_AMOUNT = 5;
+  private static final BaseColor BASE_COLOR = new BaseColor(234, 92, 82);
 
   public ByteArrayResource exportOrderToPDF(Order order, RentalDetails rentalDetails)
       throws FontNotFoundException, DocumentNotGeneratedException {
@@ -86,7 +86,7 @@ public class PDFServiceImpl implements PDFService {
       document.add(orderNumberParagraph);
 
       var dateParagraph = new Paragraph(String.format("Date: %s", LocalDateTime.now().format(
-          DateTimeFormatter.ofPattern(ORDER_DATE_FORMAT_PATTERN))), textFont);
+          DateTimeFormatter.ofPattern(RESPONSE_DATE_TIME_FORMAT_PATTERN))), textFont);
       dateParagraph.setAlignment(ALIGN_RIGHT);
       document.add(dateParagraph);
 
@@ -159,15 +159,15 @@ public class PDFServiceImpl implements PDFService {
       carVinValueCell.setHorizontalAlignment(ALIGN_CENTER);
       carVinValueCell.setVerticalAlignment(ALIGN_MIDDLE);
 
-      var pickUpDateValueCell = new PdfPCell(new Paragraph(
-          order.getPickUpDate().format(DateTimeFormatter.ofPattern(ORDER_DATE_FORMAT_PATTERN))));
+      var pickUpDateValueCell = new PdfPCell(new Paragraph(order.getPickUpDate()
+          .format(DateTimeFormatter.ofPattern(RESPONSE_DATE_TIME_FORMAT_PATTERN))));
       pickUpDateValueCell.setBorderColor(BASE_COLOR);
       pickUpDateValueCell.setPadding(TEXT_PADDING);
       pickUpDateValueCell.setHorizontalAlignment(ALIGN_CENTER);
       pickUpDateValueCell.setVerticalAlignment(ALIGN_MIDDLE);
 
-      var returnUpDateValueCell = new PdfPCell(new Paragraph(
-          order.getReturnDate().format(DateTimeFormatter.ofPattern(ORDER_DATE_FORMAT_PATTERN))));
+      var returnUpDateValueCell = new PdfPCell(new Paragraph(order.getReturnDate()
+          .format(DateTimeFormatter.ofPattern(RESPONSE_DATE_TIME_FORMAT_PATTERN))));
       returnUpDateValueCell.setBorderColor(BASE_COLOR);
       returnUpDateValueCell.setPadding(TEXT_PADDING);
       returnUpDateValueCell.setHorizontalAlignment(ALIGN_CENTER);

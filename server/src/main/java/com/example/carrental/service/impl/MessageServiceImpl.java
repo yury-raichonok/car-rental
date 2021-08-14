@@ -1,5 +1,8 @@
 package com.example.carrental.service.impl;
 
+import static com.example.carrental.constants.ApplicationConstants.HOUR_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY;
+import static com.example.carrental.constants.ApplicationConstants.MINUTES_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY;
+
 import com.example.carrental.controller.dto.message.CreateMessageRequest;
 import com.example.carrental.controller.dto.message.MessageResponse;
 import com.example.carrental.entity.message.Message;
@@ -23,9 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
-
-  private static final int START_HOUR_OF_STATISTIC = 0;
-  private static final int START_MINUTES_OF_STATISTIC = 0;
 
   private final MessageRepository messageRepository;
   private final MessageMapper messageMapper;
@@ -87,6 +87,7 @@ public class MessageServiceImpl implements MessageService {
   @Override
   public int findNewMessagesAmountPerDay() {
     return messageRepository.countAllBySentDateAfter(LocalDateTime.of(LocalDate.now(),
-        LocalTime.of(START_HOUR_OF_STATISTIC, START_MINUTES_OF_STATISTIC)));
+        LocalTime.of(HOUR_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY,
+            MINUTES_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY)));
   }
 }

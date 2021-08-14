@@ -41,7 +41,7 @@ public interface UserService {
 
   void updateUserStatus(Long id);
 
-  String checkExistedEmail(String email) throws UsernameAlreadyTakenException;
+  void checkExistedEmail(String email) throws UsernameAlreadyTakenException;
 
   User findById(Long id);
 

@@ -1,5 +1,8 @@
 package com.example.carrental.mapper;
 
+import static com.example.carrental.constants.ApplicationConstants.RESPONSE_DATE_FORMAT_PATTERN;
+import static com.example.carrental.constants.ApplicationConstants.RESPONSE_DATE_TIME_FORMAT_PATTERN;
+
 import com.example.carrental.controller.dto.rentalDetails.RentalAllRequestResponse;
 import com.example.carrental.controller.dto.rentalDetails.RentalRequestResponse;
 import com.example.carrental.controller.dto.user.UserPassportConfirmationDataResponse;
@@ -12,18 +15,15 @@ import org.mapstruct.NullValueCheckStrategy;
 @Mapper(componentModel = "spring")
 public interface RentalRequestMapper {
 
-  String REQUEST_DATE_FORMAT_PATTERN = "dd.MM.yyyy HH:mm";
-  String REQUEST_DOCUMENTS_DATE_FORMAT_PATTERN = "dd.MM.yyyy";
-
   @Mapping(target = "id", source = "rentalRequest.id")
   @Mapping(target = "userEmail", source = "rentalRequest.user.email")
   @Mapping(target = "requestType", source = "rentalRequest.rentalRequestType")
   @Mapping(target = "sentDate", source = "rentalRequest.sentDate",
-      dateFormat = REQUEST_DATE_FORMAT_PATTERN)
+      dateFormat = RESPONSE_DATE_TIME_FORMAT_PATTERN)
   @Mapping(target = "considered", source = "rentalRequest.considered")
   @Mapping(target = "considerationDate", source = "rentalRequest.considerationDate",
       nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
-      dateFormat = REQUEST_DATE_FORMAT_PATTERN)
+      dateFormat = RESPONSE_DATE_TIME_FORMAT_PATTERN)
   @Mapping(target = "comments", source = "rentalRequest.comments",
       nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
   RentalAllRequestResponse rentalRequestToRentalAllRequestResponse(RentalRequest rentalRequest);
@@ -32,7 +32,7 @@ public interface RentalRequestMapper {
   @Mapping(target = "userEmail", source = "rentalRequest.user.email")
   @Mapping(target = "requestType", source = "rentalRequest.rentalRequestType")
   @Mapping(target = "sentDate", source = "rentalRequest.sentDate",
-      dateFormat = REQUEST_DATE_FORMAT_PATTERN)
+      dateFormat = RESPONSE_DATE_TIME_FORMAT_PATTERN)
   @Mapping(target = "considered", source = "rentalRequest.considered")
   RentalRequestResponse rentalRequestToRentalRequestResponse(RentalRequest rentalRequest);
 
@@ -40,12 +40,12 @@ public interface RentalRequestMapper {
   @Mapping(target = "middleName", source = "passport.middleName")
   @Mapping(target = "lastName", source = "passport.lastName")
   @Mapping(target = "dateOfBirth", source = "passport.dateOfBirth",
-      dateFormat = REQUEST_DOCUMENTS_DATE_FORMAT_PATTERN)
+      dateFormat = RESPONSE_DATE_FORMAT_PATTERN)
   @Mapping(target = "passportSeries", source = "passport.passportSeries")
   @Mapping(target = "dateOfIssue", source = "passport.dateOfIssue",
-      dateFormat = REQUEST_DOCUMENTS_DATE_FORMAT_PATTERN)
+      dateFormat = RESPONSE_DATE_FORMAT_PATTERN)
   @Mapping(target = "validityPeriod", source = "passport.validityPeriod",
-      dateFormat = REQUEST_DOCUMENTS_DATE_FORMAT_PATTERN)
+      dateFormat = RESPONSE_DATE_FORMAT_PATTERN)
   @Mapping(target = "organizationThatIssued", source = "passport.organizationThatIssued")
   @Mapping(target = "documentsFileLink", source = "passport.documentsFileLink")
   UserPassportConfirmationDataResponse passportToUserPassportConfirmationDataResponse(

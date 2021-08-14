@@ -1,6 +1,6 @@
 package com.example.carrental.service.impl;
 
-import static com.example.carrental.service.impl.CarBrandServiceImpl.NO_CONTENT;
+import static com.example.carrental.constants.ApplicationConstants.NO_CONTENT;
 import static com.example.carrental.service.util.MultipartFileUtil.validateMultipartImageFile;
 
 import com.example.carrental.controller.dto.car.CarAdminSearchResponse;
@@ -51,9 +51,9 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class CarServiceImpl implements CarService {
 
-  public static final String PROFITABLE_OFFERS_SORT_PARAMETER = "costPerHour";
-  public static final int PROFITABLE_OFFERS_DISPLAYED_AMOUNT = 3;
-  public static final int PROFITABLE_OFFERS_DISPLAYED_PAGE = 0;
+  private static final String PROFITABLE_OFFERS_SORT_PARAMETER = "costPerHour";
+  private static final int PROFITABLE_OFFERS_DISPLAYED_AMOUNT = 3;
+  private static final int PROFITABLE_OFFERS_DISPLAYED_PAGE = 0;
 
   private final CarRepository carRepository;
   private final CarCriteriaRepository carCriteriaRepository;

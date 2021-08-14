@@ -61,7 +61,7 @@ public class CarController {
 
   @PostMapping(path = "/search")
   public ResponseEntity<Page<CarSearchResponse>> searchCars(
-      @RequestBody CarSearchRequest carSearchRequest,
+      @Valid @RequestBody CarSearchRequest carSearchRequest,
       @NotNull @CookieValue(name = "i18next") String language) {
     var carsPageResponse = carService.searchCars(carSearchRequest, language);
     return new ResponseEntity<>(carsPageResponse, HttpStatus.OK);
@@ -69,7 +69,7 @@ public class CarController {
 
   @PostMapping(path = "/search/admin")
   public ResponseEntity<Page<CarAdminSearchResponse>> searchCarsByAdmin(
-      @RequestBody CarSearchRequest carSearchRequest,
+      @Valid @RequestBody CarSearchRequest carSearchRequest,
       @NotNull @CookieValue(name = "i18next") String language) {
     var carsAdminPageResponse = carService.searchCarsByAdmin(carSearchRequest, language);
     return new ResponseEntity<>(carsAdminPageResponse, HttpStatus.OK);

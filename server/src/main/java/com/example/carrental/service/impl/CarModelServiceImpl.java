@@ -1,6 +1,6 @@
 package com.example.carrental.service.impl;
 
-import static com.example.carrental.service.impl.CarBrandServiceImpl.NO_CONTENT;
+import static com.example.carrental.constants.ApplicationConstants.NO_CONTENT;
 
 import com.example.carrental.controller.dto.car.CarModelBrandNameResponse;
 import com.example.carrental.controller.dto.car.CarModelResponse;

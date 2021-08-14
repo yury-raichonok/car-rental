@@ -1,9 +1,13 @@
 package com.example.carrental.service.impl;
 
+import static com.example.carrental.constants.ApplicationConstants.HOUR_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY;
+import static com.example.carrental.constants.ApplicationConstants.MINUTES_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY;
 import static com.example.carrental.entity.notification.NotificationType.ACCEPT;
 import static com.example.carrental.entity.notification.NotificationType.DENY;
 import static com.example.carrental.entity.rentalDetails.RentalRequestType.DRIVING_LICENSE_CONFIRMATION_REQUEST;
 import static com.example.carrental.entity.rentalDetails.RentalRequestType.PASSPORT_CONFIRMATION_REQUEST;
+import static com.example.carrental.entity.user.UserDocumentStatus.CONFIRMED;
+import static com.example.carrental.entity.user.UserDocumentStatus.UNDER_CONSIDERATION;
 
 import com.example.carrental.controller.dto.rentalDetails.CreateRentalRequestRequest;
 import com.example.carrental.controller.dto.rentalDetails.RentalAllRequestResponse;
@@ -15,13 +19,14 @@ import com.example.carrental.entity.notification.Notification;
 import com.example.carrental.entity.notification.NotificationStatus;
 import com.example.carrental.entity.rentalDetails.RentalRequest;
 import com.example.carrental.entity.user.UserDocumentStatus;
-import com.example.carrental.mapper.UserDrivingLicenseMapper;
 import com.example.carrental.mapper.RentalRequestMapper;
+import com.example.carrental.mapper.UserDrivingLicenseMapper;
 import com.example.carrental.repository.RentalRequestRepository;
 import com.example.carrental.service.NotificationService;
 import com.example.carrental.service.RentalRequestService;
 import com.example.carrental.service.UserDrivingLicenseService;
 import com.example.carrental.service.UserPassportService;
+import com.example.carrental.service.UserSecurityService;
 import com.example.carrental.service.UserService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,7 +39,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +47,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class RentalRequestServiceImpl implements RentalRequestService {
 
+  private static final String PASSPORT_REQUEST_APPROVED = "Your application for passport confirmation has been approved.";
+  private static final String DRIVING_LICENSE_REQUEST_APPROVED = "Your driving license confirmation application is approved.";
+  private static final String REQUEST_ACCEPTED = "Accepted";
+
   private final RentalRequestRepository rentalRequestRepository;
   private final UserService userService;
   private final NotificationService notificationService;
@@ -50,35 +58,34 @@ public class RentalRequestServiceImpl implements RentalRequestService {
   private final UserDrivingLicenseService userDrivingLicenseService;
   private final RentalRequestMapper rentalRequestMapper;
   private final UserDrivingLicenseMapper userDrivingLicenseMapper;
+  private final UserSecurityService userSecurityService;
 
   @Override
   public Page<RentalAllRequestResponse> findAll(Pageable pageable) {
     var rentalRequestsPage = rentalRequestRepository.findAll(pageable);
-    List<RentalAllRequestResponse> requestResponseList = new ArrayList<>();
-    rentalRequestsPage.forEach(request -> requestResponseList
+    List<RentalAllRequestResponse> requestsResponse = new ArrayList<>();
+    rentalRequestsPage.forEach(request -> requestsResponse
         .add(rentalRequestMapper.rentalRequestToRentalAllRequestResponse(request)));
-    return new PageImpl<>(requestResponseList, rentalRequestsPage.getPageable(),
+    return new PageImpl<>(requestsResponse, rentalRequestsPage.getPageable(),
         rentalRequestsPage.getTotalElements());
   }
 
   @Override
   public Page<RentalRequestResponse> findAllNew(Pageable pageable) {
     var rentalRequestsPage = rentalRequestRepository.findAllByConsideredFalse(pageable);
-    List<RentalRequestResponse> requestResponseList = new ArrayList<>();
-    rentalRequestsPage.forEach(request -> requestResponseList
+    List<RentalRequestResponse> requestsResponse = new ArrayList<>();
+    rentalRequestsPage.forEach(request -> requestsResponse
         .add(rentalRequestMapper.rentalRequestToRentalRequestResponse(request)));
-    return new PageImpl<>(requestResponseList, rentalRequestsPage.getPageable(),
+    return new PageImpl<>(requestsResponse, rentalRequestsPage.getPageable(),
         rentalRequestsPage.getTotalElements());
   }
 
   @Override
   public RentalRequest findById(Long id) {
-    Optional<RentalRequest> optionalRentalRequest = rentalRequestRepository.findById(id);
-    if (optionalRentalRequest.isEmpty()) {
+    return rentalRequestRepository.findById(id).orElseThrow(() -> {
       log.error("Request with id {} does not exist", id);
       throw new IllegalStateException(String.format("Request with id %d does not exists", id));
-    }
-    return optionalRentalRequest.get();
+    });
   }
 
   @Override
@@ -90,15 +97,13 @@ public class RentalRequestServiceImpl implements RentalRequestService {
           String.format("Type of request does not %s", DRIVING_LICENSE_CONFIRMATION_REQUEST));
     }
 
-    var optionalDrivingLicense = Optional.ofNullable(request.getUser().getDrivingLicense());
-    if (optionalDrivingLicense.isEmpty()) {
-      log.error("Driving license of user {} does not exists", request.getUser().getEmail());
-      throw new IllegalStateException(
-          String
-              .format("Driving license of user %s does not exists", request.getUser().getEmail()));
-    }
-
-    var drivingLicense = optionalDrivingLicense.get();
+    var drivingLicense = Optional.ofNullable(request.getUser().getDrivingLicense())
+        .orElseThrow(() -> {
+          log.error("Driving license of user {} does not exists", request.getUser().getEmail());
+          throw new IllegalStateException(
+              String.format("Driving license of user %s does not exists",
+                  request.getUser().getEmail()));
+        });
 
     return userDrivingLicenseMapper
         .drivingLicenseToUserDrivingLicenseConfirmationDataResponse(drivingLicense);
@@ -113,14 +118,11 @@ public class RentalRequestServiceImpl implements RentalRequestService {
           String.format("Type of request does not %s", PASSPORT_CONFIRMATION_REQUEST));
     }
 
-    var optionalPassport = Optional.ofNullable(request.getUser().getPassport());
-    if (optionalPassport.isEmpty()) {
+    var passport = Optional.ofNullable(request.getUser().getPassport()).orElseThrow(() -> {
       log.error("Passport of user {} does not exists", request.getUser().getEmail());
       throw new IllegalStateException(
           String.format("Passport of user %s does not exists", request.getUser().getEmail()));
-    }
-
-    var passport = optionalPassport.get();
+    });
 
     return rentalRequestMapper.passportToUserPassportConfirmationDataResponse(passport);
   }
@@ -128,25 +130,19 @@ public class RentalRequestServiceImpl implements RentalRequestService {
   @Override
   @Transactional
   public void create(CreateRentalRequestRequest createRentalRequestRequest) {
-    var username = SecurityContextHolder.getContext().getAuthentication().getName();
-    if ("anonymousUser".equals(username)) {
-      log.error("User is not authenticated!");
-      throw new IllegalStateException("User is not authenticated!");
-    }
+    var userEmail = userSecurityService.getUserEmailFromSecurityContext();
+    var user = userService.findUserByEmail(userEmail);
 
-    var user = userService.findUserByEmail(username);
-
-    switch (createRentalRequestRequest.getRentalRequestType()) {
-      case DRIVING_LICENSE_CONFIRMATION_REQUEST:
-        var drivingLicense = user.getDrivingLicense();
-        drivingLicense.setStatus(UserDocumentStatus.UNDER_CONSIDERATION);
-        userDrivingLicenseService.update(drivingLicense.getId(), drivingLicense);
-        break;
-      case PASSPORT_CONFIRMATION_REQUEST:
-        var passport = user.getPassport();
-        passport.setStatus(UserDocumentStatus.UNDER_CONSIDERATION);
-        userPassportService.update(passport.getId(), passport);
-        break;
+    if (DRIVING_LICENSE_CONFIRMATION_REQUEST
+        .equals(createRentalRequestRequest.getRentalRequestType())) {
+      var drivingLicense = user.getDrivingLicense();
+      drivingLicense.setStatus(UNDER_CONSIDERATION);
+      userDrivingLicenseService.update(drivingLicense.getId(), drivingLicense);
+    } else if (PASSPORT_CONFIRMATION_REQUEST
+        .equals(createRentalRequestRequest.getRentalRequestType())) {
+      var passport = user.getPassport();
+      passport.setStatus(UNDER_CONSIDERATION);
+      userPassportService.update(passport.getId(), passport);
     }
 
     var rentalRequest = RentalRequest
@@ -163,7 +159,6 @@ public class RentalRequestServiceImpl implements RentalRequestService {
   @Transactional
   public void approveRequest(Long id) {
     var rentalRequest = findById(id);
-
     var notification = Notification
         .builder()
         .notificationType(ACCEPT)
@@ -172,26 +167,23 @@ public class RentalRequestServiceImpl implements RentalRequestService {
         .user(rentalRequest.getUser())
         .build();
 
-    switch (rentalRequest.getRentalRequestType()) {
-      case PASSPORT_CONFIRMATION_REQUEST:
-        notification.setMessage("Your application for passport confirmation has been approved.");
-        var passport = rentalRequest.getUser().getPassport();
-        passport.setConfirmedAt(LocalDateTime.now());
-        passport.setStatus(UserDocumentStatus.CONFIRMED);
-        userPassportService.update(passport.getId(), passport);
-        break;
-      case DRIVING_LICENSE_CONFIRMATION_REQUEST:
-        notification.setMessage("Your driving license confirmation application is approved.");
-        var drivingLicense = rentalRequest.getUser().getDrivingLicense();
-        drivingLicense.setConfirmedAt(LocalDateTime.now());
-        drivingLicense.setStatus(UserDocumentStatus.CONFIRMED);
-        userDrivingLicenseService.update(drivingLicense.getId(), drivingLicense);
-        break;
+    if (PASSPORT_CONFIRMATION_REQUEST.equals(rentalRequest.getRentalRequestType())) {
+      notification.setMessage(PASSPORT_REQUEST_APPROVED);
+      var passport = rentalRequest.getUser().getPassport();
+      passport.setConfirmedAt(LocalDateTime.now());
+      passport.setStatus(CONFIRMED);
+      userPassportService.update(passport.getId(), passport);
+    } else if (DRIVING_LICENSE_CONFIRMATION_REQUEST.equals(rentalRequest.getRentalRequestType())) {
+      notification.setMessage(DRIVING_LICENSE_REQUEST_APPROVED);
+      var drivingLicense = rentalRequest.getUser().getDrivingLicense();
+      drivingLicense.setConfirmedAt(LocalDateTime.now());
+      drivingLicense.setStatus(CONFIRMED);
+      userDrivingLicenseService.update(drivingLicense.getId(), drivingLicense);
     }
 
     rentalRequest.setConsiderationDate(LocalDateTime.now());
     rentalRequest.setConsidered(true);
-    rentalRequest.setComments("Accepted");
+    rentalRequest.setComments(REQUEST_ACCEPTED);
 
     notificationService.sendNotification(notification);
     rentalRequestRepository.save(rentalRequest);
@@ -201,7 +193,6 @@ public class RentalRequestServiceImpl implements RentalRequestService {
   @Transactional
   public void rejectRequest(Long id, RentalRequestRejectRequest rentalRequestRejectRequest) {
     var rentalRequest = findById(id);
-
     rentalRequest.setConsiderationDate(LocalDateTime.now());
     rentalRequest.setConsidered(true);
     rentalRequest.setComments(rentalRequestRejectRequest.getComments());
@@ -215,17 +206,14 @@ public class RentalRequestServiceImpl implements RentalRequestService {
         .user(rentalRequest.getUser())
         .build();
 
-    switch (rentalRequest.getRentalRequestType()) {
-      case PASSPORT_CONFIRMATION_REQUEST:
-        var passport = rentalRequest.getUser().getPassport();
-        passport.setStatus(UserDocumentStatus.NOT_CONFIRMED);
-        userPassportService.update(passport.getId(), passport);
-        break;
-      case DRIVING_LICENSE_CONFIRMATION_REQUEST:
-        var drivingLicense = rentalRequest.getUser().getDrivingLicense();
-        drivingLicense.setStatus(UserDocumentStatus.NOT_CONFIRMED);
-        userDrivingLicenseService.update(drivingLicense.getId(), drivingLicense);
-        break;
+    if (PASSPORT_CONFIRMATION_REQUEST.equals(rentalRequest.getRentalRequestType())) {
+      var passport = rentalRequest.getUser().getPassport();
+      passport.setStatus(UserDocumentStatus.NOT_CONFIRMED);
+      userPassportService.update(passport.getId(), passport);
+    } else if (DRIVING_LICENSE_CONFIRMATION_REQUEST.equals(rentalRequest.getRentalRequestType())) {
+      var drivingLicense = rentalRequest.getUser().getDrivingLicense();
+      drivingLicense.setStatus(UserDocumentStatus.NOT_CONFIRMED);
+      userDrivingLicenseService.update(drivingLicense.getId(), drivingLicense);
     }
 
     notificationService.sendNotification(notification);
@@ -240,6 +228,8 @@ public class RentalRequestServiceImpl implements RentalRequestService {
   @Override
   public int findNewRequestsAmountPerDay() {
     return rentalRequestRepository
-        .countAllBySentDateAfter(LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0)));
+        .countAllBySentDateAfter(LocalDateTime.of(LocalDate.now(),
+            LocalTime.of(HOUR_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY,
+                MINUTES_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY)));
   }
 }

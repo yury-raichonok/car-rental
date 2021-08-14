@@ -6,24 +6,22 @@ import com.example.carrental.controller.dto.bill.RepairBillNewResponse;
 import com.example.carrental.controller.dto.bill.RepairBillResponse;
 import com.example.carrental.controller.dto.bill.RepairBillSearchRequest;
 import com.example.carrental.entity.bill.RepairBill;
-import com.example.carrental.entity.user.User;
 import com.example.carrental.mapper.RepairBillMapper;
 import com.example.carrental.repository.RepairBillCriteriaRepository;
 import com.example.carrental.repository.RepairBillRepository;
 import com.example.carrental.service.LocationTranslationService;
 import com.example.carrental.service.OrderService;
 import com.example.carrental.service.RepairBillService;
+import com.example.carrental.service.UserSecurityService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +34,7 @@ public class RepairBillServiceImpl implements RepairBillService {
   private final RepairBillCriteriaRepository repairBillCriteriaRepository;
   private final RepairBillMapper repairBillMapper;
   private final LocationTranslationService locationTranslationService;
+  private final UserSecurityService userSecurityService;
 
   private OrderService orderService;
 
@@ -48,19 +47,17 @@ public class RepairBillServiceImpl implements RepairBillService {
   public Page<RepairBillResponse> findAll(RepairBillSearchRequest repairBillSearchRequest,
       String language) {
     var billsPage = repairBillCriteriaRepository.findAll(repairBillSearchRequest);
-    List<RepairBillResponse> repairBills = new ArrayList<>();
+    List<RepairBillResponse> billsResponse = new ArrayList<>();
     billsPage.forEach(bill -> {
-      if (!"en".equals(language)) {
-        locationTranslationService.setTranslation(bill.getOrder().getLocation(), language);
-      }
-      repairBills.add(repairBillMapper.repairBillToRepairBillResponse(bill));
+      locationTranslationService.setTranslation(bill.getOrder().getLocation(), language);
+      billsResponse.add(repairBillMapper.repairBillToRepairBillResponse(bill));
     });
-    return new PageImpl<>(repairBills, billsPage.getPageable(), billsPage.getTotalElements());
+    return new PageImpl<>(billsResponse, billsPage.getPageable(), billsPage.getTotalElements());
   }
 
   @Override
   @Transactional
-  public String create(CreateRepairBillRequest createRepairBillRequest) {
+  public void create(CreateRepairBillRequest createRepairBillRequest) {
     var order = orderService.findById(createRepairBillRequest.getOrderId());
     repairBillRepository.save(RepairBill
         .builder()
@@ -69,48 +66,33 @@ public class RepairBillServiceImpl implements RepairBillService {
         .message(createRepairBillRequest.getMessage())
         .order(order)
         .build());
-    return "Success";
   }
 
   @Override
-  public Page<RepairBillHistoryResponse> findAllUserBillsHistory(Pageable pageable, String language) {
-    var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    if (Optional.ofNullable(user).isEmpty()) {
-      log.error("User not authenticated!");
-      throw new IllegalStateException("User not authenticated");
-    }
-
-    var repairBills = repairBillRepository
-        .findAllByOrder_UserEmailAndPaymentDateNotNull(user.getEmail(), pageable);
-    List<RepairBillHistoryResponse> responses = new ArrayList<>();
+  public Page<RepairBillHistoryResponse> findAllUserBillsHistory(Pageable pageable,
+      String language) {
+    var userEmail = userSecurityService.getUserEmailFromSecurityContext();
+    var repairBills = repairBillRepository.findAllByOrder_UserEmailAndPaymentDateNotNull(userEmail,
+        pageable);
+    List<RepairBillHistoryResponse> billsResponse = new ArrayList<>();
     repairBills.forEach(bill -> {
-      if (!"en".equals(language)) {
-        locationTranslationService.setTranslation(bill.getOrder().getLocation(), language);
-      }
-      responses.add(repairBillMapper.repairBillToRepairBillHistoryResponse(bill));
+      locationTranslationService.setTranslation(bill.getOrder().getLocation(), language);
+      billsResponse.add(repairBillMapper.repairBillToRepairBillHistoryResponse(bill));
     });
-    return new PageImpl<>(responses, repairBills.getPageable(),
-        repairBills.getTotalElements());
+    return new PageImpl<>(billsResponse, repairBills.getPageable(), repairBills.getTotalElements());
   }
 
   @Override
   public Page<RepairBillNewResponse> findAllNewUserBills(Pageable pageable, String language) {
-    var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    if (Optional.ofNullable(user).isEmpty()) {
-      log.error("User not authenticated!");
-      throw new IllegalStateException("User not authenticated");
-    }
-    var repairBills = repairBillRepository
-        .findAllByOrder_UserEmailAndPaymentDateNull(user.getEmail(), pageable);
-    List<RepairBillNewResponse> responses = new ArrayList<>();
+    var userEmail = userSecurityService.getUserEmailFromSecurityContext();
+    var repairBills = repairBillRepository.findAllByOrder_UserEmailAndPaymentDateNull(userEmail,
+        pageable);
+    List<RepairBillNewResponse> billsResponse = new ArrayList<>();
     repairBills.forEach(bill -> {
-      if (!"en".equals(language)) {
-        locationTranslationService.setTranslation(bill.getOrder().getLocation(), language);
-      }
-      responses.add(repairBillMapper.repairBillToRepairBillNewResponse(bill));
+      locationTranslationService.setTranslation(bill.getOrder().getLocation(), language);
+      billsResponse.add(repairBillMapper.repairBillToRepairBillNewResponse(bill));
     });
-    return new PageImpl<>(responses, repairBills.getPageable(),
-        repairBills.getTotalElements());
+    return new PageImpl<>(billsResponse, repairBills.getPageable(), repairBills.getTotalElements());
   }
 
   @Override
@@ -119,7 +101,6 @@ public class RepairBillServiceImpl implements RepairBillService {
     var order = repairBill.getOrder();
     repairBill.setPaymentDate(LocalDateTime.now());
     repairBillRepository.save(repairBill);
-
     orderService.updatePaymentDateAndStatusToPaid(order);
   }
 
@@ -130,11 +111,9 @@ public class RepairBillServiceImpl implements RepairBillService {
 
   @Override
   public RepairBill findById(Long id) {
-    var optionalRepairBill = repairBillRepository.findById(id);
-    if (optionalRepairBill.isEmpty()) {
+    return repairBillRepository.findById(id).orElseThrow(() -> {
       log.error("Repair bill with id {} does not exists", id);
       throw new IllegalStateException(String.format("Repair bill with id %d does not exists", id));
-    }
-    return optionalRepairBill.get();
+    });
   }
 }

@@ -15,7 +15,7 @@ public interface RepairBillService {
 
   Page<RepairBillResponse> findAll(RepairBillSearchRequest repairBillSearchRequest, String language);
 
-  String create(CreateRepairBillRequest createRepairBillRequest);
+  void create(CreateRepairBillRequest createRepairBillRequest);
 
   Page<RepairBillHistoryResponse> findAllUserBillsHistory(Pageable pageable, String language);
 

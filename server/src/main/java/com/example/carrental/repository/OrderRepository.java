@@ -5,9 +5,11 @@ import com.example.carrental.entity.order.OrderPaymentStatus;
 import com.example.carrental.entity.order.OrderRentalStatus;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -30,7 +32,4 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
   Page<Order> findAllByRentalStatusOrRentalStatusAndUser_Email(OrderRentalStatus firstStatus,
       OrderRentalStatus secondStatus, String email, Pageable pageable);
-
-  List<Order> getAllByRentalStatusOrRentalStatusAndCar_Vin(OrderRentalStatus status1,
-      OrderRentalStatus status2, String carVin);
 }

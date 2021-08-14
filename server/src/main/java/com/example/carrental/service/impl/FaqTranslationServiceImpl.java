@@ -1,8 +1,8 @@
 package com.example.carrental.service.impl;
 
-import static com.example.carrental.service.impl.CarClassTranslationServiceImpl.BELORUSSIAN;
-import static com.example.carrental.service.impl.CarClassTranslationServiceImpl.ENGLISH;
-import static com.example.carrental.service.impl.CarClassTranslationServiceImpl.RUSSIAN;
+import static com.example.carrental.constants.ApplicationConstants.BELORUSSIAN;
+import static com.example.carrental.constants.ApplicationConstants.ENGLISH;
+import static com.example.carrental.constants.ApplicationConstants.RUSSIAN;
 
 import com.example.carrental.controller.dto.faq.CreateFaqRequest;
 import com.example.carrental.controller.dto.faq.UpdateFaqRequest;

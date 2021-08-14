@@ -1,5 +1,6 @@
 package com.example.carrental.service.impl;
 
+import static com.example.carrental.constants.ApplicationConstants.NO_CONTENT;
 import static com.example.carrental.service.util.MultipartFileUtil.validateMultipartImageFile;
 
 import com.example.carrental.controller.dto.car.CarBrandResponse;
@@ -34,8 +35,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @RequiredArgsConstructor
 public class CarBrandServiceImpl implements CarBrandService {
-
-  public static final String NO_CONTENT = "No content";
 
   private final CarBrandRepository carBrandRepository;
   private final FileStoreService fileStoreService;

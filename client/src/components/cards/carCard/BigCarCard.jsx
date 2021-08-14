@@ -44,6 +44,7 @@ const CardContainer = styled.div`
   max-width: 100%;
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.6);
   transition: all 200ms ease-in-out;
+  margin-bottom: 20px;
 
   &:hover {
     box-shadow: 0 16px 20px -12px rgb(0 0 0 / 56%), 0 4px 25px 0 rgb(0 0 0 / 12%), 0 8px 10px -5px rgb(0 0 0 / 20%);
@@ -279,7 +280,6 @@ const CarCard = (props) => {
 
   return (
     <CardContainer>
-      
       { carImageLink ? (
         <ImageContainer style={divStyle} />
       ) : (

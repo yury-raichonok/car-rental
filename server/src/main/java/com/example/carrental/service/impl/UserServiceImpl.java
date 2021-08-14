@@ -1,5 +1,8 @@
 package com.example.carrental.service.impl;
 
+import static com.example.carrental.constants.ApplicationConstants.HOUR_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY;
+import static com.example.carrental.constants.ApplicationConstants.MINUTES_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY;
+
 import com.example.carrental.controller.dto.user.UserChangePasswordRequest;
 import com.example.carrental.controller.dto.user.UserDataResponse;
 import com.example.carrental.controller.dto.user.UserForgotPasswordRequest;
@@ -15,6 +18,7 @@ import com.example.carrental.repository.UserRepository;
 import com.example.carrental.service.EmailService;
 import com.example.carrental.service.UserConfirmationTokenService;
 import com.example.carrental.service.UserRoleService;
+import com.example.carrental.service.UserSecurityService;
 import com.example.carrental.service.UserService;
 import com.example.carrental.service.exceptions.TokenExpireException;
 import com.example.carrental.service.exceptions.UsernameAlreadyTakenException;
@@ -27,9 +31,9 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -40,6 +44,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+  private static final String PASSWORD_MISMATCH = "Password mismatch";
+  private static final String EMAIL_ALREADY_CONFIRMED = "Email already confirmed";
+  private static final String TOKEN_EXPIRED = "Token expired!";
+  private static final String USER_ROLE = "USER";
+  private static final String ADMIN_ROLE = "ADMIN";
   private static final int TIME_FOR_CONFIRMATION = 15;
 
   private final UserRepository userRepository;
@@ -49,31 +58,25 @@ public class UserServiceImpl implements UserService {
   private final EmailService emailService;
   private final UserCriteriaRepository userCriteriaRepository;
   private final UserMapper userMapper;
+  private final UserSecurityService userSecurityService;
+
+  @Value("${app.email.confirmation.link}")
+  private String emailConfirmationLink;
+
+  @Value("${app.email.restoration.link}")
+  private String emailRestorationLink;
 
   @Override
   public UserProfileResponse getUserProfile() {
-    var email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-    if ("anonymousUser".equals(email)) {
-      log.error("User is not authenticated!");
-      throw new IllegalStateException("User is not authenticated!");
-    }
-
-    var user = findUserByEmail(email);
+    var userEmail = userSecurityService.getUserEmailFromSecurityContext();
+    var user = findUserByEmail(userEmail);
     return userMapper.userToUserProfileResponse(user);
   }
 
   @Override
   public void sendEmailConfirmationMessage() {
-    var username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-    if ("anonymousUser".equals(username)) {
-      log.error("User is not authenticated!");
-      throw new IllegalStateException("User is not authenticated!");
-    }
-
-    var user = findUserByEmail(username);
-
+    var userEmail = userSecurityService.getUserEmailFromSecurityContext();
+    var user = findUserByEmail(userEmail);
     var token = UUID.randomUUID().toString();
     UserConfirmationToken confirmationToken = UserConfirmationToken
         .builder()
@@ -84,8 +87,7 @@ public class UserServiceImpl implements UserService {
         .build();
     userConfirmationTokenService.createUserConfirmationToken(confirmationToken);
 
-    var link = String.format("http://localhost:8080/users/email/confirm?token=%s", token);
-
+    var link = String.format(emailConfirmationLink, token);
     var message = String.format("Click on link to confirm your email: %s", link);
 
     emailService.sendEmail(user.getEmail(), message, "Email confirmation");
@@ -94,19 +96,16 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional
   public void confirmEmail(String token) throws TokenExpireException {
-    var confirmationToken = userConfirmationTokenService
-        .getUserConfirmationTokenByToken(token);
-
+    var confirmationToken = userConfirmationTokenService.getUserConfirmationTokenByToken(token);
     if (confirmationToken.getConfirmationTime() != null) {
-      log.error("Email already confirmed");
-      throw new IllegalStateException("Email already confirmed");
+      log.error(EMAIL_ALREADY_CONFIRMED);
+      throw new IllegalStateException(EMAIL_ALREADY_CONFIRMED);
     }
 
-    LocalDateTime expirationTime = confirmationToken.getExpirationTime();
-
+    var expirationTime = confirmationToken.getExpirationTime();
     if (expirationTime.isBefore(LocalDateTime.now())) {
       log.error("Token {} expired", token);
-      throw new TokenExpireException("Token expired!");
+      throw new TokenExpireException(TOKEN_EXPIRED);
     }
 
     var user = findById(confirmationToken.getUser().getId());
@@ -122,22 +121,19 @@ public class UserServiceImpl implements UserService {
       throws TokenExpireException {
     var confirmationToken = userConfirmationTokenService
         .getUserConfirmationTokenByToken(changePasswordRequest.getToken());
-
     if (!changePasswordRequest.getPassword().equals(changePasswordRequest.getConfirmPassword())) {
-      log.error("Password mismatch");
-      throw new IllegalStateException("Password mismatch");
+      log.error(PASSWORD_MISMATCH);
+      throw new IllegalStateException(PASSWORD_MISMATCH);
     }
-
     if (confirmationToken.getConfirmationTime() != null) {
       log.error("Token already used!");
       throw new TokenExpireException("Token already used!");
     }
 
-    LocalDateTime expirationTime = confirmationToken.getExpirationTime();
-
+    var expirationTime = confirmationToken.getExpirationTime();
     if (expirationTime.isBefore(LocalDateTime.now())) {
       log.error("Token {} expired", changePasswordRequest.getToken());
-      throw new TokenExpireException("Token expired");
+      throw new TokenExpireException(TOKEN_EXPIRED);
     }
 
     userConfirmationTokenService
@@ -155,8 +151,8 @@ public class UserServiceImpl implements UserService {
       throws UsernameAlreadyTakenException {
     if (!userRegistrationRequest.getPassword()
         .equals(userRegistrationRequest.getConfirmPassword())) {
-      log.error("Password mismatch");
-      throw new IllegalStateException("Password mismatch");
+      log.error(PASSWORD_MISMATCH);
+      throw new IllegalStateException(PASSWORD_MISMATCH);
     }
 
     checkExistedEmail(userRegistrationRequest.getEmail());
@@ -166,14 +162,13 @@ public class UserServiceImpl implements UserService {
         .builder()
         .email(userRegistrationRequest.getEmail())
         .password(encodedPassword)
-        .role(userRoleServiceService.findByRole("USER"))
+        .role(userRoleServiceService.findByRole(USER_ROLE))
         .createdAt(LocalDateTime.now())
         .changedAt(LocalDateTime.now())
         .enabled(true)
         .locked(false)
         .isEmailConfirmed(false)
         .build();
-
     userRepository.save(user);
 
     var token = UUID.randomUUID().toString();
@@ -186,26 +181,23 @@ public class UserServiceImpl implements UserService {
         .build();
     userConfirmationTokenService.createUserConfirmationToken(confirmationToken);
 
-    var link = String.format("http://localhost:8080/users/email/confirm?token=%s", token);
-
+    var link = String.format(emailConfirmationLink, token);
     var message = String.format("Click on link to confirm your email: %s", link);
-
     emailService.sendEmail(user.getEmail(), message, "Email confirmation");
   }
 
   @Override
   public Page<UserDataResponse> findAll(UserSearchRequest userSearchRequest) {
     var usersPage = userCriteriaRepository.findUsers(userSearchRequest);
-    List<UserDataResponse> userDataResponse = new ArrayList<>();
-    usersPage.forEach(user -> userDataResponse.add(userMapper.userToUserDataResponse(user)));
-    return new PageImpl<>(userDataResponse, usersPage.getPageable(), usersPage.getTotalElements());
+    List<UserDataResponse> usersResponse = new ArrayList<>();
+    usersPage.forEach(user -> usersResponse.add(userMapper.userToUserDataResponse(user)));
+    return new PageImpl<>(usersResponse, usersPage.getPageable(), usersPage.getTotalElements());
   }
 
   @Override
   @Transactional
   public void forgotPassword(UserForgotPasswordRequest forgotPasswordRequest) {
     var user = findUserByEmail(forgotPasswordRequest.getEmail());
-
     var token = UUID.randomUUID().toString();
 
     var confirmationToken = UserConfirmationToken
@@ -217,10 +209,8 @@ public class UserServiceImpl implements UserService {
         .build();
     userConfirmationTokenService.createUserConfirmationToken(confirmationToken);
 
-    var link = String.format("http://localhost:3000/reset/%s", token);
-
+    var link = String.format(emailRestorationLink, token);
     var message = String.format("Click on link to recover your password: %s", link);
-
     emailService.sendEmail(user.getEmail(), message, "Password recovery");
   }
 
@@ -229,7 +219,6 @@ public class UserServiceImpl implements UserService {
   public void update(Long id, UserUpdateRequest userUpdateRequest)
       throws UsernameAlreadyTakenException {
     var user = findById(id);
-
     if (Optional.ofNullable(userUpdateRequest.getEmail()).isPresent()) {
       checkExistedEmail(userUpdateRequest.getEmail());
       user.setEmail(userUpdateRequest.getEmail());
@@ -242,8 +231,8 @@ public class UserServiceImpl implements UserService {
     } else if (Optional.ofNullable(userUpdateRequest.getPassword()).isPresent() &&
         !userUpdateRequest.getPassword()
             .equals(userUpdateRequest.getConfirmPassword())) {
-      log.error("Passwords mismatch");
-      throw new IllegalStateException("Passwords mismatch");
+      log.error(PASSWORD_MISMATCH);
+      throw new IllegalStateException(PASSWORD_MISMATCH);
     }
     user.setChangedAt(LocalDateTime.now());
     userRepository.save(user);
@@ -253,7 +242,7 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public void updateUserRoleToAdmin(Long id) {
     var user = findById(id);
-    var role = userRoleServiceService.findByRole("ADMIN");
+    var role = userRoleServiceService.findByRole(ADMIN_ROLE);
     user.setRole(role);
     userRepository.save(user);
   }
@@ -262,7 +251,7 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public void updateUserRoleToUser(Long id) {
     var user = findById(id);
-    var role = userRoleServiceService.findByRole("USER");
+    var role = userRoleServiceService.findByRole(USER_ROLE);
     user.setRole(role);
     userRepository.save(user);
   }
@@ -276,39 +265,35 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public String checkExistedEmail(String email) throws UsernameAlreadyTakenException {
-    var optionalUser = userRepository.findByEmail(email);
-    if (optionalUser.isPresent()) {
+  public void checkExistedEmail(String email) throws UsernameAlreadyTakenException {
+    if (userRepository.findByEmail(email).isPresent()) {
       log.error("Email {} is already taken", email);
       throw new UsernameAlreadyTakenException(String.format("Email %s is already taken", email));
     }
-    return String.format("Email %s is free", email);
   }
 
   @Override
   public User findById(Long id) {
-    var optionalUser = userRepository.findById(id);
-    if (optionalUser.isEmpty()) {
+    return userRepository.findById(id).orElseThrow(() -> {
       log.error("User with id {} does not exist", id);
       throw new IllegalStateException(String.format("User with id %d does not exists", id));
-    }
-    return optionalUser.get();
+    });
   }
 
   @Override
   public int findNewUsersAmountPerDay() {
     return userRepository
-        .countAllByCreatedAtAfter(LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0)));
+        .countAllByCreatedAtAfter(LocalDateTime.of(LocalDate.now(),
+            LocalTime.of(HOUR_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY,
+                MINUTES_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY)));
   }
 
   @Override
   public User findUserByEmail(String email) {
-    var optionalUser = userRepository.findByEmail(email);
-    if (optionalUser.isEmpty()) {
+    return userRepository.findByEmail(email).orElseThrow(() -> {
       log.error("User with email {} does not exist", email);
       throw new UsernameNotFoundException(String.format("User with email %s not found", email));
-    }
-    return optionalUser.get();
+    });
   }
 
   @Override
