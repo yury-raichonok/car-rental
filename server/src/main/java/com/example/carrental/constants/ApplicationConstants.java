@@ -12,6 +12,7 @@ public final class ApplicationConstants {
   public static final String CAR_IMAGE = "Car image";
   public static final String PASSPORT_FILE = "Passport file";
   public static final String DRIVING_LICENSE_FILE = "Driving license file";
+  public static final String LANGUAGE_COOKIE_NAME = "i18next";
   public static final int HOUR_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY = 0;
   public static final int MINUTES_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY = 0;
 

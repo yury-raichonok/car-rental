@@ -175,7 +175,9 @@ const ImageComponentWrapper = styled.div`
 
 const PricingContainer = styled.div`
   width: 100%;
+  height: 234px;
   display: flex;
+  flex-direction: column;
   justify-content: center;
 `;
 
@@ -241,13 +243,15 @@ const CarComponent = (props) => {
     setLoading(true);
     const resp = await CarDataService.getCarById(props.match.params.id).catch((error) => {
       console.log("Error: ", error);
-      switch (error.response.status) {
-        case 500:
-          setIsRedirect(true)
-          break;
-      
-        default:
-          break;
+      if (error && error.response) {
+        switch (error.response.status) {
+          case 500:
+            setIsRedirect(true)
+            break;
+        
+          default:
+            break;
+        }
       }
     });
   
@@ -411,25 +415,24 @@ const CarComponent = (props) => {
           <MinRow>
             <ComponentWrapper>
               <PricingContainer>
+                Rental details
                 <Table responsive>
-                  <thead>
-                    <tr>
-                      <th>{t('rental_period')}</th>
-                      <th>{t('rental_cost_per_hour')}</th>
-                    </tr>
-                  </thead>
                   <tbody>
                     <tr>
-                      <td>{t('until_one_day')}</td>
+                      <td>{t('cost_per_hour')}</td>
                       <td>{data.costPerHour} BYN</td>
                     </tr>
+                  </tbody>
+                </Table>
+                <Table responsive>
+                  <tbody>
                     <tr>
-                      <td>{t('up_to_a_week')}</td>
-                      <td>{data.costPerHourUpToWeek} BYN</td>
+                      Attention! Car insurance is not included in the rental price. 
+                      In case of damage, exceeding the rental period, traffic fines and other violations, you will be charged a fine.
                     </tr>
                     <tr>
-                      <td>{t('more_than_week')}</td>
-                      <td>{data.costPerHourMoreThanWeek} BYN</td>
+                      
+                      
                     </tr>
                   </tbody>
                 </Table>

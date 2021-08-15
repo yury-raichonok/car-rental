@@ -1,5 +1,7 @@
 package com.example.carrental.controller;
 
+import static com.example.carrental.constants.ApplicationConstants.LANGUAGE_COOKIE_NAME;
+
 import com.example.carrental.controller.dto.car.CarAdminSearchResponse;
 import com.example.carrental.controller.dto.car.CarByIdResponse;
 import com.example.carrental.controller.dto.car.CarProfitableOfferResponse;
@@ -40,14 +42,14 @@ public class CarController {
 
   @GetMapping(path = "/profitable")
   public ResponseEntity<List<CarProfitableOfferResponse>> findAllProfitableOffers(
-      @NotNull @CookieValue(name = "i18next") String language) throws NoContentException {
+      @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language) throws NoContentException {
     var cars = carService.findAllProfitableOffers(language);
     return new ResponseEntity<>(cars, HttpStatus.OK);
   }
 
   @GetMapping(path = "/search/{id}")
   public ResponseEntity<CarByIdResponse> findCarById(@PathVariable Long id,
-      @NotNull @CookieValue(name = "i18next") String language) {
+      @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language) {
     var carSearchByIdResponse = carService.findCarById(id, language);
     return new ResponseEntity<>(carSearchByIdResponse, HttpStatus.OK);
   }
@@ -62,7 +64,7 @@ public class CarController {
   @PostMapping(path = "/search")
   public ResponseEntity<Page<CarSearchResponse>> searchCars(
       @Valid @RequestBody CarSearchRequest carSearchRequest,
-      @NotNull @CookieValue(name = "i18next") String language) {
+      @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language) {
     var carsPageResponse = carService.searchCars(carSearchRequest, language);
     return new ResponseEntity<>(carsPageResponse, HttpStatus.OK);
   }
@@ -70,7 +72,7 @@ public class CarController {
   @PostMapping(path = "/search/admin")
   public ResponseEntity<Page<CarAdminSearchResponse>> searchCarsByAdmin(
       @Valid @RequestBody CarSearchRequest carSearchRequest,
-      @NotNull @CookieValue(name = "i18next") String language) {
+      @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language) {
     var carsAdminPageResponse = carService.searchCarsByAdmin(carSearchRequest, language);
     return new ResponseEntity<>(carsAdminPageResponse, HttpStatus.OK);
   }

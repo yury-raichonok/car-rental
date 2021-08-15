@@ -52,13 +52,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .and()
         .authorizeRequests()
         .antMatchers("/paymentbills", "/repairbills").hasAuthority(ADMIN)
-        .antMatchers(HttpMethod.POST, "/brands/**", "/carclasses", "/cars", "/models/**", "/faqs",
-            "/locations", "/orders/search").hasAuthority(ADMIN)
+        .antMatchers(HttpMethod.POST, "/brands/**", "/carclasses", "/cars", "/cars/search/admin", "/models/**", "/faqs",
+            "/locations", "/cars/**/upload/image", "/orders/search").hasAuthority(ADMIN)
         .antMatchers(HttpMethod.PUT, "/users/status/**", "/brands/**", "/carclasses/**", "/cars/**",
             "/models/**", "/passports/download", "/drivinglicenses/download", "/faqs/**",
             "/locations/**", "/messages/**").hasAuthority(ADMIN)
         .antMatchers(HttpMethod.GET, "/details", "/messages/**", "/users", "/requests/**",
             "/requests/new/**", "/details/admin").hasAuthority(ADMIN)
+        .antMatchers(HttpMethod.DELETE, "/faqs/**").hasAuthority(ADMIN)
+        .antMatchers(HttpMethod.DELETE, "/notifications/**").authenticated()
         .antMatchers("/brands/all", "/cars/profitable", "/cars/search/**", "users/email/confirm/**")
         .permitAll()
         .antMatchers(HttpMethod.GET, "/brands", "/carclasses", "/cars", "/models", "/models/list",
@@ -66,7 +68,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .antMatchers(HttpMethod.POST, "/cars/search", "/messages", "/users/auth/registration",
             "/users/auth/login", "/users/auth/forgot/**").permitAll()
         .antMatchers(HttpMethod.POST, "/orders/**", "/requests").authenticated()
-        .antMatchers(HttpMethod.PUT, "/users/**").authenticated()
+        .antMatchers(HttpMethod.PUT, "/users/**", "/notifications/**").authenticated()
         .antMatchers(HttpMethod.GET, "/users/profile", "/users/auth/userinfo", "/notifications/**",
             "/details/user", "/orders/user/**").authenticated()
         .antMatchers("/drivinglicenses/**", "/passports/**", "/users/phone").authenticated()

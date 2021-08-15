@@ -1,5 +1,7 @@
 package com.example.carrental.controller;
 
+import static com.example.carrental.constants.ApplicationConstants.LANGUAGE_COOKIE_NAME;
+
 import com.example.carrental.controller.dto.car.CarClassNameResponse;
 import com.example.carrental.controller.dto.car.CarClassNameWithTranslationsResponse;
 import com.example.carrental.controller.dto.car.CreateCarClassRequest;
@@ -35,7 +37,8 @@ public class CarClassController {
 
   @GetMapping
   public ResponseEntity<List<CarClassNameResponse>> findAll(
-      @NotNull @CookieValue(name = "i18next") String language) throws NoContentException {
+      @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language)
+      throws NoContentException {
     var carClasses = carClassService.findAll(language);
     return new ResponseEntity<>(carClasses, HttpStatus.OK);
   }
