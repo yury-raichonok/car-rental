@@ -71,16 +71,7 @@ class OrderServiceImplTest {
   @MockBean
   private RentalDetailsService rentalDetailsService;
 
-  @BeforeAll
-  public static void setUp() {
-    location = Location.builder().build();
-    rentalDetails = RentalDetails.builder().id(TEST_USER_ID).email(TEST_EMAIL)
-        .phone(TEST_PHONE).location(location)
-        .fromDayToWeekCoefficient(BigDecimal.valueOf(TEST_FROM_DAY_TO_WEEK_COEFFICIENT))
-        .fromWeekCoefficient(BigDecimal.valueOf(TEST_FROM_WEEK_COEFFICIENT))
-        .paymentBillValidityPeriodInMinutes(TEST_PAYMENT_BILL_VALIDITY_PERIOD)
-        .build();
-  }
+
 
 //  @Test
 //  void givenOneHourRentalPeriod_whenCalculateTotalCost_thenReturnValidValue()

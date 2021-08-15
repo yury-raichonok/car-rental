@@ -33,8 +33,9 @@ public class RentalDetailsController {
   }
 
   @GetMapping
-  public ResponseEntity<RentalDetailsResponse> getRentalDetailsResponse() {
-    var informationResponse = rentalDetailsService.getRentalDetailsResponse();
+  public ResponseEntity<RentalDetailsResponse> getRentalDetailsResponse(
+      @NotNull @CookieValue(name = "i18next") String language) {
+    var informationResponse = rentalDetailsService.getRentalDetailsResponse(language);
     return new ResponseEntity<>(informationResponse, HttpStatus.OK);
   }
 

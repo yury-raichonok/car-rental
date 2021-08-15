@@ -11,8 +11,8 @@ import static com.itextpdf.text.pdf.BaseFont.IDENTITY_H;
 
 import com.example.carrental.config.ApplicationConfig;
 import com.example.carrental.entity.order.Order;
-import com.example.carrental.entity.rentaldetails.RentalDetails;
 import com.example.carrental.service.PDFService;
+import com.example.carrental.service.RentalDetailsService;
 import com.example.carrental.service.exceptions.DocumentNotGeneratedException;
 import com.example.carrental.service.exceptions.FontNotFoundException;
 import com.itextpdf.text.BaseColor;
@@ -49,7 +49,7 @@ public class PDFServiceImpl implements PDFService {
   private static final BaseColor BASE_COLOR = new BaseColor(234, 92, 82);
 
   private final ApplicationConfig applicationConfig;
-  private final RentalDetails rentalDetails;
+  private final RentalDetailsService rentalDetailsService;
 
   public ByteArrayResource exportOrderToPDF(Order order)
       throws FontNotFoundException, DocumentNotGeneratedException {
@@ -79,7 +79,7 @@ public class PDFServiceImpl implements PDFService {
       document.add(rentalEmailParagraph);
 
       var rentalPhoneParagraph = new Paragraph(String.format("Phone: %s",
-          rentalDetails.getPhone()), textFont);
+          rentalDetailsService.getRentalDetails().getPhone()), textFont);
       rentalPhoneParagraph.setAlignment(ALIGN_RIGHT);
       document.add(rentalPhoneParagraph);
       document.add(Chunk.NEWLINE);

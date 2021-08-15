@@ -155,7 +155,7 @@ const Column = styled.div`
 
 const RowTitle = styled.div`
   font-size: 16px;
-  width: 150px;
+  width: 80px;
   text-align: left;
 `;
 
@@ -604,53 +604,6 @@ const AdminDashboardComponent = () => {
             <RowWithTopAlign>
               <Column>
                 <Marginer direction="vertical" margin={3} />
-                <RowTitle>{t('email')}:&ensp;</RowTitle>
-              </Column>
-              {rentalDetails && editRentalDetails && (
-                <Form.Item 
-                  initialValue = {rentalDetails.email}
-                  name="email"
-                  rules={[
-                    {
-                      required: true,
-                      message: `${t('please_enter_email')}`,
-                    },
-                    {
-                      type: 'email',
-                      message: `${t('email_is_not_valid')}`,
-                    }
-                  ]}
-                >
-                  <Input placeholder={t('enter_email')}/>
-                </Form.Item>
-              )}
-              {!rentalDetails && !editRentalDetails && (
-                <Form.Item 
-                  name="email"
-                  rules={[
-                    {
-                      required: true,
-                      message: `${t('please_enter_email')}`,
-                    },
-                    {
-                      type: 'email',
-                      message: `${t('email_is_not_valid')}`,
-                    }
-                  ]}
-                >
-                  <Input placeholder={t('enter_email')}/>
-                </Form.Item>
-              )}
-              {rentalDetails && !editRentalDetails && (
-                <InfoContainer>{rentalDetails.email}</InfoContainer>
-              )}
-            </RowWithTopAlign>
-            {rentalDetails && !editRentalDetails && (
-              <Marginer direction="vertical" margin={24} />
-            )}
-            <RowWithTopAlign>
-              <Column>
-                <Marginer direction="vertical" margin={3} />
                 <RowTitle>{t('phone')}:&ensp;</RowTitle>
               </Column>
               {rentalDetails && editRentalDetails && (
@@ -702,7 +655,7 @@ const AdminDashboardComponent = () => {
               </Column>
               {rentalDetails && editRentalDetails && (
                 <Form.Item name="location" 
-                  initialValue = {rentalDetails.location}
+                  initialValue = {rentalDetails.locationId}
                   rules={[
                     {
                       required: true,
@@ -735,123 +688,6 @@ const AdminDashboardComponent = () => {
               )}
               {rentalDetails && !editRentalDetails && (
                 <InfoContainer>{rentalDetails.location}</InfoContainer>
-              )}
-            </RowWithTopAlign>
-            {rentalDetails && !editRentalDetails && (
-              <Marginer direction="vertical" margin={24} />
-            )}
-            <RowWithTopAlign>
-              <Column>
-                <Marginer direction="vertical" margin={3} />
-                <RowTitle>{t('from_day_coef')}:&ensp;</RowTitle>
-              </Column>
-              {rentalDetails && editRentalDetails && (
-                <Form.Item
-                  initialValue = {rentalDetails.fromDayToWeekCoefficient}
-                  name="fromDayToWeekCoefficient"
-                  rules={[
-                    {
-                      required: true,
-                      message: `${t('please_enter_coefficient')}`,
-                    },
-                  ]}
-                >
-                  <Input type="number" min="0" autoComplete="off" step="0.01" placeholder={t('from_day_payment_coefficient')} />
-                </Form.Item>
-              )}
-              {!rentalDetails && !editRentalDetails && (
-                <Form.Item 
-                  name="fromDayToWeekCoefficient"
-                  rules={[
-                    {
-                      required: true,
-                      message: `${t('please_enter_coefficient')}`,
-                    },
-                  ]}
-                >
-                  <Input type="number" min="0" autoComplete="off" step="0.01" placeholder={t('from_day_payment_coefficient')} />
-                </Form.Item>
-              )}
-              {rentalDetails && !editRentalDetails && (
-                <InfoContainer>{rentalDetails.fromDayToWeekCoefficient}</InfoContainer>
-              )}
-            </RowWithTopAlign>
-            {rentalDetails && !editRentalDetails && (
-              <Marginer direction="vertical" margin={24} />
-            )}
-            <RowWithTopAlign>
-              <Column>
-                <Marginer direction="vertical" margin={3} />
-                <RowTitle>{t('from_week_coef')}:&ensp;</RowTitle>
-              </Column>
-              {rentalDetails && editRentalDetails && (
-                <Form.Item
-                  initialValue = {rentalDetails.fromWeekCoefficient}
-                  name="fromWeekCoefficient"
-                  rules={[
-                    {
-                      required: true,
-                      message: `${t('please_enter_coefficient')}`,
-                    },
-                  ]}
-                >
-                  <Input type="number" min="0" autoComplete="off" step="0.01" placeholder={t('from_week_payment_coefficient')} />
-                </Form.Item>
-              )}
-              {!rentalDetails && !editRentalDetails && (
-                <Form.Item
-                  name="fromWeekCoefficient"
-                  rules={[
-                    {
-                      required: true,
-                      message: `${t('please_enter_coefficient')}`,
-                    },
-                  ]}
-                >
-                  <Input type="number" min="0" autoComplete="off" step="0.01" placeholder={t('from_week_payment_coefficient')} />
-                </Form.Item>
-              )}
-              {rentalDetails && !editRentalDetails && (
-                <InfoContainer>{rentalDetails.fromWeekCoefficient}</InfoContainer>
-              )}
-            </RowWithTopAlign>
-            {rentalDetails && !editRentalDetails && (
-              <Marginer direction="vertical" margin={24} />
-            )}
-            <RowWithTopAlign>
-              <Column>
-                <Marginer direction="vertical" margin={3} />
-                <RowTitle>{t('bill_validity_period')}:&ensp;</RowTitle>
-              </Column>
-              {rentalDetails && editRentalDetails && (
-                <Form.Item
-                  initialValue = {rentalDetails.billValidityPeriod}
-                  name="billValidityPeriod"
-                  rules={[
-                    {
-                      required: true,
-                      message: `${t('please_enter_bill_validity_period')}`,
-                    },
-                  ]}
-                >
-                  <Input type="number" min="0" autoComplete="off" placeholder={t('bill_validity_period')} />
-                </Form.Item>
-              )}
-              {!rentalDetails && !editRentalDetails && (
-                <Form.Item
-                  name="billValidityPeriod"
-                  rules={[
-                    {
-                      required: true,
-                      message: `${t('please_enter_bill_validity_period')}`,
-                    },
-                  ]}
-                >
-                  <Input type="number" min="0" autoComplete="off" placeholder={t('bill_validity_period')} />
-                </Form.Item>
-              )}
-              {rentalDetails && !editRentalDetails && (
-                <InfoContainer>{rentalDetails.billValidityPeriod}</InfoContainer>
               )}
             </RowWithTopAlign>
             {rentalDetails && !editRentalDetails && (

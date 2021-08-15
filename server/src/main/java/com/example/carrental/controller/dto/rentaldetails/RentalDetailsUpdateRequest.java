@@ -16,21 +16,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RentalDetailsUpdateRequest {
 
-  @NotBlank
-  @Email
-  private String email;
   @Pattern(regexp = "^\\+375[0-9]{9}$")
   private String phoneNumber;
   @NotNull
   @Positive
   private Long location;
-  @NotNull
-  @Positive
-  private double fromDayToWeekCoefficient;
-  @NotNull
-  @Positive
-  private double fromWeekCoefficient;
-  @NotNull
-  @Positive
-  private int billValidityPeriod;
 }

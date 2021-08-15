@@ -2,7 +2,6 @@ package com.example.carrental.entity.rentaldetails;
 
 import com.example.carrental.entity.location.Location;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -33,9 +32,6 @@ public class RentalDetails implements Serializable {
   private Long id;
 
   @Column(nullable = false)
-  private String email;
-
-  @Column(nullable = false)
   private String phone;
 
   @OneToOne(
@@ -44,11 +40,4 @@ public class RentalDetails implements Serializable {
   )
   @JoinColumn(name = "location_id", nullable = false)
   private Location location;
-
-  @Column(name = "from_day_to_week_coefficient", nullable = false)
-  private BigDecimal fromDayToWeekCoefficient;
-  @Column(name = "from_week_coefficient", nullable = false)
-  private BigDecimal fromWeekCoefficient;
-  @Column(name = "payment_bill_validity_period_in_minutes", nullable = false)
-  private int paymentBillValidityPeriodInMinutes;
 }

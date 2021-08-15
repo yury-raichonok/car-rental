@@ -65,7 +65,7 @@ public class MessageServiceImpl implements MessageService {
         .name(createMessageRequest.getName())
         .email(createMessageRequest.getEmail())
         .phone(createMessageRequest.getPhone())
-        .message(createMessageRequest.getMessage())
+        .messageText(createMessageRequest.getMessage())
         .sentDate(LocalDateTime.now())
         .readed(false)
         .build());

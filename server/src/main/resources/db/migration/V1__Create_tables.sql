@@ -106,11 +106,7 @@ CREATE TABLE location (
 
 CREATE TABLE rental_details (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    email VARCHAR (255) NOT NULL,
-    phone VARCHAR (255) NOT NULL,
-    payment_bill_validity_period_in_minutes INT NOT NULL,
-    from_day_to_week_coefficient DECIMAL (3, 2) NOT NULL,
-    from_week_coefficient DECIMAL (3, 2) NOT NULL,
+    phone VARCHAR (20) NOT NULL,
     location_id BIGINT NOT NULL,
     FOREIGN KEY (location_id) REFERENCES location (id)
 );

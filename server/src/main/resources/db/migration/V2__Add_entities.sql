@@ -13,9 +13,8 @@ INSERT INTO location_translation (id, name, language, location_id)
 VALUES (1, 'Минск, ул. Жилуновича, 47', 'ru', 1),
        (2, 'Miнск, вул. Жылуновiча, 47', 'be', 1);
 
-INSERT INTO rental_details (email, phone, payment_bill_validity_period_in_minutes,
-                            from_day_to_week_coefficient, from_week_coefficient, location_id)
-VALUES ('carrental.webapp@gmail.com', '+375111234567', 60, 0.92, 0.85, 1);
+INSERT INTO rental_details (phone, location_id)
+VALUES ('+375111234567', 1);
 
 INSERT INTO car_class (id, name, created_at)
 VALUES (1, 'Econom', '2021-08-10'),

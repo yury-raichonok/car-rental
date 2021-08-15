@@ -13,7 +13,7 @@ public interface RentalDetailsService {
 
   RentalDetails getRentalDetails();
 
-  RentalDetailsResponse getRentalDetailsResponse();
+  RentalDetailsResponse getRentalDetailsResponse(String language);
 
   void createOrUpdate(RentalDetailsUpdateRequest rentalDetailsUpdateRequest);
 }

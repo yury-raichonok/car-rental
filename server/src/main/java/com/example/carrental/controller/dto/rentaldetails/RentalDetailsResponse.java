@@ -36,13 +36,4 @@ public class RentalDetailsResponse {
       max = 255
   )
   private String location;
-  @NotNull
-  @Min(0)
-  private double fromDayToWeekCoefficient;
-  @NotNull
-  @Min(0)
-  private double fromWeekCoefficient;
-  @NotNull
-  @Min(0)
-  private int billValidityPeriod;
 }

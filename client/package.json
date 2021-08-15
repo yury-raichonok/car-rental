@@ -51,6 +51,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
     "react-scroll-to-top": "^1.0.5",
+    "react-simple-chatbot": "^0.6.1",
     "react-useanimations": "^2.0.6",
     "react-yandex-maps": "^4.6.0",
     "recharts": "^2.0.10",

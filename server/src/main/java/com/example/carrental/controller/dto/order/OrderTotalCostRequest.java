@@ -1,7 +1,7 @@
 package com.example.carrental.controller.dto.order;
 
 import java.time.LocalDateTime;
-import javax.validation.constraints.Future;
+import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -19,9 +19,9 @@ public class OrderTotalCostRequest {
   @Min(0)
   private double costPerHour;
   @NotNull
-  @Future
+  @FutureOrPresent
   private LocalDateTime pickUpDate;
   @NotNull
-  @Future
+  @FutureOrPresent
   private LocalDateTime returnDate;
 }

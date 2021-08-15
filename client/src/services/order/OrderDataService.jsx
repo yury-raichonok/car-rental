@@ -113,6 +113,7 @@ class OrderDataService {
   }
 
   calculateTotalCost(data) {
+    console.log(data);
     return axios({
       'method': 'POST',
       'url': "http://localhost:8080/orders/calculate",
