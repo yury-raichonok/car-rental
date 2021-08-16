@@ -13,6 +13,7 @@ import com.example.carrental.service.exceptions.EntityAlreadyExistsException;
 import com.example.carrental.service.exceptions.FontNotFoundException;
 import com.example.carrental.service.exceptions.NoContentException;
 import com.example.carrental.service.exceptions.OrderPeriodValidationException;
+import com.example.carrental.service.exceptions.PassportNotConfirmedException;
 import com.example.carrental.service.exceptions.PhoneNotSpecifiedException;
 import com.example.carrental.service.exceptions.TokenExpireException;
 import com.example.carrental.service.exceptions.UsernameAlreadyTakenException;
@@ -88,5 +89,10 @@ public class ExceptionController {
   @ExceptionHandler(value = {PhoneNotSpecifiedException.class})
   public ResponseEntity<String> handlePhoneNotSpecifiedException(PhoneNotSpecifiedException e) {
     return new ResponseEntity<>(e.getLocalizedMessage(), FORBIDDEN);
+  }
+
+  @ExceptionHandler(value = {PassportNotConfirmedException.class})
+  public ResponseEntity<String> handlePassportNotConfirmedException(PassportNotConfirmedException e) {
+    return new ResponseEntity<>(e.getLocalizedMessage(), METHOD_NOT_ALLOWED);
   }
 }

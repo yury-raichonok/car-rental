@@ -1,5 +1,7 @@
 package com.example.carrental.controller;
 
+import static com.example.carrental.constants.ApplicationConstants.LANGUAGE_COOKIE_NAME;
+
 import com.example.carrental.controller.dto.bill.PaymentBillResponse;
 import com.example.carrental.controller.dto.bill.PaymentBillSearchRequest;
 import com.example.carrental.controller.dto.bill.UserNewPaymentBillsResponse;
@@ -34,21 +36,21 @@ public class PaymentBillController {
   @PostMapping
   public ResponseEntity<Page<PaymentBillResponse>> findAll(
       @Valid @RequestBody PaymentBillSearchRequest paymentBillSearchRequest,
-      @NotNull @CookieValue(name = "i18next") String language) {
+      @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language) {
     var paymentBills = paymentBillService.findAll(paymentBillSearchRequest, language);
     return new ResponseEntity<>(paymentBills, HttpStatus.OK);
   }
 
   @GetMapping(path = "/user/new")
   public ResponseEntity<Page<UserNewPaymentBillsResponse>> findAllNewUserBills(Pageable pageable,
-      @NotNull @CookieValue(name = "i18next") String language) {
+      @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language) {
     var paymentBills = paymentBillService.findAllNewUserBills(pageable, language);
     return new ResponseEntity<>(paymentBills, HttpStatus.OK);
   }
 
   @GetMapping(path = "/user")
   public ResponseEntity<Page<UserPaymentBillsResponse>> findAllUserBillsHistory(Pageable pageable,
-      @NotNull @CookieValue(name = "i18next") String language) {
+      @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language) {
     var paymentBills = paymentBillService.findAllUserBillsHistory(pageable, language);
     return new ResponseEntity<>(paymentBills, HttpStatus.OK);
   }

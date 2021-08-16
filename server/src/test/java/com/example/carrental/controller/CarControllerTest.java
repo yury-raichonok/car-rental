@@ -35,7 +35,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
 import javax.servlet.http.Cookie;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -51,6 +54,15 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 class CarControllerTest {
 
+  private static CarProfitableOfferResponse firstCarProfitableOfferResponse;
+  private static CarProfitableOfferResponse secondCarProfitableOfferResponse;
+  private static CarByIdResponse carByIdResponse;
+  private static CreateCarRequest createCarRequest;
+  private static CarSearchRequest carSearchRequest;
+  private static CarSearchResponse carSearchResponse;
+  private static CarAdminSearchResponse carAdminSearchResponse;
+  private static UpdateCarRequest updateCarRequest;
+
   @Autowired
   private ObjectMapper objectMapper;
 
@@ -60,13 +72,52 @@ class CarControllerTest {
   @MockBean
   private CarService carService;
 
+  @BeforeAll
+  public static void setup() {
+    firstCarProfitableOfferResponse = CarProfitableOfferResponse.builder().id(1L).brand("name")
+        .build();
+    secondCarProfitableOfferResponse = CarProfitableOfferResponse.builder().id(2L).brand("name1")
+        .build();
+    carByIdResponse = CarByIdResponse.builder().id(1L).brand("name").build();
+    createCarRequest = CreateCarRequest.builder().brandId(1L).modelId(1L).vin("vin")
+        .locationId(1L).carClassId(1L).dateOfIssue(LocalDate.now()).color("color")
+        .bodyType(CarBodyType.COUPE).engineType(CarEngineType.DIESEL).passengersAmt(5)
+        .baggageAmt(3).autoTransmission(true).hasConditioner(true).isInRental(true).costPerHour(
+            BigDecimal.valueOf(5)).build();
+    carSearchRequest = new CarSearchRequest();
+    carSearchResponse = CarSearchResponse.builder().id(1L).brand("name").model("name")
+        .carClass("name").yearOfIssue("2000").bodyType("name").engineType("name").passengersAmt(5)
+        .baggageAmt(3).costPerHour(BigDecimal.valueOf(5)).locationName("name").build();
+    carAdminSearchResponse = CarAdminSearchResponse.builder().id(1L).vin("vin").brand("brand")
+        .model("model").carClass("class").carClassId(1L).dateOfIssue(LocalDate.of(2000, 1, 1))
+        .bodyType("name").isAutomaticTransmission(true).color("name").engineType("name")
+        .passengersAmt(5).baggageAmt(5).hasConditioner(true).costPerHour(5).locationId(1L)
+        .locationName("name").isInRental(true).build();
+    updateCarRequest = UpdateCarRequest.builder().brand("name").model("name").vin("name")
+        .location(1L).carClass(1L).dateOfIssue(LocalDate.of(2000, 1, 1)).color("name")
+        .bodyType(CarBodyType.COUPE).engineType(CarEngineType.DIESEL).passengersAmt(5).baggageAmt(5)
+        .autoTransmission(true).hasConditioner(true).costPerHour(BigDecimal.valueOf(5)).build();
+  }
+
+  @AfterAll
+  public static void teardown() {
+    firstCarProfitableOfferResponse = null;
+    secondCarProfitableOfferResponse = null;
+    carByIdResponse = null;
+    createCarRequest = null;
+    carSearchRequest = null;
+    carSearchResponse = null;
+    carAdminSearchResponse = null;
+    updateCarRequest = null;
+  }
+
   @Test
   void givenValidRequest_findAllProfitableOffers_thenReturnResponse200() throws Exception {
-    var response = Arrays.asList(CarProfitableOfferResponse.builder().id(1L).brand("name").build(),
-        CarProfitableOfferResponse.builder().id(2L).brand("name1").build());
+    var response = Arrays.asList(firstCarProfitableOfferResponse, secondCarProfitableOfferResponse);
     when(carService.findAllProfitableOffers(ENGLISH)).thenReturn(response);
 
-    mockMvc.perform(get("/cars/profitable").cookie(new Cookie(LANGUAGE_COOKIE_NAME, ENGLISH)))
+    mockMvc.perform(get("/cars/profitable")
+        .cookie(new Cookie(LANGUAGE_COOKIE_NAME, ENGLISH)))
         .andDo(print())
         .andExpect(status().isOk())
         .andExpect(content().contentType(APPLICATION_JSON_VALUE))
@@ -79,7 +130,8 @@ class CarControllerTest {
   void givenValidRequest_findAllProfitableOffersNoContent_thenReturnResponse204() throws Exception {
     when(carService.findAllProfitableOffers(ENGLISH)).thenThrow(new NoContentException(NO_CONTENT));
 
-    mockMvc.perform(get("/cars/profitable").cookie(new Cookie(LANGUAGE_COOKIE_NAME, ENGLISH)))
+    mockMvc.perform(get("/cars/profitable")
+        .cookie(new Cookie(LANGUAGE_COOKIE_NAME, ENGLISH)))
         .andDo(print())
         .andExpect(status().isNoContent())
         .andExpect(content().string(NO_CONTENT));
@@ -87,10 +139,10 @@ class CarControllerTest {
 
   @Test
   void givenValidRequest_findCarById_thenReturnResponse200() throws Exception {
-    var response = CarByIdResponse.builder().id(1L).brand("name").build();
-    when(carService.findCarById(1L, ENGLISH)).thenReturn(response);
+    when(carService.findCarById(1L, ENGLISH)).thenReturn(carByIdResponse);
 
-    mockMvc.perform(get("/cars/search/{id}", 1).cookie(new Cookie(LANGUAGE_COOKIE_NAME, ENGLISH)))
+    mockMvc.perform(get("/cars/search/{id}", 1)
+        .cookie(new Cookie(LANGUAGE_COOKIE_NAME, ENGLISH)))
         .andDo(print())
         .andExpect(status().isOk())
         .andExpect(content().contentType(APPLICATION_JSON_VALUE));
@@ -100,7 +152,8 @@ class CarControllerTest {
   void givenInvalidRequest_findCarById_thenReturnResponse400() throws Exception {
     when(carService.findCarById(1L, ENGLISH)).thenThrow(new IllegalStateException("No such car"));
 
-    mockMvc.perform(get("/cars/search/{id}", 1).cookie(new Cookie(LANGUAGE_COOKIE_NAME, ENGLISH)))
+    mockMvc.perform(get("/cars/search/{id}", 1)
+        .cookie(new Cookie(LANGUAGE_COOKIE_NAME, ENGLISH)))
         .andDo(print())
         .andExpect(status().isBadRequest())
         .andExpect(content().string("No such car"));
@@ -109,11 +162,6 @@ class CarControllerTest {
   @Test
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenValidRequest_whenCreate_thenReturnResponse200() throws Exception {
-    var createCarRequest = CreateCarRequest.builder().brandId(1L).modelId(1L).vin("vin")
-        .locationId(1L).carClassId(1L).dateOfIssue(LocalDate.now()).color("color")
-        .bodyType(CarBodyType.COUPE).engineType(CarEngineType.DIESEL).passengersAmt(5)
-        .baggageAmt(3).autoTransmission(true).hasConditioner(true).isInRental(true).costPerHour(
-            BigDecimal.valueOf(5)).build();
     doNothing().when(carService).create(createCarRequest);
 
     mockMvc.perform(post("/cars")
@@ -127,11 +175,6 @@ class CarControllerTest {
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenValidRequestWithExistedClassName_whenCreateFailed_thenReturnResponse406()
       throws Exception {
-    var createCarRequest = CreateCarRequest.builder().brandId(1L).modelId(1L).vin("vin")
-        .locationId(1L).carClassId(1L).dateOfIssue(LocalDate.now()).color("color")
-        .bodyType(CarBodyType.COUPE).engineType(CarEngineType.DIESEL).passengersAmt(5)
-        .baggageAmt(3).autoTransmission(true).hasConditioner(true).isInRental(true).costPerHour(
-            BigDecimal.valueOf(5)).build();
     doThrow(new EntityAlreadyExistsException("Entity with same vin already exists"))
         .when(carService).create(createCarRequest);
 
@@ -146,12 +189,6 @@ class CarControllerTest {
   @Test
   void givenValidRequestUnauthorized_whenCreateFailed_thenReturnResponse401()
       throws Exception {
-    var createCarRequest = CreateCarRequest.builder().brandId(1L).modelId(1L).vin("vin")
-        .locationId(1L).carClassId(1L).dateOfIssue(LocalDate.now()).color("color")
-        .bodyType(CarBodyType.COUPE).engineType(CarEngineType.DIESEL).passengersAmt(5)
-        .baggageAmt(3).autoTransmission(true).hasConditioner(true).isInRental(true).costPerHour(
-            BigDecimal.valueOf(5)).build();
-
     mockMvc.perform(post("/cars")
         .content(objectMapper.writeValueAsString(createCarRequest))
         .contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -161,14 +198,8 @@ class CarControllerTest {
 
   @Test
   void givenValidRequest_whenSearchCars_thenReturnResponse200() throws Exception {
-    CarSearchRequest carSearchRequest = new CarSearchRequest();
-    var responses = Arrays.asList(CarSearchResponse.builder().id(1L).brand("name").model("name")
-            .carClass("name").yearOfIssue("2000").bodyType("name").engineType("name").passengersAmt(5)
-            .baggageAmt(3).costPerHour(BigDecimal.valueOf(5)).locationName("name").build(),
-        CarSearchResponse.builder().id(2L).brand("name").model("name").carClass("name")
-            .yearOfIssue("2000").bodyType("name").engineType("name").passengersAmt(5).baggageAmt(3)
-            .costPerHour(BigDecimal.valueOf(5)).locationName("name").build());
-    when(carService.searchCars(carSearchRequest, ENGLISH)).thenReturn(new PageImpl<>(responses));
+    when(carService.searchCars(carSearchRequest, ENGLISH))
+        .thenReturn(new PageImpl<>(Collections.singletonList(carSearchResponse)));
 
     mockMvc.perform(post("/cars/search")
         .content(objectMapper.writeValueAsString(carSearchRequest))
@@ -181,21 +212,8 @@ class CarControllerTest {
   @Test
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenValidRequest_whenSearchCarsByAdmin_thenReturnResponse200() throws Exception {
-    CarSearchRequest carSearchRequest = new CarSearchRequest();
-    var responses = Arrays.asList(CarAdminSearchResponse.builder().id(1L).vin("vin").brand("brand")
-            .model("model").carClass("class").carClassId(1L).dateOfIssue(LocalDate.of(2000, 1, 1))
-            .bodyType("name").isAutomaticTransmission(true).color("name").engineType("name")
-            .passengersAmt(5).baggageAmt(5).hasConditioner(true).costPerHour(5).locationId(1L)
-            .locationName("name").isInRental(true).build(),
-        CarAdminSearchResponse.builder().id(1L).vin("vin")
-            .brand("brand").model("model").carClass("class").carClassId(1L)
-            .dateOfIssue(LocalDate.of(2000, 1, 1)).bodyType("name")
-            .isAutomaticTransmission(true).color("name").engineType("name").passengersAmt(5)
-            .baggageAmt(5).hasConditioner(true).costPerHour(5).locationId(1L).locationName("name")
-            .isInRental(true).build());
-
     when(carService.searchCarsByAdmin(carSearchRequest, ENGLISH))
-        .thenReturn(new PageImpl<>(responses));
+        .thenReturn(new PageImpl<>(Collections.singletonList(carAdminSearchResponse)));
 
     mockMvc.perform(post("/cars/search/admin")
         .content(objectMapper.writeValueAsString(carSearchRequest))
@@ -208,8 +226,6 @@ class CarControllerTest {
   @Test
   void givenValidRequestUnauthorized_whenSearchCarsByAdminFailed_thenReturnResponse401()
       throws Exception {
-    CarSearchRequest carSearchRequest = new CarSearchRequest();
-
     mockMvc.perform(post("/cars/search/admin")
         .content(objectMapper.writeValueAsString(carSearchRequest))
         .cookie(new Cookie(LANGUAGE_COOKIE_NAME, ENGLISH))
@@ -279,11 +295,6 @@ class CarControllerTest {
   @Test
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenValidRequest_whenUpdateSuccessful_thenReturnResponse200() throws Exception {
-    var updateCarRequest = UpdateCarRequest.builder().brand("name").model("name").vin("name")
-        .location(1L).carClass(1L).dateOfIssue(LocalDate.of(2000, 1, 1)).color("name")
-        .bodyType(CarBodyType.COUPE).engineType(CarEngineType.DIESEL).passengersAmt(5).baggageAmt(5)
-        .autoTransmission(true).hasConditioner(true).costPerHour(BigDecimal.valueOf(5)).build();
-
     doNothing().when(carService).update(1L, updateCarRequest);
 
     mockMvc.perform(put("/cars/{id}", 1)
@@ -297,11 +308,6 @@ class CarControllerTest {
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenInvalidRequestWithExistingName_whenUpdateFailed_thenReturnResponse406()
       throws Exception {
-    var updateCarRequest = UpdateCarRequest.builder().brand("name").model("name").vin("name")
-        .location(1L).carClass(1L).dateOfIssue(LocalDate.of(2000, 1, 1)).color("name")
-        .bodyType(CarBodyType.COUPE).engineType(CarEngineType.DIESEL).passengersAmt(5).baggageAmt(5)
-        .autoTransmission(true).hasConditioner(true).costPerHour(BigDecimal.valueOf(5)).build();
-
     doThrow(new EntityAlreadyExistsException("Entity with same vin already exists"))
         .when(carService).update(1L, updateCarRequest);
 
@@ -317,11 +323,6 @@ class CarControllerTest {
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenInvalidRequest_whenUpdateFailed_thenReturnResponse400()
       throws Exception {
-    var updateCarRequest = UpdateCarRequest.builder().brand("name").model("name").vin("name")
-        .location(1L).carClass(1L).dateOfIssue(LocalDate.of(2000, 1, 1)).color("name")
-        .bodyType(CarBodyType.COUPE).engineType(CarEngineType.DIESEL).passengersAmt(5).baggageAmt(5)
-        .autoTransmission(true).hasConditioner(true).costPerHour(BigDecimal.valueOf(5)).build();
-
     doThrow(new IllegalStateException("Bad request")).when(carService)
         .update(1L, updateCarRequest);
 
@@ -337,11 +338,6 @@ class CarControllerTest {
   @WithMockUser(username = "user", authorities = {"USER"})
   void givenValidRequestAsUser_whenUpdateFailed_thenReturnResponse403()
       throws Exception {
-    var updateCarRequest = UpdateCarRequest.builder().brand("name").model("name").vin("name")
-        .location(1L).carClass(1L).dateOfIssue(LocalDate.of(2000, 1, 1)).color("name")
-        .bodyType(CarBodyType.COUPE).engineType(CarEngineType.DIESEL).passengersAmt(5).baggageAmt(5)
-        .autoTransmission(true).hasConditioner(true).costPerHour(BigDecimal.valueOf(5)).build();
-
     doNothing().when(carService).update(1L, updateCarRequest);
 
     mockMvc.perform(put("/cars/{id}", 1)
@@ -354,11 +350,6 @@ class CarControllerTest {
   @Test
   void givenValidRequestUnauthorized_whenUpdateFailed_thenReturnResponse401()
       throws Exception {
-    var updateCarRequest = UpdateCarRequest.builder().brand("name").model("name").vin("name")
-        .location(1L).carClass(1L).dateOfIssue(LocalDate.of(2000, 1, 1)).color("name")
-        .bodyType(CarBodyType.COUPE).engineType(CarEngineType.DIESEL).passengersAmt(5).baggageAmt(5)
-        .autoTransmission(true).hasConditioner(true).costPerHour(BigDecimal.valueOf(5)).build();
-
     doNothing().when(carService).update(1L, updateCarRequest);
 
     mockMvc.perform(put("/cars/{id}", 1)

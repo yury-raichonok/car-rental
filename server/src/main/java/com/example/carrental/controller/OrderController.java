@@ -1,5 +1,7 @@
 package com.example.carrental.controller;
 
+import static com.example.carrental.constants.ApplicationConstants.LANGUAGE_COOKIE_NAME;
+
 import com.example.carrental.controller.dto.order.CreateOrderRequest;
 import com.example.carrental.controller.dto.order.OrderCompleteWithPenaltyRequest;
 import com.example.carrental.controller.dto.order.OrderInformationResponse;
@@ -46,35 +48,35 @@ public class OrderController {
 
   @GetMapping(path = "/current")
   public ResponseEntity<Page<OrderInformationResponse>> findAllCurrent(Pageable pageable,
-      @NotNull @CookieValue(name = "i18next") String language) {
+      @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language) {
     var ordersPage = orderService.findAllCurrent(pageable, language);
     return new ResponseEntity<>(ordersPage, HttpStatus.OK);
   }
 
   @GetMapping(path = "/future")
   public ResponseEntity<Page<OrderInformationResponse>> findAllFuture(Pageable pageable,
-      @NotNull @CookieValue(name = "i18next") String language) {
+      @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language) {
     var ordersPage = orderService.findAllFuture(pageable, language);
     return new ResponseEntity<>(ordersPage, HttpStatus.OK);
   }
 
   @GetMapping(path = "/new")
   public ResponseEntity<Page<OrderNewResponse>> findAllNew(Pageable pageable,
-      @NotNull @CookieValue(name = "i18next") String language) {
+      @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language) {
     var ordersPage = orderService.findAllNew(pageable, language);
     return new ResponseEntity<>(ordersPage, HttpStatus.OK);
   }
 
   @GetMapping(path = "/user")
   public ResponseEntity<Page<UserOrderResponse>> findAllNewUserOrders(Pageable pageable,
-      @NotNull @CookieValue(name = "i18next") String language) {
+      @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language) {
     var ordersPage = orderService.findAllNewUserOrders(pageable, language);
     return new ResponseEntity<>(ordersPage, HttpStatus.OK);
   }
 
   @GetMapping(path = "/user/history")
   public ResponseEntity<Page<UserOrderResponse>> findAllUserOrdersHistory(Pageable pageable,
-      @NotNull @CookieValue(name = "i18next") String language) {
+      @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language) {
     var ordersPage = orderService.findAllUserOrdersHistory(pageable, language);
     return new ResponseEntity<>(ordersPage, HttpStatus.OK);
   }
@@ -117,7 +119,7 @@ public class OrderController {
   @PostMapping(path = "/search")
   public ResponseEntity<Page<OrderResponse>> findAll(
       @Valid @RequestBody OrderSearchRequest orderSearchRequest,
-      @NotNull @CookieValue(name = "i18next") String language) {
+      @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language) {
     var ordersPage = orderService.findAll(orderSearchRequest, language);
     return new ResponseEntity<>(ordersPage, HttpStatus.OK);
   }

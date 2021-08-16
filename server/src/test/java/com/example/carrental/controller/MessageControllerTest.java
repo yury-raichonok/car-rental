@@ -14,9 +14,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.carrental.controller.dto.message.CreateMessageRequest;
 import com.example.carrental.controller.dto.message.MessageResponse;
+import com.example.carrental.controller.dto.notification.NotificationResponse;
 import com.example.carrental.service.MessageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
+import java.util.Collections;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -33,6 +37,9 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 class MessageControllerTest {
 
+  private static Pageable pageable;
+  private static MessageResponse messageResponse;
+
   @Autowired
   private ObjectMapper objectMapper;
 
@@ -42,20 +49,28 @@ class MessageControllerTest {
   @MockBean
   private MessageService messageService;
 
+  @BeforeAll
+  public static void setup() {
+    pageable = Pageable.ofSize(10).withPage(0);
+    messageResponse = MessageResponse.builder().id(1L).name("name")
+        .email("test@gmail.com").phone("+375121234567").message("message").sentDate("date")
+        .readed(false).build();
+  }
+
+  @AfterAll
+  public static void teardown() {
+    pageable = null;
+    messageResponse = null;
+  }
+
   @Test
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenValidRequest_whenFindAll_thenReturnResponse200() throws Exception {
-    var pageable = Pageable.ofSize(10).withPage(0);
-    var responses = Arrays.asList(MessageResponse.builder().id(1L).name("name")
-        .email("test@gmail.com").phone("+375121234567").message("message").sentDate("date")
-        .readed(false).build(), MessageResponse.builder().id(2L).name("name")
-        .email("test@gmail.com").phone("+375121234567").message("message").sentDate("date")
-        .readed(false).build());
-    Page<MessageResponse> page = new PageImpl<>(responses);
+    Page<MessageResponse> page = new PageImpl<>(Collections.singletonList(messageResponse));
 
     when(messageService.findAll(pageable)).thenReturn(page);
 
-    mockMvc.perform(get("/messages/all?page=0&size=10")
+    mockMvc.perform(get("/messages/all?page={page}&size={size}", 0, 10)
         .contentType(APPLICATION_JSON_VALUE))
         .andDo(print())
         .andExpect(status().isOk())
@@ -66,17 +81,11 @@ class MessageControllerTest {
   @WithMockUser(username = "user", authorities = {"USER"})
   void givenValidRequestAsUser_whenFindAll_thenReturnResponse403()
       throws Exception {
-    var pageable = Pageable.ofSize(10).withPage(0);
-    var responses = Arrays.asList(MessageResponse.builder().id(1L).name("name")
-        .email("test@gmail.com").phone("+375121234567").message("message").sentDate("date")
-        .readed(false).build(), MessageResponse.builder().id(2L).name("name")
-        .email("test@gmail.com").phone("+375121234567").message("message").sentDate("date")
-        .readed(false).build());
-    Page<MessageResponse> page = new PageImpl<>(responses);
+    Page<MessageResponse> page = new PageImpl<>(Collections.singletonList(messageResponse));
 
     when(messageService.findAll(pageable)).thenReturn(page);
 
-    mockMvc.perform(get("/messages/all?page=0&size=10")
+    mockMvc.perform(get("/messages/all?page={page}&size={size}", 0, 10)
         .contentType(APPLICATION_JSON_VALUE))
         .andDo(print())
         .andExpect(status().isForbidden());
@@ -85,17 +94,11 @@ class MessageControllerTest {
   @Test
   void givenValidRequestUnauthorized_whenFindAll_thenReturnResponse401()
       throws Exception {
-    var pageable = Pageable.ofSize(10).withPage(0);
-    var responses = Arrays.asList(MessageResponse.builder().id(1L).name("name")
-        .email("test@gmail.com").phone("+375121234567").message("message").sentDate("date")
-        .readed(false).build(), MessageResponse.builder().id(2L).name("name")
-        .email("test@gmail.com").phone("+375121234567").message("message").sentDate("date")
-        .readed(false).build());
-    Page<MessageResponse> page = new PageImpl<>(responses);
+    Page<MessageResponse> page = new PageImpl<>(Collections.singletonList(messageResponse));
 
     when(messageService.findAll(pageable)).thenReturn(page);
 
-    mockMvc.perform(get("/messages/all?page=0&size=10")
+    mockMvc.perform(get("/messages/all?page={page}&size={size}", 0, 10)
         .contentType(APPLICATION_JSON_VALUE))
         .andDo(print())
         .andExpect(status().isUnauthorized());
@@ -104,17 +107,11 @@ class MessageControllerTest {
   @Test
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenValidRequest_whenFindAllNewMessages_thenReturnResponse200() throws Exception {
-    var pageable = Pageable.ofSize(10).withPage(0);
-    var responses = Arrays.asList(MessageResponse.builder().id(1L).name("name")
-        .email("test@gmail.com").phone("+375121234567").message("message").sentDate("date")
-        .readed(false).build(), MessageResponse.builder().id(2L).name("name")
-        .email("test@gmail.com").phone("+375121234567").message("message").sentDate("date")
-        .readed(false).build());
-    Page<MessageResponse> page = new PageImpl<>(responses);
+    Page<MessageResponse> page = new PageImpl<>(Collections.singletonList(messageResponse));
 
     when(messageService.findAllNewMessages(pageable)).thenReturn(page);
 
-    mockMvc.perform(get("/messages/new?page=0&size=10")
+    mockMvc.perform(get("/messages/new?page={page}&size={size}", 0, 10)
         .contentType(APPLICATION_JSON_VALUE))
         .andDo(print())
         .andExpect(status().isOk())
@@ -125,17 +122,11 @@ class MessageControllerTest {
   @WithMockUser(username = "user", authorities = {"USER"})
   void givenValidRequestAsUser_whenFindAllNewMessages_thenReturnResponse403()
       throws Exception {
-    var pageable = Pageable.ofSize(10).withPage(0);
-    var responses = Arrays.asList(MessageResponse.builder().id(1L).name("name")
-        .email("test@gmail.com").phone("+375121234567").message("message").sentDate("date")
-        .readed(false).build(), MessageResponse.builder().id(2L).name("name")
-        .email("test@gmail.com").phone("+375121234567").message("message").sentDate("date")
-        .readed(false).build());
-    Page<MessageResponse> page = new PageImpl<>(responses);
+    Page<MessageResponse> page = new PageImpl<>(Collections.singletonList(messageResponse));
 
     when(messageService.findAllNewMessages(pageable)).thenReturn(page);
 
-    mockMvc.perform(get("/messages/new?page=0&size=10")
+    mockMvc.perform(get("/messages/new?page={page}&size={size}", 0, 10)
         .contentType(APPLICATION_JSON_VALUE))
         .andDo(print())
         .andExpect(status().isForbidden());
@@ -144,17 +135,11 @@ class MessageControllerTest {
   @Test
   void givenValidRequestUnauthorized_whenFindAllNewMessages_thenReturnResponse401()
       throws Exception {
-    var pageable = Pageable.ofSize(10).withPage(0);
-    var responses = Arrays.asList(MessageResponse.builder().id(1L).name("name")
-        .email("test@gmail.com").phone("+375121234567").message("message").sentDate("date")
-        .readed(false).build(), MessageResponse.builder().id(2L).name("name")
-        .email("test@gmail.com").phone("+375121234567").message("message").sentDate("date")
-        .readed(false).build());
-    Page<MessageResponse> page = new PageImpl<>(responses);
+    Page<MessageResponse> page = new PageImpl<>(Collections.singletonList(messageResponse));
 
     when(messageService.findAllNewMessages(pageable)).thenReturn(page);
 
-    mockMvc.perform(get("/messages/new?page=0&size=10")
+    mockMvc.perform(get("/messages/new?page={page}&size={size}", 0, 10)
         .contentType(APPLICATION_JSON_VALUE))
         .andDo(print())
         .andExpect(status().isUnauthorized());

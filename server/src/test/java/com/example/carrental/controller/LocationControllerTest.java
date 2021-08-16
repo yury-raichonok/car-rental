@@ -26,7 +26,10 @@ import com.example.carrental.service.exceptions.EntityAlreadyExistsException;
 import com.example.carrental.service.exceptions.NoContentException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
+import java.util.Collections;
 import javax.servlet.http.Cookie;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -43,6 +46,12 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 class LocationControllerTest {
 
+  private static Pageable pageable;
+  private static LocationNameResponse firstLocationNameResponse;
+  private static LocationNameResponse secondLocationNameResponse;
+  private static LocationWithTranslationsResponse locationWithTranslationsResponse;
+  private static CreateLocationRequest createLocationRequest;
+
   @Autowired
   private ObjectMapper objectMapper;
 
@@ -52,14 +61,35 @@ class LocationControllerTest {
   @MockBean
   private LocationService locationService;
 
+  @BeforeAll
+  public static void setup() {
+    pageable = Pageable.ofSize(10).withPage(0);
+    firstLocationNameResponse = LocationNameResponse.builder().id(1L).name("name").build();
+    secondLocationNameResponse = LocationNameResponse.builder().id(2L).name("name1").build();
+    locationWithTranslationsResponse = LocationWithTranslationsResponse.builder().id(1L)
+        .nameBe("name")
+        .nameEn("name").nameRu("name").coordinateX(1).coordinateY(1).zoom(1).build();
+    createLocationRequest = CreateLocationRequest.builder().nameBe("name").nameEn("name")
+        .nameRu("name").coordinateX(1).coordinateY(1).zoom(1).build();
+  }
+
+  @AfterAll
+  public static void teardown() {
+    pageable = null;
+    firstLocationNameResponse = null;
+    secondLocationNameResponse = null;
+    locationWithTranslationsResponse = null;
+    createLocationRequest = null;
+  }
+
   @Test
   void givenValidRequest_whenFindAllForSelect_thenReturnResponse200() throws Exception {
-    var response = Arrays.asList(LocationNameResponse.builder().id(1L).name("name").build(),
-        LocationNameResponse.builder().id(2L).name("name1").build());
+    var response = Arrays.asList(firstLocationNameResponse, secondLocationNameResponse);
 
     when(locationService.findAllForSelect(ENGLISH)).thenReturn(response);
 
-    mockMvc.perform(get("/locations/select").cookie(new Cookie(LANGUAGE_COOKIE_NAME, ENGLISH)))
+    mockMvc.perform(get("/locations/select")
+        .cookie(new Cookie(LANGUAGE_COOKIE_NAME, ENGLISH)))
         .andDo(print())
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -72,7 +102,8 @@ class LocationControllerTest {
   void givenValidRequest_whenFindAllForSelectNoContent_thenReturnResponse204() throws Exception {
     when(locationService.findAllForSelect(ENGLISH)).thenThrow(new NoContentException(NO_CONTENT));
 
-    mockMvc.perform(get("/locations/select").cookie(new Cookie(LANGUAGE_COOKIE_NAME, ENGLISH)))
+    mockMvc.perform(get("/locations/select")
+        .cookie(new Cookie(LANGUAGE_COOKIE_NAME, ENGLISH)))
         .andDo(print())
         .andExpect(status().isNoContent())
         .andExpect(content().string(NO_CONTENT));
@@ -80,12 +111,8 @@ class LocationControllerTest {
 
   @Test
   void givenValidRequest_whenFindAllPaged_thenReturnResponse200() throws Exception {
-    var pageable = Pageable.ofSize(10).withPage(0);
-    var responses = Arrays.asList(LocationWithTranslationsResponse.builder().id(1L).nameBe("name")
-            .nameEn("name").nameRu("name").coordinateX(1).coordinateY(1).zoom(1).build(),
-        LocationWithTranslationsResponse.builder().id(2L).nameBe("name").nameEn("name")
-            .nameRu("name").coordinateX(1).coordinateY(1).zoom(1).build());
-    Page<LocationWithTranslationsResponse> page = new PageImpl<>(responses);
+    Page<LocationWithTranslationsResponse> page = new PageImpl<>(
+        Collections.singletonList(locationWithTranslationsResponse));
 
     when(locationService.findAllPaged(pageable)).thenReturn(page);
 
@@ -99,8 +126,6 @@ class LocationControllerTest {
   @Test
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenValidRequest_whenCreate_thenReturnResponse200() throws Exception {
-    var createLocationRequest = CreateLocationRequest.builder().nameBe("name").nameEn("name")
-        .nameRu("name").coordinateX(1).coordinateY(1).zoom(1).build();
     doNothing().when(locationService).create(createLocationRequest);
 
     mockMvc.perform(post("/locations")
@@ -114,8 +139,6 @@ class LocationControllerTest {
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenValidRequestWithExistedBrandName_whenCreateFailed_thenReturnResponse406()
       throws Exception {
-    var createLocationRequest = CreateLocationRequest.builder().nameBe("name").nameEn("name")
-        .nameRu("name").coordinateX(1).coordinateY(1).zoom(1).build();
     doThrow(new EntityAlreadyExistsException("Entity with same name already exists"))
         .when(locationService).create(createLocationRequest);
 
@@ -130,9 +153,6 @@ class LocationControllerTest {
   @Test
   void givenValidRequestUnauthorized_whenCreateFailed_thenReturnResponse401()
       throws Exception {
-    var createLocationRequest = CreateLocationRequest.builder().nameBe("name").nameEn("name")
-        .nameRu("name").coordinateX(1).coordinateY(1).zoom(1).build();
-
     mockMvc.perform(post("/locations")
         .content(objectMapper.writeValueAsString(createLocationRequest))
         .contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -143,13 +163,10 @@ class LocationControllerTest {
   @Test
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenValidRequest_whenUpdateSuccessful_thenReturnResponse200() throws Exception {
-    var updateLocationRequest = CreateLocationRequest.builder().nameBe("name").nameEn("name")
-        .nameRu("name").coordinateX(1).coordinateY(1).zoom(1).build();
-
-    doNothing().when(locationService).update(1L, updateLocationRequest);
+    doNothing().when(locationService).update(1L, createLocationRequest);
 
     mockMvc.perform(put("/locations/{id}", 1)
-        .content(objectMapper.writeValueAsString(updateLocationRequest))
+        .content(objectMapper.writeValueAsString(createLocationRequest))
         .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andDo(print())
         .andExpect(status().isOk());
@@ -159,14 +176,11 @@ class LocationControllerTest {
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenInvalidRequest_whenUpdateFailed_thenReturnResponse400()
       throws Exception {
-    var updateLocationRequest = CreateLocationRequest.builder().nameBe("name").nameEn("name")
-        .nameRu("name").coordinateX(1).coordinateY(1).zoom(1).build();
-
     doThrow(new IllegalStateException("Bad request")).when(locationService)
-        .update(1L, updateLocationRequest);
+        .update(1L, createLocationRequest);
 
     mockMvc.perform(put("/locations/{id}", 1)
-        .content(objectMapper.writeValueAsString(updateLocationRequest))
+        .content(objectMapper.writeValueAsString(createLocationRequest))
         .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andDo(print())
         .andExpect(status().isBadRequest())
@@ -177,13 +191,10 @@ class LocationControllerTest {
   @WithMockUser(username = "user", authorities = {"USER"})
   void givenValidRequestAsUser_whenUpdateFailed_thenReturnResponse403()
       throws Exception {
-    var updateLocationRequest = CreateLocationRequest.builder().nameBe("name").nameEn("name")
-        .nameRu("name").coordinateX(1).coordinateY(1).zoom(1).build();
-
-    doNothing().when(locationService).update(1L, updateLocationRequest);
+    doNothing().when(locationService).update(1L, createLocationRequest);
 
     mockMvc.perform(put("/locations/{id}", 1)
-        .content(objectMapper.writeValueAsString(updateLocationRequest))
+        .content(objectMapper.writeValueAsString(createLocationRequest))
         .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andDo(print())
         .andExpect(status().isForbidden());
@@ -192,13 +203,10 @@ class LocationControllerTest {
   @Test
   void givenValidRequestUnauthorized_whenUpdateFailed_thenReturnResponse401()
       throws Exception {
-    var updateLocationRequest = CreateLocationRequest.builder().nameBe("name").nameEn("name")
-        .nameRu("name").coordinateX(1).coordinateY(1).zoom(1).build();
-
-    doNothing().when(locationService).update(1L, updateLocationRequest);
+    doNothing().when(locationService).update(1L, createLocationRequest);
 
     mockMvc.perform(put("/locations/{id}", 1)
-        .content(objectMapper.writeValueAsString(updateLocationRequest))
+        .content(objectMapper.writeValueAsString(createLocationRequest))
         .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andDo(print())
         .andExpect(status().isUnauthorized());

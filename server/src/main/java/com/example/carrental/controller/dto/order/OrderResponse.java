@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PastOrPresent;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -43,7 +42,6 @@ public class OrderResponse {
   private String paymentStatus;
   private String comments;
   @NotNull
-  @PastOrPresent
   private String sentDate;
   private String paymentDate;
   private String denyingDate;

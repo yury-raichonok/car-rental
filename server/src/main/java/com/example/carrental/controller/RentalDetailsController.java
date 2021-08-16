@@ -1,5 +1,7 @@
 package com.example.carrental.controller;
 
+import static com.example.carrental.constants.ApplicationConstants.LANGUAGE_COOKIE_NAME;
+
 import com.example.carrental.controller.dto.rentaldetails.RentalDetailsContactInformationResponse;
 import com.example.carrental.controller.dto.rentaldetails.RentalDetailsResponse;
 import com.example.carrental.controller.dto.rentaldetails.RentalDetailsUpdateRequest;
@@ -27,14 +29,14 @@ public class RentalDetailsController {
 
   @GetMapping(path = "/contacts")
   public ResponseEntity<RentalDetailsContactInformationResponse> getContactInformation(
-      @NotNull @CookieValue(name = "i18next") String language) {
+      @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language) {
     var informationResponse = rentalDetailsService.getContactInformation(language);
     return new ResponseEntity<>(informationResponse, HttpStatus.OK);
   }
 
   @GetMapping
   public ResponseEntity<RentalDetailsResponse> getRentalDetailsResponse(
-      @NotNull @CookieValue(name = "i18next") String language) {
+      @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language) {
     var informationResponse = rentalDetailsService.getRentalDetailsResponse(language);
     return new ResponseEntity<>(informationResponse, HttpStatus.OK);
   }

@@ -14,7 +14,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.carrental.controller.dto.notification.NotificationResponse;
 import com.example.carrental.service.NotificationService;
-import java.util.Arrays;
+import java.util.Collections;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,24 +33,37 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 class NotificationControllerTest {
 
+  private static Pageable pageable;
+  private static NotificationResponse notificationResponse;
+
   @Autowired
   private MockMvc mockMvc;
 
   @MockBean
   private NotificationService notificationService;
 
+  @BeforeAll
+  public static void setup() {
+    pageable = Pageable.ofSize(10).withPage(0);
+    notificationResponse = NotificationResponse.builder().id(1L).message("message")
+        .notificationType("type").sentDate("date").build();
+  }
+
+  @AfterAll
+  public static void teardown() {
+    pageable = null;
+    notificationResponse = null;
+  }
+
   @Test
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenValidRequest_whenFindAllNew_thenReturnResponse200() throws Exception {
-    var pageable = Pageable.ofSize(10).withPage(0);
-    var responses = Arrays.asList(NotificationResponse.builder().id(1L).message("message")
-        .notificationType("type").sentDate("date").build(), NotificationResponse.builder().id(2L)
-        .message("message").notificationType("type").sentDate("date").build());
-    Page<NotificationResponse> page = new PageImpl<>(responses);
+    Page<NotificationResponse> page = new PageImpl<>(
+        Collections.singletonList(notificationResponse));
 
     when(notificationService.findAllNew(pageable)).thenReturn(page);
 
-    mockMvc.perform(get("/notifications?page=0&size=10")
+    mockMvc.perform(get("/notifications?page={page}&size={size}", 0, 10)
         .contentType(APPLICATION_JSON_VALUE))
         .andDo(print())
         .andExpect(status().isOk())
@@ -58,15 +73,12 @@ class NotificationControllerTest {
   @Test
   void givenValidRequestUnauthorized_whenFindAllNew_thenReturnResponse401()
       throws Exception {
-    var pageable = Pageable.ofSize(10).withPage(0);
-    var responses = Arrays.asList(NotificationResponse.builder().id(1L).message("message")
-        .notificationType("type").sentDate("date").build(), NotificationResponse.builder().id(2L)
-        .message("message").notificationType("type").sentDate("date").build());
-    Page<NotificationResponse> page = new PageImpl<>(responses);
+    Page<NotificationResponse> page = new PageImpl<>(
+        Collections.singletonList(notificationResponse));
 
     when(notificationService.findAllNew(pageable)).thenReturn(page);
 
-    mockMvc.perform(get("/notifications?page=0&size=10")
+    mockMvc.perform(get("/notifications?page={page}&size={size}", 0, 10)
         .contentType(APPLICATION_JSON_VALUE))
         .andDo(print())
         .andExpect(status().isUnauthorized());
@@ -75,15 +87,12 @@ class NotificationControllerTest {
   @Test
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenValidRequest_whenFindAllNotificationsHistory_thenReturnResponse200() throws Exception {
-    var pageable = Pageable.ofSize(10).withPage(0);
-    var responses = Arrays.asList(NotificationResponse.builder().id(1L).message("message")
-        .notificationType("type").sentDate("date").build(), NotificationResponse.builder().id(2L)
-        .message("message").notificationType("type").sentDate("date").build());
-    Page<NotificationResponse> page = new PageImpl<>(responses);
+    Page<NotificationResponse> page = new PageImpl<>(
+        Collections.singletonList(notificationResponse));
 
     when(notificationService.findAllNotificationsHistory(pageable)).thenReturn(page);
 
-    mockMvc.perform(get("/notifications/history?page=0&size=10")
+    mockMvc.perform(get("/notifications/history?page={page}&size={size}", 0, 10)
         .contentType(APPLICATION_JSON_VALUE))
         .andDo(print())
         .andExpect(status().isOk())
@@ -93,15 +102,12 @@ class NotificationControllerTest {
   @Test
   void givenValidRequestUnauthorized_whenFindAllNotificationsHistory_thenReturnResponse401()
       throws Exception {
-    var pageable = Pageable.ofSize(10).withPage(0);
-    var responses = Arrays.asList(NotificationResponse.builder().id(1L).message("message")
-        .notificationType("type").sentDate("date").build(), NotificationResponse.builder().id(2L)
-        .message("message").notificationType("type").sentDate("date").build());
-    Page<NotificationResponse> page = new PageImpl<>(responses);
+    Page<NotificationResponse> page = new PageImpl<>(
+        Collections.singletonList(notificationResponse));
 
     when(notificationService.findAllNotificationsHistory(pageable)).thenReturn(page);
 
-    mockMvc.perform(get("/notifications/history?page=0&size=10")
+    mockMvc.perform(get("/notifications/history?page={page}&size={size}", 0, 10)
         .contentType(APPLICATION_JSON_VALUE))
         .andDo(print())
         .andExpect(status().isUnauthorized());

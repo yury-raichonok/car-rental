@@ -12,7 +12,7 @@ public interface NotificationMapper {
 
   @Mapping(target = "id", source = "notification.id")
   @Mapping(target = "message", source = "notification.message")
-  @Mapping(target = "notificationType", source = "notification.notificationType.notificationType")
+  @Mapping(target = "notificationType", source = "notification.notificationType.type")
   @Mapping(target = "sentDate", source = "notification.sentDate",
       dateFormat = NOTIFICATION_DATE_FORMAT_PATTERN)
   NotificationResponse notificationToNotificationResponse(Notification notification);

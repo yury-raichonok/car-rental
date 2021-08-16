@@ -19,9 +19,7 @@ public class OrderTotalCostRequest {
   @Min(0)
   private double costPerHour;
   @NotNull
-  @FutureOrPresent
   private LocalDateTime pickUpDate;
   @NotNull
-  @FutureOrPresent
   private LocalDateTime returnDate;
 }

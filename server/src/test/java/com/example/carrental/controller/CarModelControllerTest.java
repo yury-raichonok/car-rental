@@ -25,6 +25,9 @@ import com.example.carrental.service.exceptions.EntityAlreadyExistsException;
 import com.example.carrental.service.exceptions.NoContentException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
+import java.util.Collections;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -41,6 +44,13 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 class CarModelControllerTest {
 
+  private static Pageable pageable;
+  private static CarModelResponse firstCarModelResponse;
+  private static CarModelResponse secondCarModelResponse;
+  private static CarModelBrandNameResponse carModelBrandNameResponse;
+  private static CreateCarModelRequest createCarModelRequest;
+  private static UpdateCarModelRequest updateCarModelRequest;
+
   @Autowired
   private ObjectMapper objectMapper;
 
@@ -50,11 +60,30 @@ class CarModelControllerTest {
   @MockBean
   private CarModelService carModelService;
 
+  @BeforeAll
+  public static void setup() {
+    pageable = Pageable.ofSize(10).withPage(0);
+    firstCarModelResponse = CarModelResponse.builder().id(1L).name("name").brandId(1L).build();
+    secondCarModelResponse = CarModelResponse.builder().id(2L).name("name1").brandId(1L).build();
+    carModelBrandNameResponse = CarModelBrandNameResponse.builder().id(1L).name("name")
+        .brand("name").build();
+    createCarModelRequest = CreateCarModelRequest.builder().brandId(1L).name("name").build();
+    updateCarModelRequest = UpdateCarModelRequest.builder().brand("name").name("name").build();
+  }
+
+  @AfterAll
+  public static void teardown() {
+    pageable = null;
+    firstCarModelResponse = null;
+    secondCarModelResponse = null;
+    carModelBrandNameResponse = null;
+    createCarModelRequest = null;
+    updateCarModelRequest = null;
+  }
+
   @Test
   void givenValidRequest_whenFindAll_thenReturnResponse200() throws Exception {
-    var responses = Arrays
-        .asList(CarModelResponse.builder().id(1L).name("name").brandId(1L).build(),
-            CarModelResponse.builder().id(2L).name("name1").brandId(1L).build());
+    var responses = Arrays.asList(firstCarModelResponse, secondCarModelResponse);
     when(carModelService.findAll()).thenReturn(responses);
 
     mockMvc.perform(get("/models"))
@@ -78,11 +107,8 @@ class CarModelControllerTest {
 
   @Test
   void givenValidRequest_whenFindAllModelsWithBrandName_thenReturnResponse200() throws Exception {
-    var pageable = Pageable.ofSize(10).withPage(0);
-    var responses = Arrays
-        .asList(CarModelBrandNameResponse.builder().id(1L).name("name").brand("name").build(),
-            CarModelBrandNameResponse.builder().id(2L).name("name").brand("name").build());
-    Page<CarModelBrandNameResponse> page = new PageImpl<>(responses);
+    Page<CarModelBrandNameResponse> page = new PageImpl<>(
+        Collections.singletonList(carModelBrandNameResponse));
 
     when(carModelService.findAllModelsWithBrandName(pageable)).thenReturn(page);
 
@@ -94,9 +120,7 @@ class CarModelControllerTest {
 
   @Test
   void givenValidRequest_whenFindModelsByBrandId_thenReturnResponse200() throws Exception {
-    var responses = Arrays
-        .asList(CarModelResponse.builder().id(1L).name("name").brandId(1L).build(),
-            CarModelResponse.builder().id(2L).name("name1").brandId(2L).build());
+    var responses = Arrays.asList(firstCarModelResponse, secondCarModelResponse);
     when(carModelService.findModelsByBrandId(1L)).thenReturn(responses);
 
     mockMvc.perform(get("/models/brand/id/{id}", 1L))
@@ -120,9 +144,7 @@ class CarModelControllerTest {
 
   @Test
   void givenValidRequest_whenFindModelsByBrandName_thenReturnResponse200() throws Exception {
-    var responses = Arrays
-        .asList(CarModelResponse.builder().id(1L).name("name").brandId(1L).build(),
-            CarModelResponse.builder().id(2L).name("name1").brandId(2L).build());
+    var responses = Arrays.asList(firstCarModelResponse, secondCarModelResponse);
     when(carModelService.findModelsByBrandName("name")).thenReturn(responses);
 
     mockMvc.perform(get("/models/brand/{name}", "name"))
@@ -149,7 +171,6 @@ class CarModelControllerTest {
   @Test
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenValidRequest_whenCreate_thenReturnResponse200() throws Exception {
-    var createCarModelRequest = CreateCarModelRequest.builder().brandId(1L).name("name").build();
     doNothing().when(carModelService).create(createCarModelRequest);
 
     mockMvc.perform(post("/models")
@@ -163,7 +184,6 @@ class CarModelControllerTest {
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenValidRequestWithExistedBrandName_whenCreateFailed_thenReturnResponse406()
       throws Exception {
-    var createCarModelRequest = CreateCarModelRequest.builder().brandId(1L).name("name").build();
     doThrow(new EntityAlreadyExistsException("Entity with same name already exists"))
         .when(carModelService).create(createCarModelRequest);
 
@@ -178,8 +198,6 @@ class CarModelControllerTest {
   @Test
   void givenValidRequestUnauthorized_whenCreateFailed_thenReturnResponse401()
       throws Exception {
-    var createCarModelRequest = CreateCarModelRequest.builder().brandId(1L).name("name").build();
-
     mockMvc.perform(post("/models")
         .content(objectMapper.writeValueAsString(createCarModelRequest))
         .contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -190,8 +208,6 @@ class CarModelControllerTest {
   @Test
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenValidRequest_whenUpdateSuccessful_thenReturnResponse200() throws Exception {
-    var updateCarModelRequest = UpdateCarModelRequest.builder().brand("name").name("name").build();
-
     doNothing().when(carModelService).update(1L, updateCarModelRequest);
 
     mockMvc.perform(put("/models/{id}", 1)
@@ -205,8 +221,6 @@ class CarModelControllerTest {
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenInvalidRequestWithExistingName_whenUpdateFailed_thenReturnResponse406()
       throws Exception {
-    var updateCarModelRequest = UpdateCarModelRequest.builder().brand("name").name("name").build();
-
     doThrow(new EntityAlreadyExistsException("Entity with same name already exists"))
         .when(carModelService).update(1L, updateCarModelRequest);
 
@@ -222,8 +236,6 @@ class CarModelControllerTest {
   @WithMockUser(username = "user", authorities = {"ADMIN"})
   void givenInvalidRequest_whenUpdateFailed_thenReturnResponse400()
       throws Exception {
-    var updateCarModelRequest = UpdateCarModelRequest.builder().brand("name").name("name").build();
-
     doThrow(new IllegalStateException("Bad request")).when(carModelService)
         .update(1L, updateCarModelRequest);
 
@@ -239,8 +251,6 @@ class CarModelControllerTest {
   @WithMockUser(username = "user", authorities = {"USER"})
   void givenValidRequestAsUser_whenUpdateFailed_thenReturnResponse403()
       throws Exception {
-    var updateCarModelRequest = UpdateCarModelRequest.builder().brand("name").name("name").build();
-
     doNothing().when(carModelService).update(1L, updateCarModelRequest);
 
     mockMvc.perform(put("/models/{id}", 1)
@@ -253,8 +263,6 @@ class CarModelControllerTest {
   @Test
   void givenValidRequestUnauthorized_whenUpdateFailed_thenReturnResponse401()
       throws Exception {
-    var updateCarModelRequest = UpdateCarModelRequest.builder().brand("name").name("name").build();
-
     doNothing().when(carModelService).update(1L, updateCarModelRequest);
 
     mockMvc.perform(put("/models/{id}", 1)
