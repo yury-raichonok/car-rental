@@ -16,7 +16,7 @@ import static com.example.carrental.entity.order.OrderRentalStatus.NOT_STARTED;
 import static com.example.carrental.entity.user.UserDocumentStatus.CONFIRMED;
 import static java.math.MathContext.DECIMAL64;
 
-import com.example.carrental.config.ApplicationConfig;
+import com.example.carrental.config.ApplicationPropertiesConfig;
 import com.example.carrental.controller.dto.bill.CreateRepairBillRequest;
 import com.example.carrental.controller.dto.order.CreateOrderRequest;
 import com.example.carrental.controller.dto.order.OrderCompleteWithPenaltyRequest;
@@ -78,7 +78,7 @@ public class OrderServiceImpl implements OrderService {
   private static final String ORDER_REQUEST_EMAIL_TOPIC = "Order request for car rental";
   private static final String ORDER_REQUEST_REJECTED_EMAIL_TOPIC = "Order request rejected";
 
-  private final ApplicationConfig applicationConfig;
+  private final ApplicationPropertiesConfig applicationPropertiesConfig;
   private final CarService carService;
   private final EmailService emailService;
   private final LocationTranslationService locationTranslationService;
@@ -249,8 +249,8 @@ public class OrderServiceImpl implements OrderService {
             + "You have %d minutes to pay for your order in the \"Bills\" tab. "
             + "At %s the car reservation will be canceled", order.getId(),
         order.getCar().getModel().getBrand().getName(), order.getCar().getModel().getName(),
-        applicationConfig.getBillValidityPeriodInMinutes(),
-        LocalDateTime.now().plusMinutes(applicationConfig.getBillValidityPeriodInMinutes())
+        applicationPropertiesConfig.getBillValidityPeriodInMinutes(),
+        LocalDateTime.now().plusMinutes(applicationPropertiesConfig.getBillValidityPeriodInMinutes())
             .format(DateTimeFormatter.ofPattern(RESPONSE_DATE_TIME_FORMAT_PATTERN)));
 
     var notification = Notification

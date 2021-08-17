@@ -17,6 +17,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 
+/**
+ * Represents User Role.
+ *
+ * @author Yury Raichonak
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -27,6 +27,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * The controller for Location REST endpoints.
+ * <p>
+ * This class handles the CRUD operations for Locations, via HTTP actions.
+ * </p>
+ * @author Yury Raichonak
+ */
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/locations")
@@ -35,6 +42,15 @@ public class LocationController {
 
   private final LocationService locationService;
 
+  /**
+   * Handle the /locations endpoint.
+   * @param language selected language.
+   * @return locations list for select.
+   * Return one of the following status codes:
+   * 200: successfully received data.
+   * 204: no specified car locations.
+   * @throws NoContentException if list of locations is empty.
+   */
   @GetMapping(path = "/select")
   public ResponseEntity<List<LocationNameResponse>> findAllForSelect(
       @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language) throws NoContentException {
@@ -42,12 +58,25 @@ public class LocationController {
     return new ResponseEntity<>(locations, HttpStatus.OK);
   }
 
+  /**
+   * Handle the /locations/paged endpoint.
+   * @param pageable page of car classes.
+   * @return page of locations with translations.
+   */
   @GetMapping(path = "/paged")
   public ResponseEntity<Page<LocationWithTranslationsResponse>> findAllPaged(Pageable pageable) {
     var locations = locationService.findAllPaged(pageable);
     return new ResponseEntity<>(locations, HttpStatus.OK);
   }
 
+  /**
+   * Handle the /locations endpoint.
+   * @param createLocationRequest request with parameters.
+   * Return one of the following status codes:
+   * 200: successfully created new location.
+   * 406: unable to create new location, because location same name already exists.
+   * @throws EntityAlreadyExistsException if location with same name already exists.
+   */
   @PostMapping
   public ResponseEntity<HttpStatus> create(
       @Valid @RequestBody CreateLocationRequest createLocationRequest)
@@ -56,6 +85,14 @@ public class LocationController {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  /**
+   * Handle the /locations/{id} endpoint.
+   * @param id of the location which updated.
+   * @param createLocationRequest request with parameters.
+   * Return one of the following status codes:
+   * 200: location successfully updated.
+   * 400: if bad request or invalid input parameters.
+   */
   @PutMapping(path = "/{id}")
   public ResponseEntity<HttpStatus> update(@NotNull @Positive @PathVariable Long id,
       @Valid @RequestBody CreateLocationRequest createLocationRequest) {

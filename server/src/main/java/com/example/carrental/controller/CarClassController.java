@@ -27,6 +27,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * The controller for Car Class REST endpoints.
+ * <p>
+ * This class handles the CRUD operations for Classes of Cars, via HTTP actions.
+ * </p>
+ * @author Yury Raichonak
+ */
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/carclasses")
@@ -35,6 +42,15 @@ public class CarClassController {
 
   private final CarClassService carClassService;
 
+  /**
+   * Handle the /carclasses endpoint.
+   * @param language selected language.
+   * @return list of all car classes.
+   * Return one of the following status codes:
+   * 200: successfully received data.
+   * 204: no specified car classes.
+   * @throws NoContentException if list of car classes is empty.
+   */
   @GetMapping
   public ResponseEntity<List<CarClassNameResponse>> findAll(
       @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language)
@@ -43,6 +59,11 @@ public class CarClassController {
     return new ResponseEntity<>(carClasses, HttpStatus.OK);
   }
 
+  /**
+   * Handle the /carclasses/paged endpoint.
+   * @param pageable page of car classes.
+   * @return page of all car classes.
+   */
   @GetMapping(path = "/paged")
   public ResponseEntity<Page<CarClassNameWithTranslationsResponse>> findAllPaged(
       Pageable pageable) {
@@ -50,6 +71,14 @@ public class CarClassController {
     return new ResponseEntity<>(carClasses, HttpStatus.OK);
   }
 
+  /**
+   * Handle the /carclasses endpoint.
+   * @param createCarClassRequest request with parameters.
+   * Return one of the following status codes:
+   * 200: successfully created new car class.
+   * 406: unable to create car class, because class with same name already exists.
+   * @throws EntityAlreadyExistsException if class with same name already exists.
+   */
   @PostMapping
   public ResponseEntity<HttpStatus> create(
       @Valid @RequestBody CreateCarClassRequest createCarClassRequest)
@@ -58,6 +87,14 @@ public class CarClassController {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  /**
+   * Handle the /carclasses/{id} endpoint.
+   * @param id of the car class which updated.
+   * @param createCarClassRequest request with parameters.
+   * Return one of the following status codes:
+   * 200: if car class successfully updated.
+   * 400: if bad request or invalid input parameters.
+   */
   @PutMapping(path = "/{id}")
   public ResponseEntity<HttpStatus> update(@NotNull @Positive @PathVariable Long id,
       @Valid @RequestBody CreateCarClassRequest createCarClassRequest) {

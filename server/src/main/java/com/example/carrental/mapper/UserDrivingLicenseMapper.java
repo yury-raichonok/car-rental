@@ -7,9 +7,18 @@ import com.example.carrental.entity.user.UserDrivingLicense;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+/**
+ * The interface for mapping User Driving License entity to DTO.
+ *
+ * @author Yury Raichonak
+ */
 @Mapper(componentModel = "spring")
 public interface UserDrivingLicenseMapper {
 
+  /**
+   * @param userDrivingLicense data.
+   * @return UserDrivingLicenseConfirmationDataResponse DTO.
+   */
   @Mapping(target = "dateOfIssue", source = "userDrivingLicense.dateOfIssue",
       dateFormat = RESPONSE_DATE_FORMAT_PATTERN)
   @Mapping(target = "validityPeriod", source = "userDrivingLicense.validityPeriod",

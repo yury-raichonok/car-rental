@@ -1,7 +1,13 @@
 package com.example.carrental.constants;
 
+/**
+ * Application constants.
+ *
+ * @author Yury Raichonak
+ */
 public final class ApplicationConstants {
 
+  public static final String ADMIN = "ADMIN";
   public static final String NO_CONTENT = "No content";
   public static final String BELORUSSIAN = "be";
   public static final String RUSSIAN = "ru";
@@ -14,6 +20,7 @@ public final class ApplicationConstants {
   public static final String DRIVING_LICENSE_FILE = "Driving license file";
   public static final String LANGUAGE_COOKIE_NAME = "i18next";
   public static final String NOT_SPECIFIED = "Not specified";
+  public static final String SORT_BY_NAME = "name";
   public static final int HOUR_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY = 0;
   public static final int MINUTES_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY = 0;
 

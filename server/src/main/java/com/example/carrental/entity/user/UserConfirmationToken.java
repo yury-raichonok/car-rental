@@ -17,6 +17,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Represents Confirmation Token.
+ *
+ * @author Yury Raichonak
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

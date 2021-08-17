@@ -23,12 +23,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Order Criteria Repository class for searching Orders by parameters.
+ *
+ * @author Yury Raichonak
+ */
 @Repository
 @RequiredArgsConstructor
 public class OrderCriteriaRepositoryImpl implements OrderCriteriaRepository {
 
   private final EntityManager entityManager;
 
+  /**
+   * @param orderSearchRequest data.
+   * @return page of orders filtered by parameters.
+   */
   @Override
   public Page<Order> findAll(OrderSearchRequest orderSearchRequest) {
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -52,6 +61,11 @@ public class OrderCriteriaRepositoryImpl implements OrderCriteriaRepository {
     return new PageImpl<>(orders, pageable, ordersCount);
   }
 
+  /**
+   * @param criteriaBuilder orders criteria
+   * @param predicate orders predicate.
+   * @return amount of orders by criteria.
+   */
   private long getOrdersCount(CriteriaBuilder criteriaBuilder, Predicate predicate) {
     CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
     Root<Order> orderCountRoot = countQuery.from(Order.class);
@@ -61,12 +75,22 @@ public class OrderCriteriaRepositoryImpl implements OrderCriteriaRepository {
     return entityManager.createQuery(countQuery).getSingleResult();
   }
 
+  /**
+   * @param orderSearchRequest data.
+   * @return pageable representation.
+   */
   private Pageable getPageable(OrderSearchRequest orderSearchRequest) {
     Sort sort = Sort.by(orderSearchRequest.getSortDirection(), orderSearchRequest.getSortBy());
     return PageRequest
         .of(orderSearchRequest.getPageNumber(), orderSearchRequest.getPageSize(), sort);
   }
 
+  /**
+   * @param criteriaBuilder data.
+   * @param orderSearchRequest data.
+   * @param orderRoot data.
+   * @return predicates by search parameters.
+   */
   private Predicate getPredicate(CriteriaBuilder criteriaBuilder,
       OrderSearchRequest orderSearchRequest,
       Root<Order> orderRoot) {
@@ -87,6 +111,12 @@ public class OrderCriteriaRepositoryImpl implements OrderCriteriaRepository {
     return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
   }
 
+  /**
+   * @param criteriaBuilder data.
+   * @param orderSearchRequest data.
+   * @param orderCriteriaQuery data.
+   * @param orderRoot data.
+   */
   private void setOrder(CriteriaBuilder criteriaBuilder, OrderSearchRequest orderSearchRequest,
       CriteriaQuery<Order> orderCriteriaQuery, Root<Order> orderRoot) {
     if (orderSearchRequest.getSortDirection().equals("asc")) {

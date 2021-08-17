@@ -6,6 +6,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Data transfer object for changing User Phone status.
+ *
+ * @author Yury Raichonak
+ */
 @Data
 @Builder
 @NoArgsConstructor

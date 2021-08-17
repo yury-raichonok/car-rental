@@ -1,7 +1,6 @@
 package com.example.carrental.controller.dto.rentaldetails;
 
 import javax.validation.constraints.Email;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
@@ -11,6 +10,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Data transfer object for display Rental Details.
+ *
+ * @author Yury Raichonak
+ */
 @Data
 @Builder
 @NoArgsConstructor

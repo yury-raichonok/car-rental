@@ -11,6 +11,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Data transfer object for display all Rental Requests.
+ *
+ * @author Yury Raichonak
+ */
 @Data
 @Builder
 @NoArgsConstructor

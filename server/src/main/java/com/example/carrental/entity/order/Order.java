@@ -24,6 +24,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Represents rental Order.
+ *
+ * @author Yury Raichonak
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

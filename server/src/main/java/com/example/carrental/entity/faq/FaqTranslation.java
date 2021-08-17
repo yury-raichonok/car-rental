@@ -16,6 +16,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Represents translations for specified FAQs questions and answers.
+ *
+ * @author Yury Raichonak
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

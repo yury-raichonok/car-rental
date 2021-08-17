@@ -3,6 +3,11 @@ package com.example.carrental.entity.rentaldetails;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * Represents Rental Request types.
+ *
+ * @author Yury Raichonak
+ */
 @Getter
 @AllArgsConstructor
 public enum RentalRequestType {

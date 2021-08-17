@@ -11,6 +11,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Data transfer object for creating or updating User Driving License.
+ *
+ * @author Yury Raichonak
+ */
 @Data
 @Builder
 @NoArgsConstructor

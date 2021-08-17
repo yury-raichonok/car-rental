@@ -18,6 +18,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Represents User Passport.
+ *
+ * @author Yury Raichonak
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

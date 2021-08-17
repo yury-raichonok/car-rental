@@ -9,6 +9,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Data transfer object for display short User data for Administrator.
+ *
+ * @author Yury Raichonak
+ */
 @Data
 @Builder
 @NoArgsConstructor

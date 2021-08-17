@@ -19,6 +19,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Represents Payment Bill.
+ *
+ * @author Yury Raichonak
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

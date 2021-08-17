@@ -7,9 +7,18 @@ import com.example.carrental.entity.notification.Notification;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+/**
+ * The interface for mapping Message entity to DTO.
+ *
+ * @author Yury Raichonak
+ */
 @Mapper(componentModel = "spring")
 public interface NotificationMapper {
 
+  /**
+   * @param notification data.
+   * @return NotificationResponse DTO.
+   */
   @Mapping(target = "id", source = "notification.id")
   @Mapping(target = "message", source = "notification.message")
   @Mapping(target = "notificationType", source = "notification.notificationType.type")

@@ -12,9 +12,18 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.NullValueCheckStrategy;
 
+/**
+ * The interface for mapping User Driving License entity to DTO.
+ *
+ * @author Yury Raichonak
+ */
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
+  /**
+   * @param user data.
+   * @return UserDataResponse DTO.
+   */
   @Mapping(target = "id", source = "user.id")
   @Mapping(target = "email", source = "user.email")
   @Mapping(target = "role", source = "user.role.roleDescription")
@@ -32,6 +41,10 @@ public interface UserMapper {
       nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
   UserDataResponse userToUserDataResponse(User user);
 
+  /**
+   * @param user data.
+   * @return UserProfileResponse DTO.
+   */
   @Mapping(target = "id", source = "user.id")
   @Mapping(target = "email", source = "user.email")
   @Mapping(target = "phones", source = "user.phones",
@@ -43,6 +56,10 @@ public interface UserMapper {
       nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
   UserProfileResponse userToUserProfileResponse(User user);
 
+  /**
+   * @param phones of user data.
+   * @return list of UserPhoneResponse.
+   */
   @Named("getPhones")
   default List<UserPhoneResponse> getPhones(List<UserPhone> phones) {
     List<UserPhoneResponse> responses = new ArrayList<>();
@@ -50,6 +67,10 @@ public interface UserMapper {
     return responses;
   }
 
+  /**
+   * @param phones of user data.
+   * @return list of phone numbers.
+   */
   @Named("getPhoneNumbers")
   default List<String> getPhoneNumbers(List<UserPhone> phones) {
     List<String> responses = new ArrayList<>();
@@ -61,6 +82,10 @@ public interface UserMapper {
     return responses;
   }
 
+  /**
+   * @param userPhone data.
+   * @return UserPhoneResponse DTO.
+   */
   @Mapping(target = "id", source = "userPhone.id")
   @Mapping(target = "phone", source = "userPhone.phone")
   @Mapping(target = "active", source = "userPhone.active")

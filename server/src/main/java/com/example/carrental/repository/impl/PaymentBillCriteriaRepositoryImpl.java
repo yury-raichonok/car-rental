@@ -24,12 +24,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Payment Bill Criteria Repository class for searching Payment Bills by parameters.
+ *
+ * @author Yury Raichonak
+ */
 @Repository
 @RequiredArgsConstructor
 public class PaymentBillCriteriaRepositoryImpl implements PaymentBillCriteriaRepository {
 
   private final EntityManager entityManager;
 
+  /**
+   * @param paymentBillSearchRequest data.
+   * @return page of payment bills filtered by parameters.
+   */
   @Override
   public Page<PaymentBill> findAll(PaymentBillSearchRequest paymentBillSearchRequest) {
     var criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -57,6 +66,11 @@ public class PaymentBillCriteriaRepositoryImpl implements PaymentBillCriteriaRep
     return new PageImpl<>(paymentBills, pageable, paymentBillCount);
   }
 
+  /**
+   * @param criteriaBuilder payment bills criteria.
+   * @param predicate payment bills predicate.
+   * @return amount of payment bills by criteria.
+   */
   private long getPaymentBillCount(CriteriaBuilder criteriaBuilder, Predicate predicate) {
     CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
     Root<PaymentBill> paymentBillCountRoot = countQuery.from(PaymentBill.class);
@@ -67,6 +81,10 @@ public class PaymentBillCriteriaRepositoryImpl implements PaymentBillCriteriaRep
     return entityManager.createQuery(countQuery).getSingleResult();
   }
 
+  /**
+   * @param paymentBillSearchRequest data.
+   * @return pageable representation.
+   */
   private Pageable getPageable(PaymentBillSearchRequest paymentBillSearchRequest) {
     var sort = Sort
         .by(paymentBillSearchRequest.getSortDirection(), paymentBillSearchRequest.getSortBy());
@@ -74,6 +92,12 @@ public class PaymentBillCriteriaRepositoryImpl implements PaymentBillCriteriaRep
         .of(paymentBillSearchRequest.getPageNumber(), paymentBillSearchRequest.getPageSize(), sort);
   }
 
+  /**
+   * @param criteriaBuilder data.
+   * @param paymentBillSearchRequest data.
+   * @param paymentBillRoot data.
+   * @return predicates by search parameters.
+   */
   private Predicate getPredicate(CriteriaBuilder criteriaBuilder,
       PaymentBillSearchRequest paymentBillSearchRequest,
       Root<PaymentBill> paymentBillRoot) {
@@ -95,6 +119,12 @@ public class PaymentBillCriteriaRepositoryImpl implements PaymentBillCriteriaRep
     return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
   }
 
+  /**
+   * @param criteriaBuilder data.
+   * @param paymentBillSearchRequest data.
+   * @param paymentBillCriteriaQuery data.
+   * @param paymentBillRoot data.
+   */
   private void setPaymentBill(CriteriaBuilder criteriaBuilder,
       PaymentBillSearchRequest paymentBillSearchRequest,
       CriteriaQuery<PaymentBill> paymentBillCriteriaQuery, Root<PaymentBill> paymentBillRoot) {

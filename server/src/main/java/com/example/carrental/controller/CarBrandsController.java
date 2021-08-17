@@ -26,6 +26,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * The controller for Car Brand REST endpoints.
+ * <p>
+ * This class handles the CRUD operations for Brands of Cars, via HTTP actions.
+ * </p>
+ * @author Yury Raichonak
+ */
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/brands")
@@ -34,12 +41,25 @@ public class CarBrandsController {
 
   private final CarBrandService carBrandService;
 
+  /**
+   * Handle the /brands/all endpoint.
+   * @return list of all car brands.
+   * Return one of the following status codes:
+   * 200: successfully received data.
+   * 204: no specified car brands.
+   * @throws NoContentException if list of brands is empty.
+   */
   @GetMapping(path = "/all")
   public ResponseEntity<List<CarBrandResponse>> findAll() throws NoContentException {
     var brands = carBrandService.findAll();
     return new ResponseEntity<>(brands, HttpStatus.OK);
   }
 
+  /**
+   * Handle the /brands endpoint.
+   * @return list of car brands with rental offers.
+   * @throws NoContentException if list of brands is empty.
+   */
   @GetMapping
   public ResponseEntity<List<CarBrandResponse>> findAllBrandsWithRentalOffers()
       throws NoContentException {
@@ -47,12 +67,25 @@ public class CarBrandsController {
     return new ResponseEntity<>(brands, HttpStatus.OK);
   }
 
+  /**
+   * Handle the /brands/all/paged endpoint.
+   * @param pageable page of car brands.
+   * @return page of all car brands.
+   */
   @GetMapping(path = "/all/paged")
   public ResponseEntity<Page<CarBrandResponse>> findAllPaged(Pageable pageable) {
     var brands = carBrandService.findAllPaged(pageable);
     return new ResponseEntity<>(brands, HttpStatus.OK);
   }
 
+  /**
+   * Handle the /brands endpoint.
+   * @param createCarBrandRequest request data for creating new car brand.
+   * Return one of the following status codes:
+   * 200: successfully created new car brand.
+   * 406: unable to create car brand, because brand with same name already exists.
+   * @throws EntityAlreadyExistsException if brand with same name already exists.
+   */
   @PostMapping
   public ResponseEntity<HttpStatus> create(
       @Valid @RequestBody CreateCarBrandRequest createCarBrandRequest)
@@ -61,6 +94,14 @@ public class CarBrandsController {
     return new ResponseEntity<>(HttpStatus.CREATED);
   }
 
+  /**
+   * Handle the /brands/{id}/upload/image endpoint.
+   * @param id of the brand for which the image is loaded.
+   * @param brandFile image of car brand.
+   * Return one of the following status codes:
+   * 200: successfully uploaded car brand file.
+   * 400: if bad request or invalid input parameters.
+   */
   @PostMapping(
       path = "/{id}/upload/image",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
@@ -72,6 +113,16 @@ public class CarBrandsController {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  /**
+   * Handle the /brands/{id} endpoint.
+   * @param id of the brand which updated.
+   * @param createCarBrandRequest request with parameters.
+   * Return one of the following status codes:
+   * 200: car brand successfully updated.
+   * 400: if bad request or invalid input parameters.
+   * 406: unable to update car brand, because brand with same name already exists.
+   * @throws EntityAlreadyExistsException if brand with same name already exists.
+   */
   @PutMapping(path = "/{id}")
   public ResponseEntity<HttpStatus> update(@NotNull @Positive @PathVariable Long id,
       @Valid @RequestBody CreateCarBrandRequest createCarBrandRequest)

@@ -7,9 +7,18 @@ import com.example.carrental.entity.message.Message;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+/**
+ * The interface for mapping Message entity to DTO.
+ *
+ * @author Yury Raichonak
+ */
 @Mapper(componentModel = "spring")
 public interface MessageMapper {
 
+  /**
+   * @param message data.
+   * @return MessageResponse DTO.
+   */
   @Mapping(target = "id", source = "message.id")
   @Mapping(target = "name", source = "message.name")
   @Mapping(target = "email", source = "message.email")

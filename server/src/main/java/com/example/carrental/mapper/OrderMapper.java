@@ -12,9 +12,18 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.NullValueCheckStrategy;
 
+/**
+ * The interface for mapping Order entity to DTO.
+ *
+ * @author Yury Raichonak
+ */
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
 
+  /**
+   * @param order data.
+   * @return OrderResponse DTO.
+   */
   @Mapping(target = "id", source = "order.id")
   @Mapping(target = "userEmail", source = "order.user.email")
   @Mapping(target = "pickUpDate", source = "order.pickUpDate",
@@ -42,6 +51,10 @@ public interface OrderMapper {
       nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
   OrderResponse orderToOrderResponse(Order order);
 
+  /**
+   * @param order data.
+   * @return OrderNewResponse DTO.
+   */
   @Mapping(target = "id", source = "order.id")
   @Mapping(target = "userId", source = "order.user.id")
   @Mapping(target = "userEmail", source = "order.user.email")
@@ -57,6 +70,10 @@ public interface OrderMapper {
       dateFormat = RESPONSE_DATE_TIME_FORMAT_PATTERN)
   OrderNewResponse orderToOrderNewResponse(Order order);
 
+  /**
+   * @param order data.
+   * @return OrderInformationResponse DTO.
+   */
   @Mapping(target = "id", source = "order.id")
   @Mapping(target = "userId", source = "order.user.id")
   @Mapping(target = "userEmail", source = "order.user.email")
@@ -76,6 +93,10 @@ public interface OrderMapper {
   @Mapping(target = "locationName", source = "order.location.name")
   OrderInformationResponse orderToOrderInformationResponse(Order order);
 
+  /**
+   * @param order data.
+   * @return UserOrderResponse DTO.
+   */
   @Mapping(target = "id", source = "order.id")
   @Mapping(target = "pickUpDate", source = "order.pickUpDate",
       dateFormat = RESPONSE_DATE_TIME_FORMAT_PATTERN)
@@ -89,6 +110,10 @@ public interface OrderMapper {
   @Mapping(target = "locationName", source = "order.location.name")
   UserOrderResponse orderToNewUserOrderResponse(Order order);
 
+  /**
+   * @param order data.
+   * @return order car brand model as String.
+   */
   @Named("formatCarBrandModel")
   default String formatCarBrandModel(Order order) {
     return String.format("%s %s", order.getCar().getModel().getBrand().getName(),

@@ -3,7 +3,7 @@ package com.example.carrental.service.impl;
 import static com.example.carrental.constants.ApplicationConstants.HOUR_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY;
 import static com.example.carrental.constants.ApplicationConstants.MINUTES_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY;
 
-import com.example.carrental.config.ApplicationConfig;
+import com.example.carrental.config.ApplicationPropertiesConfig;
 import com.example.carrental.controller.dto.user.UserChangePasswordRequest;
 import com.example.carrental.controller.dto.user.UserDataResponse;
 import com.example.carrental.controller.dto.user.UserForgotPasswordRequest;
@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
   private static final String TOKEN_EXPIRED = "Token expired!";
   private static final String USER_ROLE = "USER";
 
-  private final ApplicationConfig applicationConfig;
+  private final ApplicationPropertiesConfig applicationPropertiesConfig;
   private final BCryptPasswordEncoder passwordEncoder;
   private final EmailService emailService;
   private final UserConfirmationTokenService userConfirmationTokenService;
@@ -82,7 +82,7 @@ public class UserServiceImpl implements UserService {
         .build();
     userConfirmationTokenService.createUserConfirmationToken(confirmationToken);
 
-    var link = String.format(applicationConfig.getEmailConfirmationLink(), token);
+    var link = String.format(applicationPropertiesConfig.getEmailConfirmationLink(), token);
     var message = String.format("Click on link to confirm your email: %s", link);
 
     emailService.sendEmail(user.getEmail(), message, "Email confirmation");
@@ -176,7 +176,7 @@ public class UserServiceImpl implements UserService {
         .build();
     userConfirmationTokenService.createUserConfirmationToken(confirmationToken);
 
-    var link = String.format(applicationConfig.getEmailConfirmationLink(), token);
+    var link = String.format(applicationPropertiesConfig.getEmailConfirmationLink(), token);
     var message = String.format("Click on link to confirm your email: %s", link);
     emailService.sendEmail(user.getEmail(), message, "Email confirmation");
   }
@@ -204,7 +204,7 @@ public class UserServiceImpl implements UserService {
         .build();
     userConfirmationTokenService.createUserConfirmationToken(confirmationToken);
 
-    var link = String.format(applicationConfig.getEmailRestorationLink(), token);
+    var link = String.format(applicationPropertiesConfig.getEmailRestorationLink(), token);
     var message = String.format("Click on link to recover your password: %s", link);
     emailService.sendEmail(user.getEmail(), message, "Password recovery");
   }

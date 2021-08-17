@@ -12,9 +12,18 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.NullValueCheckStrategy;
 
+/**
+ * The interface for mapping Repair Bill entity to DTO.
+ *
+ * @author Yury Raichonak
+ */
 @Mapper(componentModel = "spring")
 public interface RepairBillMapper {
 
+  /**
+   * @param repairBill data.
+   * @return RepairBillResponse DTO.
+   */
   @Mapping(target = "id", source = "repairBill.id")
   @Mapping(target = "userEmail", source = "repairBill.order.user.email")
   @Mapping(target = "sentDate", source = "repairBill.sentDate",
@@ -31,6 +40,10 @@ public interface RepairBillMapper {
       dateFormat = RESPONSE_DATE_TIME_FORMAT_PATTERN)
   RepairBillResponse repairBillToRepairBillResponse(RepairBill repairBill);
 
+  /**
+   * @param repairBill data.
+   * @return RepairBillNewResponse DTO.
+   */
   @Mapping(target = "id", source = "repairBill.id")
   @Mapping(target = "sentDate", source = "repairBill.sentDate",
       dateFormat = RESPONSE_DATE_FORMAT_PATTERN)
@@ -42,6 +55,10 @@ public interface RepairBillMapper {
   @Mapping(target = "locationName", source = "repairBill.order.location.name")
   RepairBillNewResponse repairBillToRepairBillNewResponse(RepairBill repairBill);
 
+  /**
+   * @param repairBill data.
+   * @return RepairBillHistoryResponse DTO.
+   */
   @Mapping(target = "id", source = "repairBill.id")
   @Mapping(target = "sentDate", source = "repairBill.sentDate",
       dateFormat = RESPONSE_DATE_FORMAT_PATTERN)
@@ -56,6 +73,10 @@ public interface RepairBillMapper {
       dateFormat = RESPONSE_DATE_TIME_FORMAT_PATTERN)
   RepairBillHistoryResponse repairBillToRepairBillHistoryResponse(RepairBill repairBill);
 
+  /**
+   * @param repairBill data.
+   * @return repair bill order car brand model as String.
+   */
   @Named("formatCarBrandModel")
   default String formatCarBrandModel(RepairBill repairBill) {
     return String.format("%s %s", repairBill.getOrder().getCar().getModel().getBrand().getName(),

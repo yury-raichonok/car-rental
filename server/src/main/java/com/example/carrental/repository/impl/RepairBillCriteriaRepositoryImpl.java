@@ -24,12 +24,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Repair Bill Criteria Repository class for searching Repair Bills by parameters.
+ *
+ * @author Yury Raichonak
+ */
 @Repository
 @RequiredArgsConstructor
 public class RepairBillCriteriaRepositoryImpl implements RepairBillCriteriaRepository {
 
   private final EntityManager entityManager;
 
+  /**
+   * @param repairBillSearchRequest data.
+   * @return page of repair bills filtered by parameters.
+   */
   @Override
   public Page<RepairBill> findAll(RepairBillSearchRequest repairBillSearchRequest) {
     var criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -57,6 +66,11 @@ public class RepairBillCriteriaRepositoryImpl implements RepairBillCriteriaRepos
     return new PageImpl<>(paymentBills, pageable, repairBillCount);
   }
 
+  /**
+   * @param criteriaBuilder repair bills criteria.
+   * @param predicate repair bills predicate.
+   * @return amount of repair bills by criteria.
+   */
   private long getRepairBillCount(CriteriaBuilder criteriaBuilder, Predicate predicate) {
     CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
     Root<RepairBill> paymentBillCountRoot = countQuery.from(RepairBill.class);
@@ -67,6 +81,10 @@ public class RepairBillCriteriaRepositoryImpl implements RepairBillCriteriaRepos
     return entityManager.createQuery(countQuery).getSingleResult();
   }
 
+  /**
+   * @param repairBillSearchRequest data.
+   * @return pageable representation.
+   */
   private Pageable getPageable(RepairBillSearchRequest repairBillSearchRequest) {
     var sort = Sort
         .by(repairBillSearchRequest.getSortDirection(), repairBillSearchRequest.getSortBy());
@@ -74,6 +92,12 @@ public class RepairBillCriteriaRepositoryImpl implements RepairBillCriteriaRepos
         .of(repairBillSearchRequest.getPageNumber(), repairBillSearchRequest.getPageSize(), sort);
   }
 
+  /**
+   * @param criteriaBuilder data.
+   * @param repairBillSearchRequest data.
+   * @param repairBillRoot data.
+   * @return predicates by search parameters.
+   */
   private Predicate getPredicate(CriteriaBuilder criteriaBuilder,
       RepairBillSearchRequest repairBillSearchRequest,
       Root<RepairBill> repairBillRoot) {
@@ -95,6 +119,12 @@ public class RepairBillCriteriaRepositoryImpl implements RepairBillCriteriaRepos
     return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
   }
 
+  /**
+   * @param criteriaBuilder data.
+   * @param repairBillSearchRequest data.
+   * @param repairBillCriteriaQuery data.
+   * @param repairBillRoot data.
+   */
   private void setRepairBill(CriteriaBuilder criteriaBuilder,
       RepairBillSearchRequest repairBillSearchRequest,
       CriteriaQuery<RepairBill> repairBillCriteriaQuery, Root<RepairBill> repairBillRoot) {

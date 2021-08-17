@@ -32,6 +32,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * The controller for Car REST endpoints.
+ * <p>
+ * This class handles the CRUD operations for Cars, via HTTP actions.
+ * </p>
+ * @author Yury Raichonak
+ */
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/cars")
@@ -40,6 +47,15 @@ public class CarController {
 
   private final CarService carService;
 
+  /**
+   * Handle the /cars/profitable endpoint.
+   * @param language selected language.
+   * @return list of 3 cheapest cars.
+   * Return one of the following status codes:
+   * 200: successfully received data.
+   * 204: no specified cars.
+   * @throws NoContentException if list of profitable car offers is empty.
+   */
   @GetMapping(path = "/profitable")
   public ResponseEntity<List<CarProfitableOfferResponse>> findAllProfitableOffers(
       @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language) throws NoContentException {
@@ -47,6 +63,12 @@ public class CarController {
     return new ResponseEntity<>(cars, HttpStatus.OK);
   }
 
+  /**
+   * Handle the /cars/search/{id} endpoint.
+   * @param id of the car.
+   * @param language selected language.
+   * @return data of selected car.
+   */
   @GetMapping(path = "/search/{id}")
   public ResponseEntity<CarByIdResponse> findCarById(@PathVariable Long id,
       @NotNull @CookieValue(name = LANGUAGE_COOKIE_NAME) String language) {
@@ -54,6 +76,14 @@ public class CarController {
     return new ResponseEntity<>(carSearchByIdResponse, HttpStatus.OK);
   }
 
+  /**
+   * Handle the /cars endpoint.
+   * @param createCarRequest request with parameters.
+   * Return one of the following status codes:
+   * 200: successfully created new car.
+   * 406: unable to create car, because car with same vin already exists.
+   * @throws EntityAlreadyExistsException if car with same vin already exists.
+   */
   @PostMapping
   public ResponseEntity<HttpStatus> create(@Valid @RequestBody CreateCarRequest createCarRequest)
       throws EntityAlreadyExistsException {
@@ -61,6 +91,12 @@ public class CarController {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  /**
+   * Handle the /cars/search endpoint.
+   * @param carSearchRequest search request parameters.
+   * @param language selected language.
+   * @return list of cars by specified parameters.
+   */
   @PostMapping(path = "/search")
   public ResponseEntity<Page<CarSearchResponse>> searchCars(
       @Valid @RequestBody CarSearchRequest carSearchRequest,
@@ -69,6 +105,12 @@ public class CarController {
     return new ResponseEntity<>(carsPageResponse, HttpStatus.OK);
   }
 
+  /**
+   * Handle the /cars/search endpoint.
+   * @param carSearchRequest search request parameters.
+   * @param language selected language.
+   * @return list of cars by specified parameters.
+   */
   @PostMapping(path = "/search/admin")
   public ResponseEntity<Page<CarAdminSearchResponse>> searchCarsByAdmin(
       @Valid @RequestBody CarSearchRequest carSearchRequest,
@@ -77,6 +119,14 @@ public class CarController {
     return new ResponseEntity<>(carsAdminPageResponse, HttpStatus.OK);
   }
 
+  /**
+   * Handle the /cars/{id}/upload/image endpoint.
+   * @param id of the car for which the image is loaded.
+   * @param carFile image of car.
+   * Return one of the following status codes:
+   * 200: successfully uploaded car file.
+   * 400: if bad request or invalid input parameters.
+   */
   @PostMapping(path = "/{id}/upload/image")
   public ResponseEntity<HttpStatus> uploadCarImage(@NotNull @Positive @PathVariable Long id,
       @NotNull @RequestParam MultipartFile carFile) {
@@ -84,6 +134,16 @@ public class CarController {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  /**
+   * Handle the /cars/{id} endpoint.
+   * @param id of the car which updated.
+   * @param updateCarRequest request with parameters.
+   * Return one of the following status codes:
+   * 200: car data successfully updated.
+   * 400: if bad request or invalid input parameters.
+   * 406: unable to update car, because car with same vin already exists.
+   * @throws EntityAlreadyExistsException if car with same vin already exists.
+   */
   @PutMapping(path = "/{id}")
   public ResponseEntity<HttpStatus> update(@NotNull @Positive @PathVariable Long id,
       @Valid @RequestBody UpdateCarRequest updateCarRequest) throws EntityAlreadyExistsException {
@@ -91,6 +151,13 @@ public class CarController {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  /**
+   * Handle the /cars/update/status/{id} endpoint.
+   * @param id of the car which rental status updated.
+   * Return one of the following status codes:
+   * 200: car rental status successfully updated (in rental / not in rental).
+   * 400: if bad request or invalid input parameters.
+   */
   @PutMapping(path = "/update/status/{id}")
   public ResponseEntity<HttpStatus> updateRentalStatus(@NotNull @Positive @PathVariable Long id) {
     carService.updateRentalStatus(id);

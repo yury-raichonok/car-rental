@@ -8,9 +8,18 @@ import com.example.carrental.entity.user.UserPassport;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+/**
+ * The interface for mapping User Passport entity to DTO.
+ *
+ * @author Yury Raichonak
+ */
 @Mapper(componentModel = "spring")
 public interface UserPassportMapper {
 
+  /**
+   * @param userPassport data.
+   * @return UserPassportDataResponse DTO.
+   */
   @Mapping(target = "firstName", source = "userPassport.firstName")
   @Mapping(target = "middleName", source = "userPassport.middleName")
   @Mapping(target = "lastName", source = "userPassport.lastName")
@@ -22,6 +31,10 @@ public interface UserPassportMapper {
   @Mapping(target = "organizationThatIssued", source = "userPassport.organizationThatIssued")
   UserPassportDataResponse userPassportToUserPassportDataResponse(UserPassport userPassport);
 
+  /**
+   * @param userPassport data.
+   * @return UserPassportConfirmationDataResponse DTO.
+   */
   @Mapping(target = "firstName", source = "userPassport.firstName")
   @Mapping(target = "middleName", source = "userPassport.middleName")
   @Mapping(target = "lastName", source = "userPassport.lastName")

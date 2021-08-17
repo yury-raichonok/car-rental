@@ -9,9 +9,18 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
+/**
+ * The interface for mapping Car entity to DTO.
+ *
+ * @author Yury Raichonak
+ */
 @Mapper(componentModel = "spring")
 public interface CarMapper {
 
+  /**
+   * @param car data.
+   * @return CarSearchResponse DTO.
+   */
   @Mapping(target = "id", source = "car.id")
   @Mapping(target = "brand", source = "car.model.brand.name")
   @Mapping(target = "model", source = "car.model.name")
@@ -29,6 +38,10 @@ public interface CarMapper {
   @Mapping(target = "carImageLink", source = "car.carImageLink")
   CarSearchResponse carToCarSearchResponse(Car car);
 
+  /**
+   * @param car data.
+   * @return CarByIdResponse DTO.
+   */
   @Mapping(target = "id", source = "car.id")
   @Mapping(target = "brand", source = "car.model.brand.name")
   @Mapping(target = "model", source = "car.model.name")
@@ -48,6 +61,10 @@ public interface CarMapper {
   @Mapping(target = "carImageLink", source = "car.carImageLink")
   CarByIdResponse carToCarByIdResponse(Car car);
 
+  /**
+   * @param car data.
+   * @return CarProfitableOfferResponse DTO.
+   */
   @Mapping(target = "id", source = "car.id")
   @Mapping(target = "brand", source = "car.model.brand.name")
   @Mapping(target = "model", source = "car.model.name")
@@ -60,6 +77,10 @@ public interface CarMapper {
   @Mapping(target = "costPerHour", source = "car.costPerHour")
   CarProfitableOfferResponse carToCarChipOfferResponse(Car car);
 
+  /**
+   * @param car data.
+   * @return CarAdminSearchResponse DTO.
+   */
   @Mapping(target = "id", source = "car.id")
   @Mapping(target = "vin", source = "car.vin")
   @Mapping(target = "brand", source = "car.model.brand.name")
@@ -81,6 +102,10 @@ public interface CarMapper {
   @Mapping(target = "carImageLink", source = "car.carImageLink")
   CarAdminSearchResponse carToCarCarAdminSearchResponse(Car car);
 
+  /**
+   * @param car data.
+   * @return car year of issue as String.
+   */
   @Named("getYearOfIssue")
   default String getYearOfIssue(Car car) {
     return String.valueOf(car.getDateOfIssue().getYear());

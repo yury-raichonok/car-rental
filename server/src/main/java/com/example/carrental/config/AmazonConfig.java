@@ -14,6 +14,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
+/**
+ * Configurations for Amazon S3 cloud storage.
+ * <p>
+ * This class provides data to save and retrieve data from Amazon S3 storage.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Configuration
 @ConfigurationProperties("amazon")
 @RequiredArgsConstructor

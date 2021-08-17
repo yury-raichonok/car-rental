@@ -1,5 +1,7 @@
 package com.example.carrental.config;
 
+import static com.example.carrental.constants.ApplicationConstants.ADMIN;
+
 import com.example.carrental.service.UserSecurityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -15,12 +17,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Web Security configurations.
+ *
+ * @author Yury Raichonak
+ */
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-
-  private static final String ADMIN = "ADMIN";
 
   private final AuthenticationEntryPoint authenticationEntryPoint;
   private final BCryptPasswordEncoder passwordEncoder;

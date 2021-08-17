@@ -8,6 +8,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
+/**
+ * The configurations for Twilio service.
+ * <p>
+ * This class prevents configurations for SMS sending.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Configuration
 @ConfigurationProperties("twilio")
 @Data

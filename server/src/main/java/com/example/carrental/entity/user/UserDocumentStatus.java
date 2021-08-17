@@ -3,6 +3,11 @@ package com.example.carrental.entity.user;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * Represents User Document statuses.
+ *
+ * @author Yury Raichonak
+ */
 @Getter
 @AllArgsConstructor
 public enum  UserDocumentStatus {

@@ -19,6 +19,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * The controller for Phones REST endpoints.
+ * <p>
+ * This class handles the CRUD operations for Phones, via HTTP actions.
+ * </p>
+ * @author Yury Raichonak
+ */
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/users/phone")
@@ -27,6 +34,16 @@ public class UserPhoneController {
 
   private final UserPhoneService userPhoneService;
 
+  /**
+   * Handle the /users/phone endpoint.
+   * @param userPhoneConfirmationRequest request with parameters.
+   * Return one of the following status codes:
+   * 200: successfully created new phone.
+   * 405: unable to created new phone, because confirmation token already expired.
+   * 406: unable to created new phone, because such phone number already exists.
+   * @throws TokenExpireException if confirmation token already expired.
+   * @throws EntityAlreadyExistsException if such phone number already exists.
+   */
   @PostMapping
   public ResponseEntity<HttpStatus> create(
       @Valid @RequestBody UserPhoneConfirmationRequest userPhoneConfirmationRequest)
@@ -35,6 +52,14 @@ public class UserPhoneController {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  /**
+   * Handle the /users/phone endpoint.
+   * @param userSmsRequest request with parameters.
+   * Return one of the following status codes:
+   * 200: successfully send SMS for phone confirmation.
+   * 406: unable to send confirmation SMS, because such phone number already exists.
+   * @throws EntityAlreadyExistsException if such phone number already exists.
+   */
   @PutMapping
   public ResponseEntity<HttpStatus> sendConfirmationSms(
       @Valid @RequestBody UserSmsRequest userSmsRequest) throws EntityAlreadyExistsException {
@@ -42,6 +67,14 @@ public class UserPhoneController {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  /**
+   * Handle the /users/phone/{id} endpoint.
+   * @param id
+   * Return one of the following status codes:
+   * 200: phone status successfully updated.
+   * 406: unable to update phone status, because such phone number already exists.
+   * @throws EntityAlreadyExistsException if such phone number already exists.
+   */
   @PutMapping(path = "/{id}")
   public ResponseEntity<HttpStatus> updatePhoneStatus(@NotNull @Positive @PathVariable Long id)
       throws EntityAlreadyExistsException {

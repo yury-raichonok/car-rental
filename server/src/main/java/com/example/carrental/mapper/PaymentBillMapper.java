@@ -12,9 +12,18 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.NullValueCheckStrategy;
 
+/**
+ * The interface for mapping Payment Bill entity to DTO.
+ *
+ * @author Yury Raichonak
+ */
 @Mapper(componentModel = "spring")
 public interface PaymentBillMapper {
 
+  /**
+   * @param paymentBill data.
+   * @return PaymentBillResponse DTO.
+   */
   @Mapping(target = "id", source = "paymentBill.id")
   @Mapping(target = "userEmail", source = "paymentBill.order.user.email")
   @Mapping(target = "sentDate", source = "paymentBill.sentDate",
@@ -33,6 +42,10 @@ public interface PaymentBillMapper {
       dateFormat = RESPONSE_DATE_TIME_FORMAT_PATTERN)
   PaymentBillResponse paymentBillToPaymentBillResponse(PaymentBill paymentBill);
 
+  /**
+   * @param paymentBill data.
+   * @return UserPaymentBillsResponse DTO.
+   */
   @Mapping(target = "id", source = "paymentBill.id")
   @Mapping(target = "sentDate", source = "paymentBill.sentDate",
       dateFormat = RESPONSE_DATE_TIME_FORMAT_PATTERN)
@@ -47,6 +60,10 @@ public interface PaymentBillMapper {
       dateFormat = RESPONSE_DATE_TIME_FORMAT_PATTERN)
   UserPaymentBillsResponse paymentBillToUserPaymentBillsResponse(PaymentBill paymentBill);
 
+  /**
+   * @param paymentBill data.
+   * @return UserNewPaymentBillsResponse DTO.
+   */
   @Mapping(target = "id", source = "paymentBill.id")
   @Mapping(target = "sentDate", source = "paymentBill.sentDate",
       dateFormat = RESPONSE_DATE_TIME_FORMAT_PATTERN)
@@ -60,12 +77,20 @@ public interface PaymentBillMapper {
   @Mapping(target = "locationName", source = "paymentBill.order.location.name")
   UserNewPaymentBillsResponse paymentBillToUserNewPaymentBillsResponse(PaymentBill paymentBill);
 
+  /**
+   * @param paymentBill data.
+   * @return payment bill car brand model as String.
+   */
   @Named("formatCarBrandModel")
   default String formatCarBrandModel(PaymentBill paymentBill) {
     return String.format("%s %s", paymentBill.getOrder().getCar().getModel().getBrand().getName(),
         paymentBill.getOrder().getCar().getModel().getName());
   }
 
+  /**
+   * @param paymentBill data.
+   * @return payment bill status as Boolean.
+   */
   @Named("getPaymentBillStatus")
   default boolean getPaymentBillStatus(PaymentBill paymentBill) {
     return !paymentBill.getExpirationTime().isBefore(LocalDateTime.now());

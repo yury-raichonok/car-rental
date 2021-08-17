@@ -12,9 +12,18 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValueCheckStrategy;
 
+/**
+ * The interface for mapping Rental Request entity to DTO.
+ *
+ * @author Yury Raichonak
+ */
 @Mapper(componentModel = "spring")
 public interface RentalRequestMapper {
 
+  /**
+   * @param rentalRequest data.
+   * @return RentalAllRequestResponse DTO.
+   */
   @Mapping(target = "id", source = "rentalRequest.id")
   @Mapping(target = "userEmail", source = "rentalRequest.user.email")
   @Mapping(target = "requestType", source = "rentalRequest.rentalRequestType")
@@ -28,6 +37,10 @@ public interface RentalRequestMapper {
       nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
   RentalAllRequestResponse rentalRequestToRentalAllRequestResponse(RentalRequest rentalRequest);
 
+  /**
+   * @param rentalRequest data.
+   * @return RentalRequestResponse DTO.
+   */
   @Mapping(target = "id", source = "rentalRequest.id")
   @Mapping(target = "userEmail", source = "rentalRequest.user.email")
   @Mapping(target = "requestType", source = "rentalRequest.rentalRequestType")
@@ -36,6 +49,10 @@ public interface RentalRequestMapper {
   @Mapping(target = "considered", source = "rentalRequest.considered")
   RentalRequestResponse rentalRequestToRentalRequestResponse(RentalRequest rentalRequest);
 
+  /**
+   * @param passport data.
+   * @return UserPassportConfirmationDataResponse DTO.
+   */
   @Mapping(target = "firstName", source = "passport.firstName")
   @Mapping(target = "middleName", source = "passport.middleName")
   @Mapping(target = "lastName", source = "passport.lastName")

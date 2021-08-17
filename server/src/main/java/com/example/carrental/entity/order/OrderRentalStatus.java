@@ -3,6 +3,11 @@ package com.example.carrental.entity.order;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * Represents Order rental status.
+ *
+ * @author Yury Raichonak
+ */
 @Getter
 @AllArgsConstructor
 public enum OrderRentalStatus {

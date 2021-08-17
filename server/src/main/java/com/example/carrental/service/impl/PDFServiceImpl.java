@@ -9,7 +9,7 @@ import static com.itextpdf.text.Font.NORMAL;
 import static com.itextpdf.text.pdf.BaseFont.EMBEDDED;
 import static com.itextpdf.text.pdf.BaseFont.IDENTITY_H;
 
-import com.example.carrental.config.ApplicationConfig;
+import com.example.carrental.config.ApplicationPropertiesConfig;
 import com.example.carrental.entity.order.Order;
 import com.example.carrental.service.PDFService;
 import com.example.carrental.service.RentalDetailsService;
@@ -48,7 +48,7 @@ public class PDFServiceImpl implements PDFService {
   private static final int TABLE_COLUMNS_AMOUNT = 5;
   private static final BaseColor BASE_COLOR = new BaseColor(234, 92, 82);
 
-  private final ApplicationConfig applicationConfig;
+  private final ApplicationPropertiesConfig applicationPropertiesConfig;
   private final RentalDetailsService rentalDetailsService;
 
   public ByteArrayResource exportOrderToPDF(Order order)
@@ -74,7 +74,7 @@ public class PDFServiceImpl implements PDFService {
       document.add(rentalAddressParagraph);
 
       var rentalEmailParagraph = new Paragraph(String.format("Email: %s",
-          applicationConfig.getRentalEmail()), textFont);
+          applicationPropertiesConfig.getRentalEmail()), textFont);
       rentalEmailParagraph.setAlignment(ALIGN_RIGHT);
       document.add(rentalEmailParagraph);
 

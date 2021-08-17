@@ -7,11 +7,19 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
+/**
+ * Aspect for logging all application logic.
+ *
+ * @author Yury Raichonak
+ */
 @Aspect
 @Component
 @Slf4j
 public class LoggerAspect {
 
+  /**
+   * Pointcut for logging CRUD methods with parameters.
+   */
   @Pointcut(value = "execution(* com.example.carrental.*.*.create*(..)) || "
       + "execution(* com.example.carrental.*.*.update*(..)) || "
       + "execution(* com.example.carrental.*.*.searchCars*(..)) || "
@@ -39,10 +47,16 @@ public class LoggerAspect {
   public void addOrGetOrUpdateEntityPointcut() {
   }
 
+  /**
+   * Pointcut for logging get methods.
+   */
   @Pointcut(value = "execution(* com.example.carrental.*.*.findAll*(..))")
   public void getAllEntitiesPointcut() {
   }
 
+  /**
+   * Pointcut for logging methods with user personal data, without it.
+   */
   @Pointcut(value = "execution(* com.example.carrental.*.*.getUser*(..)) ||"
       + "execution(* com.example.carrental.*.*.changePassword(..)) ||"
       + "execution(* com.example.carrental.*.*.sendEmailConfirmationMessage(..)) ||"
@@ -55,6 +69,9 @@ public class LoggerAspect {
   public void getInfoPointcut() {
   }
 
+  /**
+   * @param proceedingJoinPoint CRUD methods join point.
+   */
   @Around("addOrGetOrUpdateEntityPointcut()")
   public Object addOrUpdateEntityLogger(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
     String methodName = proceedingJoinPoint.getSignature().getName();
@@ -66,6 +83,9 @@ public class LoggerAspect {
     return object;
   }
 
+  /**
+   * @param proceedingJoinPoint get methods join point.
+   */
   @Around("getAllEntitiesPointcut()")
   public Object getAllEntitiesLogger(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
     String methodName = proceedingJoinPoint.getSignature().getName();
@@ -76,6 +96,9 @@ public class LoggerAspect {
     return object;
   }
 
+  /**
+   * @param proceedingJoinPoint methods with user personal data join point.
+   */
   @Around("getInfoPointcut()")
   public Object getInfoLogger(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
     String methodName = proceedingJoinPoint.getSignature().getName();

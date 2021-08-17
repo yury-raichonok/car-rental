@@ -5,9 +5,18 @@ import com.example.carrental.entity.rentaldetails.RentalDetails;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+/**
+ * The interface for mapping Rental Details entity to DTO.
+ *
+ * @author Yury Raichonak
+ */
 @Mapper(componentModel = "spring")
 public interface RentalDetailsMapper {
 
+  /**
+   * @param rentalDetails data.
+   * @return RentalDetailsResponse DTO.
+   */
   @Mapping(target = "phoneNumber", source = "rentalDetails.phone")
   @Mapping(target = "locationId", source = "rentalDetails.location.id")
   @Mapping(target = "location", source = "rentalDetails.location.name")

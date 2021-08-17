@@ -2,7 +2,7 @@ package com.example.carrental.service.impl;
 
 import static com.example.carrental.entity.order.OrderPaymentStatus.PAID;
 
-import com.example.carrental.config.ApplicationConfig;
+import com.example.carrental.config.ApplicationPropertiesConfig;
 import com.example.carrental.controller.dto.bill.PaymentBillResponse;
 import com.example.carrental.controller.dto.bill.PaymentBillSearchRequest;
 import com.example.carrental.controller.dto.bill.UserNewPaymentBillsResponse;
@@ -34,7 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class PaymentBillServiceImpl implements PaymentBillService {
 
-  private final ApplicationConfig applicationConfig;
+  private final ApplicationPropertiesConfig applicationPropertiesConfig;
   private final PaymentBillRepository paymentBillRepository;
   private final PaymentBillCriteriaRepository paymentBillCriteriaRepository;
   private final PaymentBillMapper paymentBillMapper;
@@ -123,7 +123,7 @@ public class PaymentBillServiceImpl implements PaymentBillService {
         .totalCost(order.getTotalCost())
         .sentDate(LocalDateTime.now())
         .expirationTime(
-            LocalDateTime.now().plusMinutes(applicationConfig.getBillValidityPeriodInMinutes()))
+            LocalDateTime.now().plusMinutes(applicationPropertiesConfig.getBillValidityPeriodInMinutes()))
         .order(order)
         .build());
   }

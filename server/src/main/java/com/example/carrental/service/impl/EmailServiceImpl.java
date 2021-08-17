@@ -1,10 +1,9 @@
 package com.example.carrental.service.impl;
 
-import com.example.carrental.config.ApplicationConfig;
+import com.example.carrental.config.ApplicationPropertiesConfig;
 import com.example.carrental.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
 
-  private final ApplicationConfig applicationConfig;
+  private final ApplicationPropertiesConfig applicationPropertiesConfig;
   private final JavaMailSender mailSender;
 
   @Override
@@ -24,7 +23,7 @@ public class EmailServiceImpl implements EmailService {
   public void sendEmail(String to, String body, String topic) {
     try {
       var simpleMailMessage = new SimpleMailMessage();
-      simpleMailMessage.setFrom(applicationConfig.getRentalEmail());
+      simpleMailMessage.setFrom(applicationPropertiesConfig.getRentalEmail());
       simpleMailMessage.setTo(to);
       simpleMailMessage.setSubject(topic);
       simpleMailMessage.setText(body);

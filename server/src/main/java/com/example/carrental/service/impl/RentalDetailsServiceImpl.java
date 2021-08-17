@@ -1,6 +1,6 @@
 package com.example.carrental.service.impl;
 
-import com.example.carrental.config.ApplicationConfig;
+import com.example.carrental.config.ApplicationPropertiesConfig;
 import com.example.carrental.controller.dto.rentaldetails.RentalDetailsContactInformationResponse;
 import com.example.carrental.controller.dto.rentaldetails.RentalDetailsResponse;
 import com.example.carrental.controller.dto.rentaldetails.RentalDetailsUpdateRequest;
@@ -22,7 +22,7 @@ public class RentalDetailsServiceImpl implements RentalDetailsService {
   private static final long RENTAL_DETAILS_ID = 1L;
   private static final String DETAILS_DOES_NOT_SET = "Rental details does not set";
 
-  private final ApplicationConfig applicationConfig;
+  private final ApplicationPropertiesConfig applicationPropertiesConfig;
   private final LocationService locationService;
   private final LocationTranslationService locationTranslationService;
   private final RentalDetailsRepository rentalDetailsRepository;
@@ -37,7 +37,7 @@ public class RentalDetailsServiceImpl implements RentalDetailsService {
     return RentalDetailsContactInformationResponse
         .builder()
         .phone(rentalDetails.getPhone())
-        .email(applicationConfig.getRentalEmail())
+        .email(applicationPropertiesConfig.getRentalEmail())
         .locationName(location.getName())
         .locationCoordinateX(rentalDetails.getLocation().getCoordinateX())
         .locationCoordinateY(rentalDetails.getLocation().getCoordinateY())

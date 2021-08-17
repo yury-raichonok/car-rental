@@ -16,9 +16,9 @@ public final class MultipartFileUtil {
 
   public static void validateMultipartImageFile(MultipartFile file) {
     if (file.isEmpty()) {
-      log.error("Cannot upload empty file [{}]", file.getSize());
+      log.error("Cannot upload empty file [{}]", file.getOriginalFilename());
       throw new IllegalStateException(String.format("Cannot upload empty file [%s]",
-          file.getSize()));
+          file.getOriginalFilename()));
     }
     if (!Arrays.asList(IMAGE_JPEG.getMimeType(), IMAGE_PNG.getMimeType(), IMAGE_GIF.getMimeType())
         .contains(file.getContentType())) {

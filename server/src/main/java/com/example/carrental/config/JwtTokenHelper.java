@@ -9,24 +9,39 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+/**
+ * JwtToken helper class.
+ * <p>
+ * This class provides logic for parsing and generating JWT Tokens.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtTokenHelper {
 
   private static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS256;
 
-  private final ApplicationConfig applicationConfig;
+  private final ApplicationPropertiesConfig applicationPropertiesConfig;
 
+  /**
+   * @param token JWT token from request.
+   * @return claims set.
+   */
   private Claims getAllClaimsFromToken(String token) {
     Claims claims;
     try {
-      claims = Jwts.parser().setSigningKey(applicationConfig.getJwtSecret()).parseClaimsJws(token).getBody();
+      claims = Jwts.parser().setSigningKey(applicationPropertiesConfig.getJwtSecret()).parseClaimsJws(token).getBody();
     } catch (Exception e) {
       claims = null;
     }
     return claims;
   }
 
+  /**
+   * @param token JWT token from request.
+   * @return parsed user email.
+   */
   public String getEmailFromToken(String token) {
     String email;
     try {
@@ -38,15 +53,23 @@ public class JwtTokenHelper {
     return email;
   }
 
+  /**
+   * @param username user username.
+   * @return generated JWT Token, using secret key and signature algorithm.
+   */
   public String generateToken(String username) {
 
-    return Jwts.builder().setIssuer(applicationConfig.getName()).setSubject(username).setIssuedAt(new Date())
-        .setExpiration(generateExpirationDate()).signWith(SIGNATURE_ALGORITHM, applicationConfig.getJwtSecret())
+    return Jwts.builder().setIssuer(applicationPropertiesConfig.getName()).setSubject(username).setIssuedAt(new Date())
+        .setExpiration(generateExpirationDate()).signWith(SIGNATURE_ALGORITHM, applicationPropertiesConfig
+            .getJwtSecret())
         .compact();
   }
 
+  /**
+   * @return generated token expiration date.
+   */
   private Date generateExpirationDate() {
-    return new Date(new Date().getTime() + applicationConfig.getJwtExpirationMs() * 1000);
+    return new Date(new Date().getTime() + applicationPropertiesConfig.getJwtExpirationMs() * 1000);
   }
 
   public Boolean validateToken(String token, UserDetails userDetails) {
@@ -56,11 +79,19 @@ public class JwtTokenHelper {
     );
   }
 
+  /**
+   * @param token JWT token from request.
+   * @return boolean value is token expired.
+   */
   public boolean isTokenExpired(String token) {
     Date expireDate=getExpirationDate(token);
     return expireDate.before(new Date());
   }
 
+  /**
+   * @param token JWT token from request.
+   * @return token expiration date.
+   */
   private Date getExpirationDate(String token) {
     Date expireDate;
     try {
@@ -72,17 +103,10 @@ public class JwtTokenHelper {
     return expireDate;
   }
 
-  public Date getIssuedAtDateFromToken(String token) {
-    Date issueAt;
-    try {
-      final Claims claims = this.getAllClaimsFromToken(token);
-      issueAt = claims.getIssuedAt();
-    } catch (Exception e) {
-      issueAt = null;
-    }
-    return issueAt;
-  }
-
+  /**
+   * @param request from client.
+   * @return parsed JWT Token.
+   */
   public String getToken( HttpServletRequest request ) {
     String authHeader = getAuthHeaderFromHeader( request );
     if ( authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -91,6 +115,10 @@ public class JwtTokenHelper {
     return null;
   }
 
+  /**
+   * @param request from client.
+   * @return authorization header.
+   */
   public String getAuthHeaderFromHeader( HttpServletRequest request ) {
     return request.getHeader("Authorization");
   }

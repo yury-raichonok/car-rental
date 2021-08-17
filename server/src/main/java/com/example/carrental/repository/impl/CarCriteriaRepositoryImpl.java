@@ -26,12 +26,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Car Criteria Repository class for searching Cars by parameters.
+ *
+ * @author Yury Raichonak
+ */
 @Repository
 @RequiredArgsConstructor
 public class CarCriteriaRepositoryImpl implements CarCriteriaRepository {
 
   private final EntityManager entityManager;
 
+  /**
+   * @param carSearchRequest data.
+   * @return page of cars filtered by parameters.
+   */
   @Override
   public Page<Car> findCars(CarSearchRequest carSearchRequest) {
     var criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -54,6 +63,11 @@ public class CarCriteriaRepositoryImpl implements CarCriteriaRepository {
     return new PageImpl<>(cars, pageable, carsCount);
   }
 
+  /**
+   * @param criteriaBuilder cars criteria.
+   * @param predicate cars predicate.
+   * @return amount of cars by criteria.
+   */
   private long getCarsCount(CriteriaBuilder criteriaBuilder, Predicate predicate) {
     CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
     Root<Car> carCountRoot = countQuery.from(Car.class);
@@ -65,11 +79,21 @@ public class CarCriteriaRepositoryImpl implements CarCriteriaRepository {
     return entityManager.createQuery(countQuery).getSingleResult();
   }
 
+  /**
+   * @param carSearchRequest data.
+   * @return pageable representation.
+   */
   private Pageable getPageable(CarSearchRequest carSearchRequest) {
     var sort = Sort.by(carSearchRequest.getSortDirection(), carSearchRequest.getSortBy());
     return PageRequest.of(carSearchRequest.getPageNumber(), carSearchRequest.getPageSize(), sort);
   }
 
+  /**
+   * @param criteriaBuilder data.
+   * @param carSearchRequest data.
+   * @param carCriteriaQuery data.
+   * @param carRoot data.
+   */
   private void setOrder(CriteriaBuilder criteriaBuilder, CarSearchRequest carSearchRequest,
       CriteriaQuery<Car> carCriteriaQuery, Root<Car> carRoot) {
     if (carSearchRequest.getSortDirection().equals("asc")) {
@@ -79,6 +103,12 @@ public class CarCriteriaRepositoryImpl implements CarCriteriaRepository {
     }
   }
 
+  /**
+   * @param criteriaBuilder data.
+   * @param carSearchRequest data.
+   * @param carRoot data.
+   * @return predicates by search parameters.
+   */
   private Predicate getPredicate(CriteriaBuilder criteriaBuilder, CarSearchRequest carSearchRequest,
       Root<Car> carRoot) {
     Join<Car, CarModel> modelJoin = carRoot.join("model");

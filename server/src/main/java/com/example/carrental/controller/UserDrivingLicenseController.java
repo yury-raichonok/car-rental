@@ -26,6 +26,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * The controller for Driving Licenses REST endpoints.
+ * <p>
+ * This class handles the CRUD operations for Driving Licenses, via HTTP actions.
+ * </p>
+ * @author Yury Raichonak
+ */
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/drivinglicenses")
@@ -34,6 +41,11 @@ public class UserDrivingLicenseController {
 
   private final UserDrivingLicenseService userDrivingLicenseService;
 
+  /**
+   * Handle the /drivinglicenses/{id} endpoint.
+   * @param id of driving license.
+   * @return driving license data for confirmation request.
+   */
   @GetMapping(path = "/{id}")
   public ResponseEntity<UserDrivingLicenseConfirmationDataResponse> findDrivingLicenseById(
       @NotNull @Positive @PathVariable Long id) {
@@ -41,6 +53,14 @@ public class UserDrivingLicenseController {
     return new ResponseEntity<>(userPassportDataResponse, HttpStatus.OK);
   }
 
+  /**
+   * Handle the /drivinglicenses/data endpoint.
+   * @return user driving license data.
+   * Return one of the following status codes:
+   * 200: successfully received data.
+   * 204: no specified user driving license data.
+   * @throws NoContentException if no specified user driving license data.
+   */
   @GetMapping(path = "/data")
   public ResponseEntity<UserDrivingLicenseDataResponse> findUserDrivingLicenseData()
       throws NoContentException {
@@ -48,6 +68,11 @@ public class UserDrivingLicenseController {
     return new ResponseEntity<>(userDrivingLicenseDataResponse, HttpStatus.OK);
   }
 
+  /**
+   * Handle the /drivinglicenses endpoint.
+   * @param createOrUpdateUserDrivingLicenseRequest request with parameters.
+   * @return status 200 if driving license data successfully created of updated.
+   */
   @PostMapping
   public ResponseEntity<HttpStatus> createOrUpdate(
       @Valid @RequestBody CreateOrUpdateUserDrivingLicenseRequest
@@ -56,6 +81,14 @@ public class UserDrivingLicenseController {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  /**
+   * Handle the /drivinglicenses/{id}/status endpoint.
+   * @param id of the driving license which status updated (confirmed / not confirmed).
+   * Return one of the following status codes:
+   * 200: if driving license status successfully updated.
+   * 405: if trying to update not confirmed driving license status.
+   * @throws DrivingLicenseNotConfirmedException if driving license not confirmed.
+   */
   @PutMapping(path = "/{id}/status")
   public ResponseEntity<HttpStatus> updateDrivingLicenseStatus(
       @NotNull @Positive @PathVariable Long id) throws DrivingLicenseNotConfirmedException {
@@ -63,6 +96,13 @@ public class UserDrivingLicenseController {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  /**
+   * Handle the /drivinglicenses/upload endpoint.
+   * @param drivingLicenseFile driving license confirmation file.
+   * Return one of the following status codes:
+   * 200: successfully uploaded driving license confirmation file.
+   * 400: if bad request or invalid input parameters.
+   */
   @PostMapping(
       path = "/upload",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
@@ -74,6 +114,14 @@ public class UserDrivingLicenseController {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  /**
+   * Handle the /drivinglicenses/upload endpoint.
+   * @param userDocumentsDownloadRequest request with parameters.
+   * @return zipped file of specified documents scans for confirmation.
+   * Return one of the following status codes:
+   * 200: successfully downloaded driving license confirmation files.
+   * 400: if bad request or invalid input parameters.
+   */
   @PutMapping(path = "/download")
   public ResponseEntity<ByteArrayResource> downloadFiles(
       @Valid @RequestBody UserDocumentsDownloadRequest userDocumentsDownloadRequest) {

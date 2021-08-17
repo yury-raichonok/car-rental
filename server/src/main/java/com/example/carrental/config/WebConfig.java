@@ -6,11 +6,16 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * Web configurations.
+ *
+ * @author Yury Raichonak
+ */
 @Configuration
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-  private final ApplicationConfig applicationConfig;
+  private final ApplicationPropertiesConfig applicationPropertiesConfig;
 
   @Override
   public void addCorsMappings(CorsRegistry registry) {
@@ -20,7 +25,7 @@ public class WebConfig implements WebMvcConfigurer {
             HttpMethod.POST.name(),
             HttpMethod.PUT.name(),
             HttpMethod.DELETE.name())
-        .allowedOrigins(applicationConfig.getClientAddress())
+        .allowedOrigins(applicationPropertiesConfig.getClientAddress())
         .allowCredentials(true);
   }
 }
