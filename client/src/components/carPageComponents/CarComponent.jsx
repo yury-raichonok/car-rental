@@ -173,12 +173,27 @@ const ImageComponentWrapper = styled.div`
   align-items: center;
 `;
 
+const AlertContainer = styled.div`
+  width: 100%;
+
+  span {
+    color: red;
+    font-weigth: 500;
+  }
+`;
+
+const TopContainer = styled.div`
+  width: 100%;
+  font-weight: 500;
+  font-size: 18px;
+`;
+
 const PricingContainer = styled.div`
   width: 100%;
-  height: 234px;
+  height: 214px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-around;
 `;
 
 const Title = styled.div`
@@ -415,7 +430,9 @@ const CarComponent = (props) => {
           <MinRow>
             <ComponentWrapper>
               <PricingContainer>
-                Rental details
+                <TopContainer>
+                  {t('rental_details')}
+                </TopContainer>
                 <Table responsive>
                   <tbody>
                     <tr>
@@ -424,18 +441,10 @@ const CarComponent = (props) => {
                     </tr>
                   </tbody>
                 </Table>
-                <Table responsive>
-                  <tbody>
-                    <tr>
-                      Attention! Car insurance is not included in the rental price. 
-                      In case of damage, exceeding the rental period, traffic fines and other violations, you will be charged a fine.
-                    </tr>
-                    <tr>
-                      
-                      
-                    </tr>
-                  </tbody>
-                </Table>
+                <AlertContainer>
+                  <span>{t('attention')}!</span> {t('car_insurance_is_not_included_in_the_rental_price')}
+                  {t('in_case_of_damage_exceeding_the_rental_period_traffic_fines_and_other_violations_you_will_be_charged_a_fine')}
+                </AlertContainer>
               </PricingContainer>
             </ComponentWrapper>
           </MinRow>

@@ -806,7 +806,7 @@
   "how_to_confirm_personal_data": "How to confirm personal data?",
   "how_to_specify_a_contact_phone_number": "How to specify a contact phone number?",
   "thank_you": "Thank you!",
-  "to_register": "To register, you need to fill in the fields in the Account / Registration tab, and then confirm your email by clicking on the link in the letter",
+  "to_register": "To register, you need to fill in the fields in the Account / Register tab, and then confirm your email by clicking on the link in the letter",
   "to_confirm_data": "To confirm personal data, you must indicate them in your personal account, then attach scans of documents and send a confirmation request",
   "to_specify_phone": "To specify a contact phone number, go to your personal account and enter the number. After that you will receive an SMS for confirmation.",
   "redirect_to_brands": "Now I will redirect you to a page with a list of car brands in our rental.",
@@ -818,5 +818,9 @@
   "you_are_welcome": "You are welcome! Want something else?",
   "how_can_i_help_you": "How can I help you?",
   "it_was_nice_to_chat": "It was nice to chat! Contact us more =)",
-  "type_message": "Type message"
+  "type_message": "Type message",
+
+  "attention": "Attention",
+  "car_insurance_is_not_included_in_the_rental_price": "Car insurance is not included in the rental price",
+  "in_case_of_damage_exceeding_the_rental_period_traffic_fines_and_other_violations_you_will_be_charged_a_fine": " In case of damage, exceeding the rental period, traffic fines and other violations, you will be charged a fine"
 }

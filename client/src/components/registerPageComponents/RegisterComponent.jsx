@@ -185,11 +185,11 @@ const RegisterComponent = (props) => {
   const [registered, setRegistered] = useState(false);
   const [isLoading, setLoading] = useState(false);
 
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
 
     setLoading(true);
     
-    UserDataService.registrateUser(values).then(
+    await UserDataService.registrateUser(values).then(
       res => {
         setRegistered(true);
         console.log(res);
@@ -323,17 +323,9 @@ const RegisterComponent = (props) => {
             <TextContainer className="forgot-password text-right">
               {t('already_registered')} <Link to="/login">{t('sign_in')}?</Link>
             </TextContainer>
-            {isLoading ? (
-              <Spin tip={t('loading') + "..."}>
-                <button className="btn"  type="submit">
-                  {t('submit')}
-                </button>
-              </Spin>
-            ) : (
-              <button className="btn"  type="submit">
-                {t('submit')}
+            <button className="btn"  type="submit">
+                {t('submit')} <Spin spinning={isLoading}/>
               </button>
-            )}
           </Form>
         </SignUpFormContainer>
       </BackgroundFilter>
