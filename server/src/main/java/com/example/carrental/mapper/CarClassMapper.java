@@ -1,5 +1,9 @@
 package com.example.carrental.mapper;
 
+import static com.example.carrental.constants.ApplicationConstants.BELORUSSIAN;
+import static com.example.carrental.constants.ApplicationConstants.NOT_SPECIFIED;
+import static com.example.carrental.constants.ApplicationConstants.RUSSIAN;
+
 import com.example.carrental.controller.dto.car.CarClassNameResponse;
 import com.example.carrental.controller.dto.car.CarClassNameWithTranslationsResponse;
 import com.example.carrental.entity.car.CarClass;
@@ -24,22 +28,22 @@ public interface CarClassMapper {
   @Named("getNameRu")
   default String getNameRu(CarClass carClass) {
     var nameRu = carClass.getCarClassTranslations().stream()
-        .filter(translation -> "ru".equals(translation.getLanguage())).findFirst();
+        .filter(translation -> RUSSIAN.equals(translation.getLanguage())).findFirst();
     if (nameRu.isPresent()) {
       return nameRu.get().getName();
     } else {
-      return "Not specified";
+      return NOT_SPECIFIED;
     }
   }
 
   @Named("getNameBe")
   default String getNameBe(CarClass carClass) {
     var nameBe = carClass.getCarClassTranslations().stream()
-        .filter(translation -> "be".equals(translation.getLanguage())).findFirst();
+        .filter(translation -> BELORUSSIAN.equals(translation.getLanguage())).findFirst();
     if (nameBe.isPresent()) {
       return nameBe.get().getName();
     } else {
-      return "Not specified";
+      return NOT_SPECIFIED;
     }
   }
 }

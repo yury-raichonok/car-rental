@@ -103,7 +103,7 @@ public class CarServiceImpl implements CarService {
     var car = findByIdInRental(id);
     carClassTranslationService.setTranslation(car.getCarClass(), language);
     locationTranslationService.setTranslation(car.getLocation(), language);
-    return carMapper.carAndRentalDetailsToCarByIdResponse(car);
+    return carMapper.carToCarByIdResponse(car);
   }
 
   @Override

@@ -46,7 +46,7 @@ public interface CarMapper {
   @Mapping(target = "locationCoordinateX", source = "car.location.coordinateX")
   @Mapping(target = "locationCoordinateY", source = "car.location.coordinateY")
   @Mapping(target = "carImageLink", source = "car.carImageLink")
-  CarByIdResponse carAndRentalDetailsToCarByIdResponse(Car car);
+  CarByIdResponse carToCarByIdResponse(Car car);
 
   @Mapping(target = "id", source = "car.id")
   @Mapping(target = "brand", source = "car.model.brand.name")

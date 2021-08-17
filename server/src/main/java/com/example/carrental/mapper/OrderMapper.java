@@ -2,7 +2,6 @@ package com.example.carrental.mapper;
 
 import static com.example.carrental.constants.ApplicationConstants.RESPONSE_DATE_TIME_FORMAT_PATTERN;
 
-import com.example.carrental.controller.dto.bill.CreatePaymentBillRequest;
 import com.example.carrental.controller.dto.order.OrderInformationResponse;
 import com.example.carrental.controller.dto.order.OrderNewResponse;
 import com.example.carrental.controller.dto.order.OrderResponse;
@@ -76,9 +75,6 @@ public interface OrderMapper {
   @Mapping(target = "carVin", source = "order.car.vin")
   @Mapping(target = "locationName", source = "order.location.name")
   OrderInformationResponse orderToOrderInformationResponse(Order order);
-
-  @Mapping(target = "orderId", source = "order.id")
-  CreatePaymentBillRequest orderToCreatePaymentBillRequest(Order order);
 
   @Mapping(target = "id", source = "order.id")
   @Mapping(target = "pickUpDate", source = "order.pickUpDate",

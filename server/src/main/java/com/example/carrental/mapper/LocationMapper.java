@@ -1,5 +1,9 @@
 package com.example.carrental.mapper;
 
+import static com.example.carrental.constants.ApplicationConstants.BELORUSSIAN;
+import static com.example.carrental.constants.ApplicationConstants.NOT_SPECIFIED;
+import static com.example.carrental.constants.ApplicationConstants.RUSSIAN;
+
 import com.example.carrental.controller.dto.location.LocationNameResponse;
 import com.example.carrental.controller.dto.location.LocationWithTranslationsResponse;
 import com.example.carrental.entity.location.Location;
@@ -26,22 +30,22 @@ public interface LocationMapper {
   @Named("getNameRu")
   default String getNameRu(Location location) {
     var translationRu = location.getLocationTranslations().stream()
-        .filter(translation -> "ru".equals(translation.getLanguage())).findFirst();
+        .filter(translation -> RUSSIAN.equals(translation.getLanguage())).findFirst();
     if (translationRu.isPresent()) {
       return translationRu.get().getName();
     } else {
-      return "Not specified";
+      return NOT_SPECIFIED;
     }
   }
 
   @Named("getNameBe")
   default String getNameBe(Location location) {
     var translationBe = location.getLocationTranslations().stream()
-        .filter(translation -> "be".equals(translation.getLanguage())).findFirst();
+        .filter(translation -> BELORUSSIAN.equals(translation.getLanguage())).findFirst();
     if (translationBe.isPresent()) {
       return translationBe.get().getName();
     } else {
-      return "Not specified";
+      return NOT_SPECIFIED;
     }
   }
 }

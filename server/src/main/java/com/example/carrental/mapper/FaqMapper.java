@@ -1,5 +1,9 @@
 package com.example.carrental.mapper;
 
+import static com.example.carrental.constants.ApplicationConstants.BELORUSSIAN;
+import static com.example.carrental.constants.ApplicationConstants.NOT_SPECIFIED;
+import static com.example.carrental.constants.ApplicationConstants.RUSSIAN;
+
 import com.example.carrental.controller.dto.faq.FaqResponse;
 import com.example.carrental.controller.dto.faq.FaqWithTranslationsResponse;
 import com.example.carrental.entity.faq.Faq;
@@ -27,44 +31,44 @@ public interface FaqMapper {
   @Named("getQuestionRu")
   default String getQuestionRu(Faq faq) {
     var translationRu = faq.getFaqTranslations().stream()
-        .filter(translation -> "ru".equals(translation.getLanguage())).findFirst();
+        .filter(translation -> RUSSIAN.equals(translation.getLanguage())).findFirst();
     if (translationRu.isPresent()) {
       return translationRu.get().getQuestion();
     } else {
-      return "Not specified";
+      return NOT_SPECIFIED;
     }
   }
 
   @Named("getAnswerRu")
   default String getAnswerRu(Faq faq) {
     var translationRu = faq.getFaqTranslations().stream()
-        .filter(translation -> "ru".equals(translation.getLanguage())).findFirst();
+        .filter(translation -> RUSSIAN.equals(translation.getLanguage())).findFirst();
     if (translationRu.isPresent()) {
       return translationRu.get().getAnswer();
     } else {
-      return "Not specified";
+      return NOT_SPECIFIED;
     }
   }
 
   @Named("getQuestionBe")
   default String getQuestionBe(Faq faq) {
     var translationBe = faq.getFaqTranslations().stream()
-        .filter(translation -> "be".equals(translation.getLanguage())).findFirst();
+        .filter(translation -> BELORUSSIAN.equals(translation.getLanguage())).findFirst();
     if (translationBe.isPresent()) {
       return translationBe.get().getQuestion();
     } else {
-      return "Not specified";
+      return NOT_SPECIFIED;
     }
   }
 
   @Named("getAnswerBe")
   default String getAnswerBe(Faq faq) {
     var translationBe = faq.getFaqTranslations().stream()
-        .filter(translation -> "be".equals(translation.getLanguage())).findFirst();
+        .filter(translation -> BELORUSSIAN.equals(translation.getLanguage())).findFirst();
     if (translationBe.isPresent()) {
       return translationBe.get().getAnswer();
     } else {
-      return "Not specified";
+      return NOT_SPECIFIED;
     }
   }
 }
