@@ -24,6 +24,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The service for FAQs.
+ * <p>
+ * This class performs the CRUD operations for FAQs.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -33,6 +40,11 @@ public class FaqServiceImpl implements FaqService {
   private final FaqRepository faqRepository;
   private final FaqTranslationService faqTranslationService;
 
+  /**
+   * @param language selected language.
+   * @return faq response list
+   * @throws NoContentException if faq response list is empty.
+   */
   @Override
   public List<FaqResponse> findAll(String language) throws NoContentException {
     var faqs = faqRepository.findAll();
@@ -47,6 +59,10 @@ public class FaqServiceImpl implements FaqService {
     return faqsResponse;
   }
 
+  /**
+   * @param pageable data.
+   * @return faq with translations list.
+   */
   @Override
   public Page<FaqWithTranslationsResponse> findAllPaged(Pageable pageable) {
     var faqsPage = faqRepository.findAll(pageable);
@@ -55,6 +71,10 @@ public class FaqServiceImpl implements FaqService {
     return new PageImpl<>(faqResponses, faqsPage.getPageable(), faqsPage.getTotalElements());
   }
 
+  /**
+   * @param id of faq.
+   * @return faq.
+   */
   @Override
   public Faq findById(Long id) {
     return faqRepository.findById(id).orElseThrow(() -> {
@@ -63,6 +83,10 @@ public class FaqServiceImpl implements FaqService {
     });
   }
 
+  /**
+   * @param createFaqRequest request data for creating new faq.
+   * @throws EntityAlreadyExistsException if faq with same question already exists.
+   */
   @Override
   @Transactional
   public void create(CreateFaqRequest createFaqRequest) throws EntityAlreadyExistsException {
@@ -82,6 +106,10 @@ public class FaqServiceImpl implements FaqService {
     faqTranslationService.create(createFaqRequest, faq);
   }
 
+  /**
+   * @param id of updating faq.
+   * @param updateFaqRequest request data for updating faq.
+   */
   @Override
   @Transactional
   public void update(Long id, UpdateFaqRequest updateFaqRequest) {
@@ -94,6 +122,9 @@ public class FaqServiceImpl implements FaqService {
     faqTranslationService.update(updateFaqRequest, faq.getFaqTranslations());
   }
 
+  /**
+   * @param id of faq.
+   */
   @Override
   @Transactional
   public void delete(Long id) {

@@ -7,6 +7,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+/**
+ * The service for Messages.
+ * <p>
+ * This interface describes actions on Messages.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 public interface MessageService {
 

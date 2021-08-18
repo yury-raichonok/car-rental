@@ -16,6 +16,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The service for Faq Translations.
+ * <p>
+ * This class performs the CRUD operations for Faq Translations.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -23,6 +30,10 @@ public class FaqTranslationServiceImpl implements FaqTranslationService {
 
   private final FaqTranslationRepository faqTranslationRepository;
 
+  /**
+   * @param createFaqRequest data for creating new translations.
+   * @param faq for which creating translations.
+   */
   @Override
   @Transactional
   public void create(CreateFaqRequest createFaqRequest, Faq faq) {
@@ -43,6 +54,10 @@ public class FaqTranslationServiceImpl implements FaqTranslationService {
         .build());
   }
 
+  /**
+   * @param updateFaqRequest data for updating translations.
+   * @param translations list of translations.
+   */
   @Override
   @Transactional
   public void update(UpdateFaqRequest updateFaqRequest, List<FaqTranslation> translations) {
@@ -63,6 +78,10 @@ public class FaqTranslationServiceImpl implements FaqTranslationService {
     });
   }
 
+  /**
+   * @param faq which question and answer replaces by translated name.
+   * @param language selected language.
+   */
   @Override
   public void setTranslation(Faq faq, String language) {
     if (!ENGLISH.equals(language)) {

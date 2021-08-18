@@ -21,6 +21,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+/**
+ * The service for Orders.
+ * <p>
+ * This interface describes actions on Orders.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 public interface OrderService {
 

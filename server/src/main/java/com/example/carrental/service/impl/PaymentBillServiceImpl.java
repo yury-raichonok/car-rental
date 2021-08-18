@@ -29,6 +29,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The service for Payment bills.
+ * <p>
+ * This class performs the CRUD operations for Payment bills.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -41,6 +48,11 @@ public class PaymentBillServiceImpl implements PaymentBillService {
   private final LocationTranslationService locationTranslationService;
   private final UserSecurityService userSecurityService;
 
+  /**
+   * @param paymentBillSearchRequest search parameters.
+   * @param language selected language.
+   * @return page of payment bills.
+   */
   @Override
   public Page<PaymentBillResponse> findAll(PaymentBillSearchRequest paymentBillSearchRequest,
       String language) {
@@ -53,6 +65,11 @@ public class PaymentBillServiceImpl implements PaymentBillService {
     return new PageImpl<>(billsResponse, billsPage.getPageable(), billsPage.getTotalElements());
   }
 
+  /**
+   * @param pageable data.
+   * @param language selected language.
+   * @return page of new user payment bills.
+   */
   @Override
   public Page<UserNewPaymentBillsResponse> findAllNewUserBills(Pageable pageable, String language) {
     var userEmail = userSecurityService.getUserEmailFromSecurityContext();
@@ -68,6 +85,11 @@ public class PaymentBillServiceImpl implements PaymentBillService {
         paymentBills.getTotalElements());
   }
 
+  /**
+   * @param pageable data.
+   * @param language selected language.
+   * @return page of user paid bills.
+   */
   @Override
   public Page<UserPaymentBillsResponse> findAllUserBillsHistory(Pageable pageable,
       String language) {
@@ -83,6 +105,10 @@ public class PaymentBillServiceImpl implements PaymentBillService {
         paymentBills.getTotalElements());
   }
 
+  /**
+   * @param id of payment bill.
+   * @throws IllegalStateException if payment bill already been paid, or it expires.
+   */
   @Override
   @Transactional
   public void approveWithoutPayment(Long id) {
@@ -103,6 +129,9 @@ public class PaymentBillServiceImpl implements PaymentBillService {
     paymentBillRepository.save(paymentBill);
   }
 
+  /**
+   * @param id of payment bill.
+   */
   @Override
   @Transactional
   public void payBill(Long id) {
@@ -115,6 +144,9 @@ public class PaymentBillServiceImpl implements PaymentBillService {
     paymentBillRepository.save(paymentBill);
   }
 
+  /**
+   * @param order for which creating new payment bill.
+   */
   @Override
   @Transactional
   public void create(Order order) {
@@ -128,6 +160,11 @@ public class PaymentBillServiceImpl implements PaymentBillService {
         .build());
   }
 
+  /**
+   * @param id of payment bill.
+   * @return payment bill.
+   * @throws IllegalStateException if payment bill with specified id is not exists.
+   */
   @Override
   public PaymentBill findById(long id) {
     return paymentBillRepository.findById(id).orElseThrow(() -> {
@@ -136,6 +173,9 @@ public class PaymentBillServiceImpl implements PaymentBillService {
     });
   }
 
+  /**
+   * @return amount of new user payment bills.
+   */
   @Override
   public int findNewUserBillsAmount() {
     var userEmail = userSecurityService.getUserEmailFromSecurityContext();

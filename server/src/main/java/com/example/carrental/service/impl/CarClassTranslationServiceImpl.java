@@ -15,6 +15,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The service for Car Class Translations.
+ * <p>
+ * This class performs the CRUD operations for Car Class Translations.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -22,6 +29,10 @@ public class CarClassTranslationServiceImpl implements CarClassTranslationServic
 
   private final CarClassTranslationRepository carClassTranslationRepository;
 
+  /**
+   * @param createCarClassRequest data for creating new translations.
+   * @param carClass for which creating translations.
+   */
   @Override
   @Transactional
   public void create(CreateCarClassRequest createCarClassRequest, CarClass carClass) {
@@ -39,6 +50,10 @@ public class CarClassTranslationServiceImpl implements CarClassTranslationServic
         .build());
   }
 
+  /**
+   * @param createCarClassRequest data for updating translations.
+   * @param translations list of translations.
+   */
   @Override
   @Transactional
   public void update(CreateCarClassRequest createCarClassRequest,
@@ -58,6 +73,10 @@ public class CarClassTranslationServiceImpl implements CarClassTranslationServic
     });
   }
 
+  /**
+   * @param carClass which name replaces by translated name.
+   * @param language selected language.
+   */
   @Override
   public void setTranslation(CarClass carClass, String language) {
     if (!ENGLISH.equals(language)) {

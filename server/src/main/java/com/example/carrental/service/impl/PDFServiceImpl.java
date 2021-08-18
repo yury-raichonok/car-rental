@@ -35,6 +35,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 
+/**
+ * The service for exporting PDF files.
+ *
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -51,8 +56,15 @@ public class PDFServiceImpl implements PDFService {
   private final ApplicationPropertiesConfig applicationPropertiesConfig;
   private final RentalDetailsService rentalDetailsService;
 
+  /**
+   * @param order which data exported.
+   * @return byte array resource.
+   * @throws FontNotFoundException if font for generating document is not found.
+   * @throws DocumentNotGeneratedException id document not generated.
+   */
   public ByteArrayResource exportOrderToPDF(Order order)
       throws FontNotFoundException, DocumentNotGeneratedException {
+    var rentalDetails = rentalDetailsService.getRentalDetails();
     try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
       var document = new Document();
       PdfWriter.getInstance(document, byteArrayOutputStream);
@@ -79,7 +91,7 @@ public class PDFServiceImpl implements PDFService {
       document.add(rentalEmailParagraph);
 
       var rentalPhoneParagraph = new Paragraph(String.format("Phone: %s",
-          rentalDetailsService.getRentalDetails().getPhone()), textFont);
+          rentalDetails.getPhone()), textFont);
       rentalPhoneParagraph.setAlignment(ALIGN_RIGHT);
       document.add(rentalPhoneParagraph);
       document.add(Chunk.NEWLINE);

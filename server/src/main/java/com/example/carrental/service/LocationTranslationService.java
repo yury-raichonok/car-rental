@@ -6,6 +6,13 @@ import com.example.carrental.entity.location.LocationTranslation;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
+/**
+ * The service for Location Translations.
+ * <p>
+ * This interface describes actions on Location Translations.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 public interface LocationTranslationService {
 

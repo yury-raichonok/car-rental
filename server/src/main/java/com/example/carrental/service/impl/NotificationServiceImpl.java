@@ -17,6 +17,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The service for Notifications.
+ * <p>
+ * This class performs the CRUD operations for Notifications.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -26,6 +33,10 @@ public class NotificationServiceImpl implements NotificationService {
   private final NotificationRepository notificationRepository;
   private final UserSecurityService userSecurityService;
 
+  /**
+   * @param pageable data.
+   * @return page of notification response.
+   */
   @Override
   public Page<NotificationResponse> findAllNew(Pageable pageable) {
     var userEmail = userSecurityService.getUserEmailFromSecurityContext();
@@ -38,6 +49,10 @@ public class NotificationServiceImpl implements NotificationService {
         notifications.getTotalElements());
   }
 
+  /**
+   * @param pageable data.
+   * @return page of notification history response.
+   */
   @Override
   public Page<NotificationResponse> findAllNotificationsHistory(Pageable pageable) {
     var userEmail = userSecurityService.getUserEmailFromSecurityContext();
@@ -50,11 +65,17 @@ public class NotificationServiceImpl implements NotificationService {
         notifications.getTotalElements());
   }
 
+  /**
+   * @param notification data for creating new notification.
+   */
   @Override
   public void sendNotification(Notification notification) {
     notificationRepository.save(notification);
   }
 
+  /**
+   * @param id of updated notification.
+   */
   @Override
   @Transactional
   public void updateNotificationAsRead(Long id) {
@@ -63,6 +84,10 @@ public class NotificationServiceImpl implements NotificationService {
     notificationRepository.save(notification);
   }
 
+  /**
+   * @param id of notification.
+   * @return notification.
+   */
   @Override
   public Notification findById(Long id) {
     return notificationRepository.findById(id).orElseThrow(() -> {
@@ -71,6 +96,9 @@ public class NotificationServiceImpl implements NotificationService {
     });
   }
 
+  /**
+   * @param id of notification.
+   */
   @Override
   @Transactional
   public void delete(Long id) {
@@ -79,6 +107,9 @@ public class NotificationServiceImpl implements NotificationService {
     notificationRepository.save(notification);
   }
 
+  /**
+   * @return amount of new user notifications.
+   */
   @Override
   public int findNewUserNotificationsAmount() {
     var userEmail = userSecurityService.getUserEmailFromSecurityContext();

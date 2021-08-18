@@ -18,6 +18,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The service for User Authentication.
+ *
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -28,6 +33,10 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
   private final UserSecurityService userSecurityService;
   private final UserService userService;
 
+  /**
+   * @param user data.
+   * @return user information.
+   */
   @Override
   public UserInfoResponse getUserInfo(Principal user) {
     if (null == user) {
@@ -42,6 +51,10 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
         .build();
   }
 
+  /**
+   * @param userLoginRequest data for login.
+   * @return user login response.
+   */
   @Override
   @Transactional
   public UserLoginResponse login(UserLoginRequest userLoginRequest) {

@@ -27,6 +27,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/**
+ * File Store service for performing operations on files.
+ * <p>
+ * This class saves and loads files from Amazon S3 cloud storage.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -37,6 +44,12 @@ public class FileStoreServiceImpl implements FileStoreService {
   private final AmazonConfig amazonConfig;
   private final AmazonS3 s3;
 
+  /**
+   * @param fileType one of two: Car image / Brand image.
+   * @param fileName data.
+   * @param file to upload.
+   * @return public link on uploaded tile.
+   */
   public String uploadPublicImage(String fileType, String fileName, File file) {
     try {
       if (CAR_IMAGE.equals(fileType)) {
@@ -62,6 +75,11 @@ public class FileStoreServiceImpl implements FileStoreService {
     }
   }
 
+  /**
+   * @param fileType one of two: Passport file / Driving license file.
+   * @param fileName data.
+   * @param file to upload.
+   */
   @Override
   public void uploadFile(String fileType, String fileName, File file) {
     try {
@@ -82,6 +100,11 @@ public class FileStoreServiceImpl implements FileStoreService {
     }
   }
 
+  /**
+   * @param fileType one of two: Passport file / Driving license file.
+   * @param directory of files.
+   * @return zipped files from specified Amazon S3 directory.
+   */
   @Override
   public ByteArrayOutputStream downloadZippedFiles(String fileType, String directory) {
     ObjectListing objectListing;

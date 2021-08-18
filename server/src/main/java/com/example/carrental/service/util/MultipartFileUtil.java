@@ -8,12 +8,21 @@ import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * Utility class for validating uploaded images.
+ *
+ * @author Yury Raichonak
+ */
 @Slf4j
 public final class MultipartFileUtil {
 
   private MultipartFileUtil() {
   }
 
+  /**
+   * @param file multipart image file.
+   * @throws IllegalStateException if validation does not passed.
+   */
   public static void validateMultipartImageFile(MultipartFile file) {
     if (file.isEmpty()) {
       log.error("Cannot upload empty file [{}]", file.getOriginalFilename());

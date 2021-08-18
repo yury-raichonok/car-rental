@@ -24,6 +24,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The service for Car Models.
+ * <p>
+ * This class performs the CRUD operations for Car Models.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -33,6 +40,10 @@ public class CarModelServiceImpl implements CarModelService {
   private final CarModelMapper carModelMapper;
   private final CarModelRepository carModelRepository;
 
+  /**
+   * @return list of car models.
+   * @throws NoContentException if list of car models is empty.
+   */
   @Override
   public List<CarModelResponse> findAll() throws NoContentException {
     var models = carModelRepository.findAll();
@@ -44,6 +55,10 @@ public class CarModelServiceImpl implements CarModelService {
     return modelsResponse;
   }
 
+  /**
+   * @param pageable data.
+   * @return page of car models with brand name.
+   */
   @Override
   public Page<CarModelBrandNameResponse> findAllModelsWithBrandName(Pageable pageable) {
     var models = carModelRepository.findAll(pageable);
@@ -53,6 +68,11 @@ public class CarModelServiceImpl implements CarModelService {
     return new PageImpl<>(modelsResponse, models.getPageable(), models.getTotalElements());
   }
 
+  /**
+   * @param id of car model.
+   * @return car model.
+   * @throws IllegalStateException if model with such name does not exists.
+   */
   @Override
   public CarModel findById(Long id) {
     return carModelRepository.findById(id).orElseThrow(() -> {
@@ -61,6 +81,12 @@ public class CarModelServiceImpl implements CarModelService {
     });
   }
 
+  /**
+   * @param name of model.
+   * @param brandName name of car brand.
+   * @return car model with specified brand and name.
+   * @throws IllegalStateException if model of specified brand with such name does not exists.
+   */
   @Override
   public CarModel findModelByNameAndBrandName(String name, String brandName) {
     return carModelRepository.findByNameAndBrandName(name, brandName).orElseThrow(() -> {
@@ -70,9 +96,13 @@ public class CarModelServiceImpl implements CarModelService {
     });
   }
 
+  /**
+   * @param id of car brand.
+   * @return list of car models.
+   * @throws NoContentException if list of brand models is empty.
+   */
   @Override
   public List<CarModelResponse> findModelsByBrandId(Long id) throws NoContentException {
-    carBrandService.findById(id);
     var models = carModelRepository.findAllByBrandId(id);
     List<CarModelResponse> modelsResponse = new ArrayList<>();
     models.forEach(model -> modelsResponse.add(carModelMapper.carModelToCarModelResponse(model)));
@@ -82,9 +112,13 @@ public class CarModelServiceImpl implements CarModelService {
     return modelsResponse;
   }
 
+  /**
+   * @param name of car brand.
+   * @return list of car models.
+   * @throws NoContentException if list of brand models is empty.
+   */
   @Override
   public List<CarModelResponse> findModelsByBrandName(String name) throws NoContentException {
-    carBrandService.findByName(name);
     var models = carModelRepository.findAllByBrandNameOrderByName(name);
     List<CarModelResponse> modelsResponse = new ArrayList<>();
     models.forEach(model -> modelsResponse.add(carModelMapper.carModelToCarModelResponse(model)));
@@ -94,6 +128,10 @@ public class CarModelServiceImpl implements CarModelService {
     return modelsResponse;
   }
 
+  /**
+   * @param createCarModelRequest request with data.
+   * @throws EntityAlreadyExistsException if model of brand with such name already exists.
+   */
   @Override
   @Transactional
   public void create(CreateCarModelRequest createCarModelRequest)
@@ -107,6 +145,11 @@ public class CarModelServiceImpl implements CarModelService {
         .build());
   }
 
+  /**
+   * @param id of updated model.
+   * @param updateCarModelRequest data for updating car model.
+   * @throws EntityAlreadyExistsException if model of brand with new name already exists.
+   */
   @Override
   @Transactional
   public void update(Long id, UpdateCarModelRequest updateCarModelRequest)
@@ -122,6 +165,11 @@ public class CarModelServiceImpl implements CarModelService {
     carModelRepository.save(carModel);
   }
 
+  /**
+   * @param modelName name of model.
+   * @param brandName name of brand.
+   * @throws EntityAlreadyExistsException if such car model of specified brand already exists.
+   */
   private void validateCarModelByBrandAndName(String modelName, String brandName)
       throws EntityAlreadyExistsException {
     if (carModelRepository.findByNameAndBrandName(modelName, brandName).isPresent()) {

@@ -31,6 +31,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * The service for Car Brands.
+ * <p>
+ * This class performs the CRUD operations for Car Brands.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -40,6 +47,10 @@ public class CarBrandServiceImpl implements CarBrandService {
   private final CarBrandRepository carBrandRepository;
   private final FileStoreService fileStoreService;
 
+  /**
+   * @return list of car brands.
+   * @throws NoContentException if list of brands is empty.
+   */
   @Override
   public List<CarBrandResponse> findAll() throws NoContentException {
     var brands = carBrandRepository.findAll();
@@ -51,6 +62,10 @@ public class CarBrandServiceImpl implements CarBrandService {
     return brandsResponse;
   }
 
+  /**
+   * @return list of car brands.
+   * @throws NoContentException if list of brands is empty.
+   */
   @Override
   public List<CarBrandResponse> findAllBrandsWithRentalOffers() throws NoContentException {
     var brands = carBrandRepository.findAllWithRentalOffers();
@@ -62,6 +77,10 @@ public class CarBrandServiceImpl implements CarBrandService {
     return brandsResponse;
   }
 
+  /**
+   * @param pageable data.
+   * @return page of car brands.
+   */
   @Override
   public Page<CarBrandResponse> findAllPaged(Pageable pageable) {
     var brands = carBrandRepository.findAll(pageable);
@@ -70,6 +89,11 @@ public class CarBrandServiceImpl implements CarBrandService {
     return new PageImpl<>(brandsResponse, brands.getPageable(), brands.getTotalElements());
   }
 
+  /**
+   * @param id of car brand.
+   * @return car brand.
+   * @throws IllegalStateException if car brand with specified id not exists.
+   */
   @Override
   public CarBrand findById(Long id) {
     return carBrandRepository.findById(id).orElseThrow(() -> {
@@ -78,6 +102,11 @@ public class CarBrandServiceImpl implements CarBrandService {
     });
   }
 
+  /**
+   * @param name of car brand.
+   * @return car brand.
+   * @throws IllegalStateException if car brand with specified name not exists.
+   */
   @Override
   public CarBrand findByName(String name) {
     return carBrandRepository.findByName(name).orElseThrow(() -> {
@@ -87,6 +116,10 @@ public class CarBrandServiceImpl implements CarBrandService {
     });
   }
 
+  /**
+   * @param createCarBrandRequest request data for creating new brand.
+   * @throws EntityAlreadyExistsException if brand with specified name already exists.
+   */
   @Override
   public void create(CreateCarBrandRequest createCarBrandRequest)
       throws EntityAlreadyExistsException {
@@ -98,6 +131,11 @@ public class CarBrandServiceImpl implements CarBrandService {
         .build());
   }
 
+  /**
+   * @param id of car brand.
+   * @param brandFile image of car brand.
+   * @throws IllegalStateException if bad request or invalid input parameters.
+   */
   @Override
   @Transactional
   public void uploadBrandImage(Long id, MultipartFile brandFile) {
@@ -125,6 +163,11 @@ public class CarBrandServiceImpl implements CarBrandService {
     carBrandRepository.save(carBrand);
   }
 
+  /**
+   * @param id of car brand.
+   * @param createCarBrandRequest request data for updating car brand.
+   * @throws EntityAlreadyExistsException if car brand with new name already exists.
+   */
   @Override
   @Transactional
   public void update(Long id, CreateCarBrandRequest createCarBrandRequest)
@@ -137,6 +180,10 @@ public class CarBrandServiceImpl implements CarBrandService {
     carBrandRepository.save(carBrand);
   }
 
+  /**
+   * @param brandName of brand.
+   * @throws EntityAlreadyExistsException if car brand with specified name already exists.
+   */
   private void validateCarBrandName(String brandName) throws EntityAlreadyExistsException {
     if (carBrandRepository.findByName(brandName).isPresent()) {
       log.error("Car brand {} already exists", brandName);

@@ -12,6 +12,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+/**
+ * The service for FAQs.
+ * <p>
+ * This interface describes actions on FAQs.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 public interface FaqService {
 

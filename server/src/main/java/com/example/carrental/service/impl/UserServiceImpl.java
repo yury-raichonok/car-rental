@@ -39,6 +39,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The service for Users.
+ * <p>
+ * This class performs the CRUD operations for Users.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -61,6 +68,9 @@ public class UserServiceImpl implements UserService {
   private final UserRoleService userRoleServiceService;
   private final UserSecurityService userSecurityService;
 
+  /**
+   * @return user profile response.
+   */
   @Override
   public UserProfileResponse getUserProfile() {
     var userEmail = userSecurityService.getUserEmailFromSecurityContext();
@@ -68,6 +78,9 @@ public class UserServiceImpl implements UserService {
     return userMapper.userToUserProfileResponse(user);
   }
 
+  /**
+   * Method for sending email confirmation message.
+   */
   @Override
   public void sendEmailConfirmationMessage() {
     var userEmail = userSecurityService.getUserEmailFromSecurityContext();
@@ -88,6 +101,11 @@ public class UserServiceImpl implements UserService {
     emailService.sendEmail(user.getEmail(), message, "Email confirmation");
   }
 
+  /**
+   * @param token for email confirmation.
+   * @throws TokenExpireException if token already expires.
+   * @throws IllegalStateException if email already confirmed.
+   */
   @Override
   @Transactional
   public void confirmEmail(String token) throws TokenExpireException {
@@ -110,6 +128,10 @@ public class UserServiceImpl implements UserService {
     userConfirmationTokenService.updateUserConfirmationTokenConfirmedAt(token);
   }
 
+  /**
+   * @param changePasswordRequest data for changing passwird.
+   * @throws TokenExpireException if token already expired.
+   */
   @Override
   @Transactional
   public void changePassword(UserChangePasswordRequest changePasswordRequest)
@@ -140,6 +162,10 @@ public class UserServiceImpl implements UserService {
     userRepository.save(user);
   }
 
+  /**
+   * @param userRegistrationRequest data for creating new user.
+   * @throws UsernameAlreadyTakenException if specified username already taken.
+   */
   @Override
   @Transactional
   public void create(UserRegistrationRequest userRegistrationRequest)
@@ -181,6 +207,10 @@ public class UserServiceImpl implements UserService {
     emailService.sendEmail(user.getEmail(), message, "Email confirmation");
   }
 
+  /**
+   * @param userSearchRequest search parameters.
+   * @return page of users.
+   */
   @Override
   public Page<UserDataResponse> findAll(UserSearchRequest userSearchRequest) {
     var usersPage = userCriteriaRepository.findUsers(userSearchRequest);
@@ -189,6 +219,9 @@ public class UserServiceImpl implements UserService {
     return new PageImpl<>(usersResponse, usersPage.getPageable(), usersPage.getTotalElements());
   }
 
+  /**
+   * @param forgotPasswordRequest data for password restoration.
+   */
   @Override
   @Transactional
   public void forgotPassword(UserForgotPasswordRequest forgotPasswordRequest) {
@@ -209,6 +242,11 @@ public class UserServiceImpl implements UserService {
     emailService.sendEmail(user.getEmail(), message, "Password recovery");
   }
 
+  /**
+   * @param id of user.
+   * @param userUpdateRequest data for updating user.
+   * @throws UsernameAlreadyTakenException if specified email is already taken.
+   */
   @Override
   @Transactional
   public void update(Long id, UserUpdateRequest userUpdateRequest)
@@ -233,6 +271,9 @@ public class UserServiceImpl implements UserService {
     userRepository.save(user);
   }
 
+  /**
+   * @param id of user.
+   */
   @Override
   @Transactional
   public void updateUserRoleToAdmin(Long id) {
@@ -242,6 +283,9 @@ public class UserServiceImpl implements UserService {
     userRepository.save(user);
   }
 
+  /**
+   * @param id of user.
+   */
   @Override
   @Transactional
   public void updateUserRoleToUser(Long id) {
@@ -251,6 +295,9 @@ public class UserServiceImpl implements UserService {
     userRepository.save(user);
   }
 
+  /**
+   * @param id of user.
+   */
   @Override
   @Transactional
   public void updateUserStatus(Long id) {
@@ -259,6 +306,10 @@ public class UserServiceImpl implements UserService {
     userRepository.save(user);
   }
 
+  /**
+   * @param email of user.
+   * @throws UsernameAlreadyTakenException if specified email is already taken.
+   */
   @Override
   public void checkExistedEmail(String email) throws UsernameAlreadyTakenException {
     if (userRepository.findByEmail(email).isPresent()) {
@@ -267,6 +318,10 @@ public class UserServiceImpl implements UserService {
     }
   }
 
+  /**
+   * @param id of user.
+   * @return user.
+   */
   @Override
   public User findById(Long id) {
     return userRepository.findById(id).orElseThrow(() -> {
@@ -275,6 +330,9 @@ public class UserServiceImpl implements UserService {
     });
   }
 
+  /**
+   * @return new users amount per day.
+   */
   @Override
   public int findNewUsersAmountPerDay() {
     return userRepository
@@ -283,6 +341,10 @@ public class UserServiceImpl implements UserService {
                 MINUTES_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY)));
   }
 
+  /**
+   * @param email of user.
+   * @return user.
+   */
   @Override
   public User findUserByEmail(String email) {
     return userRepository.findByEmail(email).orElseThrow(() -> {
@@ -291,6 +353,9 @@ public class UserServiceImpl implements UserService {
     });
   }
 
+  /**
+   * @param email of user.
+   */
   @Override
   @Transactional
   public void updateLastLoginDate(String email) {

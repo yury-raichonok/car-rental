@@ -10,6 +10,13 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The service for Emails.
+ * <p>
+ * This class sends emails to users.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -18,6 +25,11 @@ public class EmailServiceImpl implements EmailService {
   private final ApplicationPropertiesConfig applicationPropertiesConfig;
   private final JavaMailSender mailSender;
 
+  /**
+   * @param to email of receiver.
+   * @param body of email.
+   * @param topic of email.
+   */
   @Override
   @Transactional
   public void sendEmail(String to, String body, String topic) {

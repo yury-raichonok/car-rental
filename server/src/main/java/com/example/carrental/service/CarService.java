@@ -15,6 +15,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * The service for Cars.
+ * <p>
+ * This interface describes actions on Cars.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 public interface CarService {
 

@@ -13,6 +13,13 @@ import com.example.carrental.service.exceptions.UsernameAlreadyTakenException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+/**
+ * The service for Users.
+ * <p>
+ * This interface describes actions on Users.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 public interface UserService {
 

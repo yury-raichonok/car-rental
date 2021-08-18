@@ -15,6 +15,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The service for Location Translations.
+ * <p>
+ * This class performs the CRUD operations for Location Translations.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -22,6 +29,10 @@ public class LocationTranslationServiceImpl implements LocationTranslationServic
 
   private final LocationTranslationRepository locationTranslationRepository;
 
+  /**
+   * @param createLocationRequest data for creating new translations.
+   * @param location for which creating translations.
+   */
   @Override
   @Transactional
   public void create(CreateLocationRequest createLocationRequest, Location location) {
@@ -40,6 +51,10 @@ public class LocationTranslationServiceImpl implements LocationTranslationServic
         .build());
   }
 
+  /**
+   * @param createLocationRequest data for updating translations.
+   * @param translations list of translations.
+   */
   @Override
   @Transactional
   public void update(CreateLocationRequest createLocationRequest,
@@ -59,6 +74,10 @@ public class LocationTranslationServiceImpl implements LocationTranslationServic
     });
   }
 
+  /**
+   * @param location which name replaces by translated name.
+   * @param language selected language.
+   */
   @Override
   public void setTranslation(Location location, String language) {
     if (!ENGLISH.equals(language)) {

@@ -6,6 +6,13 @@ import com.example.carrental.controller.dto.rentaldetails.RentalDetailsUpdateReq
 import com.example.carrental.entity.rentaldetails.RentalDetails;
 import org.springframework.stereotype.Service;
 
+/**
+ * The service for Rental Details.
+ * <p>
+ * This interface describes actions on Rental Details.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 public interface RentalDetailsService {
 

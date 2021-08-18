@@ -25,6 +25,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The service for Repair Bills.
+ * <p>
+ * This class performs the CRUD operations for Repair Bills.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -36,6 +43,11 @@ public class RepairBillServiceImpl implements RepairBillService {
   private final LocationTranslationService locationTranslationService;
   private final UserSecurityService userSecurityService;
 
+  /**
+   * @param repairBillSearchRequest search parameters.
+   * @param language selected language.
+   * @return page of repair bills.
+   */
   @Override
   public Page<RepairBillResponse> findAll(RepairBillSearchRequest repairBillSearchRequest,
       String language) {
@@ -48,6 +60,9 @@ public class RepairBillServiceImpl implements RepairBillService {
     return new PageImpl<>(billsResponse, billsPage.getPageable(), billsPage.getTotalElements());
   }
 
+  /**
+   * @param createRepairBillRequest data to create repair bill.
+   */
   @Override
   @Transactional
   public void create(CreateRepairBillRequest createRepairBillRequest) {
@@ -60,6 +75,11 @@ public class RepairBillServiceImpl implements RepairBillService {
         .build());
   }
 
+  /**
+   * @param pageable data.
+   * @param language selected language.
+   * @return page of user payed repair bills.
+   */
   @Override
   public Page<RepairBillHistoryResponse> findAllUserBillsHistory(Pageable pageable,
       String language) {
@@ -74,6 +94,11 @@ public class RepairBillServiceImpl implements RepairBillService {
     return new PageImpl<>(billsResponse, repairBills.getPageable(), repairBills.getTotalElements());
   }
 
+  /**
+   * @param pageable data.
+   * @param language selected language.
+   * @return page of new user repair bills.
+   */
   @Override
   public Page<RepairBillNewResponse> findAllNewUserBills(Pageable pageable, String language) {
     var userEmail = userSecurityService.getUserEmailFromSecurityContext();
@@ -87,6 +112,9 @@ public class RepairBillServiceImpl implements RepairBillService {
     return new PageImpl<>(billsResponse, repairBills.getPageable(), repairBills.getTotalElements());
   }
 
+  /**
+   * @param id of repair bill.
+   */
   @Override
   public void payBill(Long id) {
     var repairBill = findById(id);
@@ -97,12 +125,20 @@ public class RepairBillServiceImpl implements RepairBillService {
     repairBillRepository.save(repairBill);
   }
 
+  /**
+   * @return amount of new user repair bills.
+   */
   @Override
   public int findNewUserRepairBillsAmount() {
     var userEmail = userSecurityService.getUserEmailFromSecurityContext();
     return repairBillRepository.countAllByOrder_UserEmailAndPaymentDateNull(userEmail);
   }
 
+  /**
+   * @param id of repair bill.
+   * @return repair bill.
+   * @throws IllegalStateException if repair bill with specified id does not exists.
+   */
   @Override
   public RepairBill findById(Long id) {
     return repairBillRepository.findById(id).orElseThrow(() -> {

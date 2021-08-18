@@ -31,6 +31,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * The service for User Passports.
+ * <p>
+ * This class performs the CRUD operations for User Passports.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -42,6 +49,10 @@ public class UserPassportServiceImpl implements UserPassportService {
   private final UserSecurityService userSecurityService;
   private final UserService userService;
 
+  /**
+   * @return user passport data.
+   * @throws NoContentException if user passport is not specified.
+   */
   @Override
   public UserPassportDataResponse getUserPassportData() throws NoContentException {
     var userEmail = userSecurityService.getUserEmailFromSecurityContext();
@@ -53,6 +64,10 @@ public class UserPassportServiceImpl implements UserPassportService {
     return userPassportMapper.userPassportToUserPassportDataResponse(passport);
   }
 
+  /**
+   * @param id of user passport.
+   * @return user passport.
+   */
   @Override
   public UserPassport findById(Long id) {
     return userPassportRepository.findById(id).orElseThrow(() -> {
@@ -62,12 +77,19 @@ public class UserPassportServiceImpl implements UserPassportService {
     });
   }
 
+  /**
+   * @param id of user passport.
+   * @return user passport response.
+   */
   @Override
   public UserPassportConfirmationDataResponse findPassportDataById(Long id) {
     var passport = findById(id);
     return userPassportMapper.userPassportToUserPassportConfirmationDataResponse(passport);
   }
 
+  /**
+   * @param createOrUpdateUserPassportRequest data for creating or updating user passport.
+   */
   @Override
   @Transactional
   public void createOrUpdate(
@@ -110,6 +132,10 @@ public class UserPassportServiceImpl implements UserPassportService {
     }
   }
 
+  /**
+   * @param id of user passport.
+   * @param userPassport data for updating.
+   */
   @Override
   @Transactional
   public void update(Long id, UserPassport userPassport) {
@@ -133,6 +159,10 @@ public class UserPassportServiceImpl implements UserPassportService {
     userPassportRepository.save(passport);
   }
 
+  /**
+   * @param id of user passport.
+   * @throws PassportNotConfirmedException if user passport is pending.
+   */
   @Override
   @Transactional
   public void updatePassportStatus(Long id) throws PassportNotConfirmedException {
@@ -154,6 +184,10 @@ public class UserPassportServiceImpl implements UserPassportService {
     userPassportRepository.save(passport);
   }
 
+  /**
+   * @param userDocumentsDownloadRequest directory of files.
+   * @return files from specified directory.
+   */
   @Override
   public ByteArrayResource downloadFiles(
       UserDocumentsDownloadRequest userDocumentsDownloadRequest) {
@@ -161,6 +195,9 @@ public class UserPassportServiceImpl implements UserPassportService {
         userDocumentsDownloadRequest.getDirectory()).toByteArray());
   }
 
+  /**
+   * @param passportFile file for passport confirmation.
+   */
   @Override
   @Transactional
   public void uploadFile(MultipartFile passportFile) {

@@ -6,6 +6,13 @@ import com.example.carrental.entity.car.CarClassTranslation;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
+/**
+ * The service for Car Class.
+ * <p>
+ * This interface describes actions on Car Classes.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 public interface CarClassTranslationService {
 

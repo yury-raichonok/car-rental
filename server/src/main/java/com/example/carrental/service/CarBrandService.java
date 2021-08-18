@@ -11,6 +11,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * The service for Car Brands.
+ * <p>
+ * This interface describes actions on Car Brands.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 public interface CarBrandService {
 

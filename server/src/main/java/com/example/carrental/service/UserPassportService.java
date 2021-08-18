@@ -11,6 +11,13 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * The service for User Passports.
+ * <p>
+ * This interface describes actions on User Passports.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 public interface UserPassportService {
 

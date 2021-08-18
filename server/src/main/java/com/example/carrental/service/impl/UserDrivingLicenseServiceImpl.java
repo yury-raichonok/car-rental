@@ -31,6 +31,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * The service for User Driving Licensea.
+ * <p>
+ * This class performs the CRUD operations for User Driving Licenses.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -42,6 +49,10 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
   private final UserSecurityService userSecurityService;
   private final UserService userService;
 
+  /**
+   * @param id of driving license.
+   * @return user driving license confirmation data.
+   */
   @Override
   public UserDrivingLicenseConfirmationDataResponse findDrivingLicenseById(Long id) {
     var drivingLicense = findById(id);
@@ -49,6 +60,10 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
         .drivingLicenseToUserDrivingLicenseConfirmationDataResponse(drivingLicense);
   }
 
+  /**
+   * @return user driving license data.
+   * @throws NoContentException if driving license is not specified.
+   */
   @Override
   public UserDrivingLicenseDataResponse findUserDrivingLicenseData() throws NoContentException {
     var userEmail = userSecurityService.getUserEmailFromSecurityContext();
@@ -68,6 +83,11 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
         .build();
   }
 
+  /**
+   * @param id of driving license.
+   * @return driving license.
+   * @throws IllegalStateException if driving license with specified id does not exists.
+   */
   @Override
   public UserDrivingLicense findById(Long id) {
     return userDrivingLicenseRepository.findById(id).orElseThrow(() -> {
@@ -77,6 +97,9 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
     });
   }
 
+  /**
+   * @param createOrUpdateUserDrivingLicenseRequest data for create of update driving license.
+   */
   @Override
   @Transactional
   public void createOrUpdate(
@@ -108,6 +131,10 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
     }
   }
 
+  /**
+   * @param id of user driving license.
+   * @param userDrivingLicense such updated.
+   */
   @Override
   @Transactional
   public void update(Long id, UserDrivingLicense userDrivingLicense) {
@@ -125,6 +152,10 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
     userDrivingLicenseRepository.save(drivingLicense);
   }
 
+  /**
+   * @param id of driving license.
+   * @throws DrivingLicenseNotConfirmedException if driving license is pending.
+   */
   @Override
   @Transactional
   public void updateDrivingLicenseStatus(Long id) throws DrivingLicenseNotConfirmedException {
@@ -146,6 +177,10 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
     userDrivingLicenseRepository.save(drivingLicense);
   }
 
+  /**
+   * @param drivingLicenseFile file for confirmation documents.
+   * @throws IllegalStateException if wrong input data.
+   */
   @Override
   public void uploadFile(MultipartFile drivingLicenseFile) {
     if (drivingLicenseFile.isEmpty()) {
@@ -185,6 +220,10 @@ public class UserDrivingLicenseServiceImpl implements UserDrivingLicenseService 
     userDrivingLicenseRepository.save(drivingLicense);
   }
 
+  /**
+   * @param userDocumentsDownloadRequest directory from which download files.
+   * @return files from specified directory.
+   */
   @Override
   public ByteArrayResource downloadFiles(
       UserDocumentsDownloadRequest userDocumentsDownloadRequest) {

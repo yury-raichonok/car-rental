@@ -44,6 +44,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * The service for Cars.
+ * <p>
+ * This class performs the CRUD operations for Cars.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -63,6 +70,11 @@ public class CarServiceImpl implements CarService {
   private final LocationTranslationService locationTranslationService;
   private final CarMapper carMapper;
 
+  /**
+   * @param language selected language.
+   * @return list of maximum 3 car profitable offers (cheapest by cost).
+   * @throws NoContentException if car list is empty.
+   */
   @Override
   public List<CarProfitableOfferResponse> findAllProfitableOffers(String language)
       throws NoContentException {
@@ -81,6 +93,11 @@ public class CarServiceImpl implements CarService {
     return carsResponse;
   }
 
+  /**
+   * @param id of car.
+   * @return car.
+   * @throws IllegalStateException if car with such if does not exists.
+   */
   @Override
   public Car findById(Long id) {
     return carRepository.findById(id).orElseThrow(() -> {
@@ -89,6 +106,11 @@ public class CarServiceImpl implements CarService {
     });
   }
 
+  /**
+   * @param id of car
+   * @return car.
+   * @throws IllegalStateException if car with such if does not exists, or has status inRental false.
+   */
   @Override
   public Car findByIdInRental(Long id) {
     return carRepository.findByIdAndInRentalIsTrue(id).orElseThrow(() -> {
@@ -98,6 +120,11 @@ public class CarServiceImpl implements CarService {
     });
   }
 
+  /**
+   * @param id of car.
+   * @param language selected language.
+   * @return car by id response.
+   */
   @Override
   public CarByIdResponse findCarById(Long id, String language) {
     var car = findByIdInRental(id);
@@ -106,6 +133,10 @@ public class CarServiceImpl implements CarService {
     return carMapper.carToCarByIdResponse(car);
   }
 
+  /**
+   * @param createCarRequest data for creating.
+   * @throws EntityAlreadyExistsException if car with specivied VIN already exists.
+   */
   @Override
   @Transactional
   public void create(CreateCarRequest createCarRequest) throws EntityAlreadyExistsException {
@@ -140,6 +171,11 @@ public class CarServiceImpl implements CarService {
     carRepository.save(car);
   }
 
+  /**
+   * @param carSearchRequest search parameters.
+   * @param language selected language.
+   * @return page of cars response, filtered by parameters.
+   */
   @Override
   public Page<CarSearchResponse> searchCars(CarSearchRequest carSearchRequest, String language) {
     var carsPage = carCriteriaRepository.findCars(carSearchRequest);
@@ -152,6 +188,11 @@ public class CarServiceImpl implements CarService {
     return new PageImpl<>(carsResponse, carsPage.getPageable(), carsPage.getTotalElements());
   }
 
+  /**
+   * @param carSearchRequest search parameters.
+   * @param language selected language.
+   * @return page of cars admin search response, filtered by parameters.
+   */
   @Override
   public Page<CarAdminSearchResponse> searchCarsByAdmin(
       CarSearchRequest carSearchRequest, String language) {
@@ -165,6 +206,11 @@ public class CarServiceImpl implements CarService {
     return new PageImpl<>(carsResponse, carsPage.getPageable(), carsPage.getTotalElements());
   }
 
+  /**
+   * @param id of car.
+   * @param carFile image of car.
+   * @throws IllegalStateException if bad request or invalid input parameters.
+   */
   @Override
   @Transactional
   public void uploadCarImage(Long id, MultipartFile carFile) {
@@ -192,6 +238,11 @@ public class CarServiceImpl implements CarService {
     carRepository.save(car);
   }
 
+  /**
+   * @param id of car.
+   * @param updateCarRequest data for car updating.
+   * @throws EntityAlreadyExistsException if car with new vin and not current id exists.
+   */
   @Override
   @Transactional
   public void update(Long id, UpdateCarRequest updateCarRequest)
@@ -225,6 +276,10 @@ public class CarServiceImpl implements CarService {
     carRepository.save(car);
   }
 
+  /**
+   * @param id of updated car.
+   * Set status inRental, that is responsible for displaying the car in search results.
+   */
   @Override
   @Transactional
   public void updateRentalStatus(Long id) {

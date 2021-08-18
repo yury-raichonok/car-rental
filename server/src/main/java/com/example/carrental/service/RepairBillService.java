@@ -10,6 +10,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+/**
+ * The service for Repair Bills.
+ * <p>
+ * This interface describes actions on Repair Bills.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 public interface RepairBillService {
 

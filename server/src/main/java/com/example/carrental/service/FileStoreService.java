@@ -4,6 +4,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import org.springframework.stereotype.Service;
 
+/**
+ * The service for File Storage.
+ * <p>
+ * This interface describes actions for File Storage.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 public interface FileStoreService {
 

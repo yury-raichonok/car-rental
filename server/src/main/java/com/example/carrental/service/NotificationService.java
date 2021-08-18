@@ -6,6 +6,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+/**
+ * The service for Notifications.
+ * <p>
+ * This interface describes actions on Notifications.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 public interface NotificationService {
 

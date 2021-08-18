@@ -7,6 +7,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/**
+ * The service for User Roles.
+ * <p>
+ * This class performs the CRUD operations for User Roles.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -14,6 +21,10 @@ public class UserRoleServiceImpl implements UserRoleService {
 
   private final UserRoleRepository userRoleRepository;
 
+  /**
+   * @param id of role.
+   * @return user role.
+   */
   @Override
   public UserRole findById(Long id) {
     return userRoleRepository.findById(id).orElseThrow(() -> {
@@ -22,6 +33,10 @@ public class UserRoleServiceImpl implements UserRoleService {
     });
   }
 
+  /**
+   * @param role of user.
+   * @return user role.
+   */
   @Override
   public UserRole findByRole(String role) {
     return userRoleRepository.findByRole(role).orElseThrow(() -> {

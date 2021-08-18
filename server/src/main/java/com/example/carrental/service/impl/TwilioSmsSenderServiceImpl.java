@@ -7,12 +7,21 @@ import com.twilio.type.PhoneNumber;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * The service for sending SMS with Twilio.
+ *
+ * @author Yury Raichonak
+ */
 @Service
 @RequiredArgsConstructor
 public class TwilioSmsSenderServiceImpl implements SmsSenderService {
 
   private final TwilioConfig twilioConfig;
 
+  /**
+   * @param phoneNumber of receiver.
+   * @param token for phone confirmation.
+   */
   @Override
   public void sendSms(PhoneNumber phoneNumber, String token) {
     var creator = Message

@@ -22,6 +22,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The service for Messages.
+ * <p>
+ * This class performs the CRUD operations for Messages.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -30,6 +37,10 @@ public class MessageServiceImpl implements MessageService {
   private final MessageMapper messageMapper;
   private final MessageRepository messageRepository;
 
+  /**
+   * @param pageable data.
+   * @return page of message response.
+   */
   @Override
   public Page<MessageResponse> findAll(Pageable pageable) {
     var messagesPage = messageRepository.findAll(pageable);
@@ -40,6 +51,10 @@ public class MessageServiceImpl implements MessageService {
         messagesPage.getTotalElements());
   }
 
+  /**
+   * @param pageable data.
+   * @return page of message response.
+   */
   @Override
   public Page<MessageResponse> findAllNewMessages(Pageable pageable) {
     var messagesPage = messageRepository.findAllByReadedFalse(pageable);
@@ -50,6 +65,10 @@ public class MessageServiceImpl implements MessageService {
         messagesPage.getTotalElements());
   }
 
+  /**
+   * @param id of message.
+   * @return message.
+   */
   @Override
   public Message findById(Long id) {
     return messageRepository.findById(id).orElseThrow(() -> {
@@ -58,6 +77,9 @@ public class MessageServiceImpl implements MessageService {
     });
   }
 
+  /**
+   * @param createMessageRequest data for creating new message.
+   */
   @Override
   public void create(CreateMessageRequest createMessageRequest) {
     messageRepository.save(Message
@@ -71,6 +93,9 @@ public class MessageServiceImpl implements MessageService {
         .build());
   }
 
+  /**
+   * @param id of message.
+   */
   @Override
   @Transactional
   public void updateMessageAsRead(Long id) {
@@ -79,11 +104,17 @@ public class MessageServiceImpl implements MessageService {
     messageRepository.save(message);
   }
 
+  /**
+   * @return amount of new messages.
+   */
   @Override
   public int findNewMessagesAmount() {
     return messageRepository.countAllByReadedFalse();
   }
 
+  /**
+   * @return amount of new messages per day.
+   */
   @Override
   public int findNewMessagesAmountPerDay() {
     return messageRepository.countAllBySentDateAfter(LocalDateTime.of(LocalDate.now(),

@@ -20,6 +20,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The service for User Phones.
+ * <p>
+ * This class performs the CRUD operations for User Phones.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -33,6 +40,10 @@ public class UserPhoneServiceImpl implements UserPhoneService {
   private final UserSecurityService userSecurityService;
   private final UserService userService;
 
+  /**
+   * @param id of phone
+   * @return user phone.
+   */
   @Override
   public UserPhone findById(Long id) {
     return userPhoneRepository.findById(id).orElseThrow(() -> {
@@ -41,6 +52,11 @@ public class UserPhoneServiceImpl implements UserPhoneService {
     });
   }
 
+  /**
+   * @param userPhoneConfirmationRequest data for creating new user phone.
+   * @throws EntityAlreadyExistsException if such phone number already exists.
+   * @throws TokenExpireException if confirmation token already expired.
+   */
   @Override
   @Transactional
   public void create(UserPhoneConfirmationRequest userPhoneConfirmationRequest)
@@ -62,6 +78,10 @@ public class UserPhoneServiceImpl implements UserPhoneService {
         .build());
   }
 
+  /**
+   * @param userSmsRequest request data.
+   * @throws EntityAlreadyExistsException if such phone number already exists.
+   */
   @Override
   @Transactional
   public void sendConfirmationSms(UserSmsRequest userSmsRequest)
@@ -87,6 +107,10 @@ public class UserPhoneServiceImpl implements UserPhoneService {
         String.valueOf(token));
   }
 
+  /**
+   * @param id of user phone.
+   * @throws EntityAlreadyExistsException if such phone number already exists.
+   */
   @Override
   public void updatePhoneStatus(Long id) throws EntityAlreadyExistsException {
     var phone = findById(id);
@@ -101,6 +125,10 @@ public class UserPhoneServiceImpl implements UserPhoneService {
     userPhoneRepository.save(phone);
   }
 
+  /**
+   * @param number data.
+   * @throws EntityAlreadyExistsException if such phone number already exists.
+   */
   private void checkIfPhoneNumberExists(String number) throws EntityAlreadyExistsException {
     if (userPhoneRepository.findByPhoneAndActiveTrue(number).isPresent()) {
       log.error("Phone with number {} already exists!", number);

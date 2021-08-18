@@ -7,6 +7,13 @@ import com.example.carrental.entity.faq.FaqTranslation;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
+/**
+ * The service for FAQ Translations.
+ * <p>
+ * This interface describes actions on FAQ Translations.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 public interface FaqTranslationService {
 

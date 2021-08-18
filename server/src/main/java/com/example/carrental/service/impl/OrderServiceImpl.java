@@ -69,6 +69,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The service for Orders.
+ * <p>
+ * This class performs the CRUD operations for Orders.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -92,6 +99,11 @@ public class OrderServiceImpl implements OrderService {
   private final UserSecurityService userSecurityService;
   private final UserService userService;
 
+  /**
+   * @param pageable data.
+   * @param language selected language.
+   * @return page of order information response.
+   */
   @Override
   public Page<OrderInformationResponse> findAllCurrent(Pageable pageable, String language) {
     var ordersPage = orderRepository.findAllByRentalStatus(IN_PROCESS, pageable);
@@ -104,6 +116,11 @@ public class OrderServiceImpl implements OrderService {
     return new PageImpl<>(ordersResponse, ordersPage.getPageable(), ordersPage.getTotalElements());
   }
 
+  /**
+   * @param pageable data.
+   * @param language selected language.
+   * @return page of orders information.
+   */
   @Override
   public Page<OrderInformationResponse> findAllFuture(Pageable pageable, String language) {
     var ordersPage = orderRepository.findAllByRentalStatusAndPaymentStatus(NOT_STARTED, PAID,
@@ -117,6 +134,11 @@ public class OrderServiceImpl implements OrderService {
     return new PageImpl<>(ordersResponse, ordersPage.getPageable(), ordersPage.getTotalElements());
   }
 
+  /**
+   * @param pageable data.
+   * @param language selected language.
+   * @return page of orders.
+   */
   @Override
   public Page<OrderNewResponse> findAllNew(Pageable pageable, String language) {
     var ordersPage = orderRepository.findAllByRentalStatus(OrderRentalStatus.NEW, pageable);
@@ -128,6 +150,11 @@ public class OrderServiceImpl implements OrderService {
     return new PageImpl<>(ordersResponse, ordersPage.getPageable(), ordersPage.getTotalElements());
   }
 
+  /**
+   * @param pageable data.
+   * @param language selected language.
+   * @return page of orders.
+   */
   @Override
   public Page<UserOrderResponse> findAllNewUserOrders(Pageable pageable, String language) {
     var userEmail = userSecurityService.getUserEmailFromSecurityContext();
@@ -142,6 +169,11 @@ public class OrderServiceImpl implements OrderService {
     return new PageImpl<>(ordersResponse, orderPage.getPageable(), orderPage.getTotalElements());
   }
 
+  /**
+   * @param pageable data.
+   * @param language selected language.
+   * @return page of orders.
+   */
   @Override
   public Page<UserOrderResponse> findAllUserOrdersHistory(Pageable pageable, String language) {
     var userEmail = userSecurityService.getUserEmailFromSecurityContext();
@@ -156,6 +188,11 @@ public class OrderServiceImpl implements OrderService {
     return new PageImpl<>(ordersResponse, orderPage.getPageable(), orderPage.getTotalElements());
   }
 
+  /**
+   * @param orderTotalCostRequest data for calculating total cost.
+   * @return total cost response.
+   * @throws OrderPeriodValidationException if specified invalid rental period.
+   */
   @Override
   public OrderTotalCostResponse calculateTotalCost(OrderTotalCostRequest orderTotalCostRequest)
       throws OrderPeriodValidationException {
@@ -181,6 +218,11 @@ public class OrderServiceImpl implements OrderService {
     return new OrderTotalCostResponse(BigDecimal.valueOf(totalCost).round(DECIMAL64));
   }
 
+  /**
+   * @param createOrderRequest data for creating new order.
+   * @throws DocumentsNotConfirmedException if user documents are not confirmed.
+   * @throws PhoneNotSpecifiedException if user contact phone is not specified.
+   */
   @Override
   @Transactional
   public void create(CreateOrderRequest createOrderRequest) {
@@ -227,6 +269,11 @@ public class OrderServiceImpl implements OrderService {
         .build());
   }
 
+  /**
+   * @param orderSearchRequest search request.
+   * @param language selected language.
+   * @return page of orders.
+   */
   @Override
   public Page<OrderResponse> findAll(OrderSearchRequest orderSearchRequest, String language) {
     var ordersPage = orderCriteriaRepository.findAll(orderSearchRequest);
@@ -238,6 +285,9 @@ public class OrderServiceImpl implements OrderService {
     return new PageImpl<>(ordersResponse, ordersPage.getPageable(), ordersPage.getTotalElements());
   }
 
+  /**
+   * @param id of order.
+   */
   @Override
   @Transactional
   public void approveOrder(Long id) {
@@ -268,6 +318,10 @@ public class OrderServiceImpl implements OrderService {
     orderRepository.save(order);
   }
 
+  /**
+   * @param id of order.
+   * @param orderRejectRequest data canceling order.
+   */
   @Override
   @Transactional
   public void cancelOrderAfterPayment(Long id, OrderRejectRequest orderRejectRequest) {
@@ -294,6 +348,9 @@ public class OrderServiceImpl implements OrderService {
     emailService.sendEmail(order.getUser().getEmail(), message, ORDER_CANCELED_EMAIL_TOPIC);
   }
 
+  /**
+   * @param id of order.
+   */
   @Override
   @Transactional
   public void completeOrder(Long id) {
@@ -315,6 +372,10 @@ public class OrderServiceImpl implements OrderService {
     notificationService.sendNotification(notification);
   }
 
+  /**
+   * @param id of order.
+   * @param orderCompleteWithPenaltyRequest data to complete order.
+   */
   @Override
   @Transactional
   public void completeOrderWithPenalty(Long id,
@@ -342,6 +403,10 @@ public class OrderServiceImpl implements OrderService {
         .build());
   }
 
+  /**
+   * @param id of order.
+   * @param orderRejectRequest data to reject order.
+   */
   @Override
   @Transactional
   public void rejectOrder(Long id, OrderRejectRequest orderRejectRequest) {
@@ -364,6 +429,9 @@ public class OrderServiceImpl implements OrderService {
         ORDER_REQUEST_REJECTED_EMAIL_TOPIC);
   }
 
+  /**
+   * @param id of order.
+   */
   @Override
   @Transactional
   public void startRentalPeriod(Long id) {
@@ -372,6 +440,10 @@ public class OrderServiceImpl implements OrderService {
     orderRepository.save(order);
   }
 
+  /**
+   * @param id of order.
+   * @param createOrderRequest data for updating order.
+   */
   @Override
   @Transactional
   public void update(Long id, CreateOrderRequest createOrderRequest) {
@@ -386,6 +458,12 @@ public class OrderServiceImpl implements OrderService {
     orderRepository.save(order);
   }
 
+  /**
+   * @param id of order.
+   * @return byte array resource.
+   * @throws FontNotFoundException if font for PDF file is not found.
+   * @throws DocumentNotGeneratedException if PDF document is not generated.
+   */
   @Override
   public ByteArrayResource exportOrderToPDF(Long id)
       throws FontNotFoundException, DocumentNotGeneratedException {
@@ -393,6 +471,10 @@ public class OrderServiceImpl implements OrderService {
     return pdfService.exportOrderToPDF(order);
   }
 
+  /**
+   * @param id of order.
+   * @return order.
+   */
   @Override
   public Order findById(Long id) {
     return orderRepository.findById(id).orElseThrow(() -> {
@@ -401,11 +483,17 @@ public class OrderServiceImpl implements OrderService {
     });
   }
 
+  /**
+   * @return amount of new orders.
+   */
   @Override
   public int findNewOrdersAmount() {
     return orderRepository.countAllByRentalStatus(OrderRentalStatus.NEW);
   }
 
+  /**
+   * @return amount of new orders per day.
+   */
   @Override
   public int findNewOrdersAmountPerDay() {
     return orderRepository.countAllBySentDateAfter(LocalDateTime.of(LocalDate.now(),
@@ -413,6 +501,9 @@ public class OrderServiceImpl implements OrderService {
             MINUTES_OF_START_OF_COUNTING_STATISTIC_FOR_THE_DAY)));
   }
 
+  /**
+   * @return amount of new user orders.
+   */
   @Override
   public int findUserOrdersAmount() {
     var userEmail = userSecurityService.getUserEmailFromSecurityContext();

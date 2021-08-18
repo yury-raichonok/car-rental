@@ -14,6 +14,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/**
+ * The service for Rental Details.
+ * <p>
+ * This class performs the CRUD operations for Rental Details.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -28,6 +35,10 @@ public class RentalDetailsServiceImpl implements RentalDetailsService {
   private final RentalDetailsRepository rentalDetailsRepository;
   private final RentalDetailsMapper rentalDetailsMapper;
 
+  /**
+   * @param language selected language.
+   * @return rental details contact information.
+   */
   @Override
   public RentalDetailsContactInformationResponse getContactInformation(String language) {
     var rentalDetails = getRentalDetails();
@@ -45,6 +56,9 @@ public class RentalDetailsServiceImpl implements RentalDetailsService {
         .build();
   }
 
+  /**
+   * @return rental details.
+   */
   @Override
   public RentalDetails getRentalDetails() {
     return rentalDetailsRepository.findById(RENTAL_DETAILS_ID).orElseThrow(() -> {
@@ -53,18 +67,21 @@ public class RentalDetailsServiceImpl implements RentalDetailsService {
     });
   }
 
+  /**
+   * @param language selected language.
+   * @return rental details response.
+   */
   @Override
   public RentalDetailsResponse getRentalDetailsResponse(String language) {
-    var rentalDetails = rentalDetailsRepository.findById(RENTAL_DETAILS_ID)
-        .orElseThrow(() -> {
-          log.error(DETAILS_DOES_NOT_SET);
-          throw new IllegalStateException(DETAILS_DOES_NOT_SET);
-        });
+    var rentalDetails = getRentalDetails();
     var location = rentalDetails.getLocation();
     locationTranslationService.setTranslation(location, language);
     return rentalDetailsMapper.rentalDetailsToRentalDetailsResponse(rentalDetails);
   }
 
+  /**
+   * @param rentalDetailsUpdateRequest data for creating or updating rental details.
+   */
   @Override
   public void createOrUpdate(RentalDetailsUpdateRequest rentalDetailsUpdateRequest) {
     var location = locationService.findById(rentalDetailsUpdateRequest.getLocation());

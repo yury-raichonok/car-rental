@@ -1,7 +1,7 @@
 package com.example.carrental.service.exceptions;
 
 /**
- * Custom Runtime Exception.
+ * DocumentNotGeneratedException it is a custom Runtime Exception.
  * <p>
  * The exception is thrown if the PDF document based on the order is not generated.
  * </p>

@@ -23,6 +23,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The service for rental Locations.
+ * <p>
+ * This class performs the CRUD operations for rental Locations.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -32,6 +39,11 @@ public class LocationServiceImpl implements LocationService {
   private final LocationRepository locationRepository;
   private final LocationTranslationService locationTranslationService;
 
+  /**
+   * @param language selected language.
+   * @return list of locations for select.
+   * @throws NoContentException if locations list is empty.
+   */
   @Override
   public List<LocationNameResponse> findAllForSelect(String language) throws NoContentException {
     var locations = locationRepository.findAll();
@@ -46,6 +58,10 @@ public class LocationServiceImpl implements LocationService {
     return locationsResponse;
   }
 
+  /**
+   * @param pageable data.
+   * @return page of locations with translations.
+   */
   @Override
   public Page<LocationWithTranslationsResponse> findAllPaged(Pageable pageable) {
     var locationsPage = locationRepository.findAll(pageable);
@@ -56,6 +72,10 @@ public class LocationServiceImpl implements LocationService {
         locationsPage.getTotalElements());
   }
 
+  /**
+   * @param id of location.
+   * @return location.
+   */
   @Override
   public Location findById(Long id) {
     return locationRepository.findById(id).orElseThrow(() -> {
@@ -64,6 +84,10 @@ public class LocationServiceImpl implements LocationService {
     });
   }
 
+  /**
+   * @param createLocationRequest data for creating new location.
+   * @throws EntityAlreadyExistsException if location with same name already exists.
+   */
   @Override
   @Transactional
   public void create(CreateLocationRequest createLocationRequest)
@@ -86,6 +110,10 @@ public class LocationServiceImpl implements LocationService {
     locationTranslationService.create(createLocationRequest, location);
   }
 
+  /**
+   * @param id of location.
+   * @param createLocationRequest data for updating location.
+   */
   @Override
   @Transactional
   public void update(Long id, CreateLocationRequest createLocationRequest) {

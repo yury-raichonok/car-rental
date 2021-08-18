@@ -7,6 +7,13 @@ import com.example.carrental.service.exceptions.EntityAlreadyExistsException;
 import com.example.carrental.service.exceptions.TokenExpireException;
 import org.springframework.stereotype.Service;
 
+/**
+ * The service for User Phones.
+ * <p>
+ * This interface describes actions on User Phones.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 public interface UserPhoneService {
 

@@ -42,6 +42,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The service for Rental Requests.
+ * <p>
+ * This class performs the CRUD operations for Rental Requests.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -60,6 +67,10 @@ public class RentalRequestServiceImpl implements RentalRequestService {
   private final UserService userService;
   private final UserPassportService userPassportService;
 
+  /**
+   * @param pageable data.
+   * @return page of rental requests.
+   */
   @Override
   public Page<RentalAllRequestResponse> findAll(Pageable pageable) {
     var rentalRequestsPage = rentalRequestRepository.findAll(pageable);
@@ -70,6 +81,10 @@ public class RentalRequestServiceImpl implements RentalRequestService {
         rentalRequestsPage.getTotalElements());
   }
 
+  /**
+   * @param pageable data.
+   * @return page of rental requests.
+   */
   @Override
   public Page<RentalRequestResponse> findAllNew(Pageable pageable) {
     var rentalRequestsPage = rentalRequestRepository.findAllByConsideredFalse(pageable);
@@ -80,6 +95,11 @@ public class RentalRequestServiceImpl implements RentalRequestService {
         rentalRequestsPage.getTotalElements());
   }
 
+  /**
+   * @param id of renral request.
+   * @return rental request.
+   * @throws IllegalStateException if request with specified id does not exists.
+   */
   @Override
   public RentalRequest findById(Long id) {
     return rentalRequestRepository.findById(id).orElseThrow(() -> {
@@ -88,6 +108,11 @@ public class RentalRequestServiceImpl implements RentalRequestService {
     });
   }
 
+  /**
+   * @param id of rental requset.
+   * @return user driving license data from confirmation request.
+   * @throws IllegalStateException if documents with specified id does not exists.
+   */
   @Override
   public UserDrivingLicenseConfirmationDataResponse findRequestDrivingLicenseData(Long id) {
     var request = findById(id);
@@ -109,6 +134,11 @@ public class RentalRequestServiceImpl implements RentalRequestService {
         .drivingLicenseToUserDrivingLicenseConfirmationDataResponse(drivingLicense);
   }
 
+  /**
+   * @param id of rental request.
+   * @return user passport data from confirmation request.
+   * @throws IllegalStateException if documents with specified id does not exists
+   */
   @Override
   public UserPassportConfirmationDataResponse findRequestPassportData(Long id) {
     var request = findById(id);
@@ -127,6 +157,9 @@ public class RentalRequestServiceImpl implements RentalRequestService {
     return rentalRequestMapper.passportToUserPassportConfirmationDataResponse(passport);
   }
 
+  /**
+   * @param createRentalRequestRequest data for creating new confirmation request.
+   */
   @Override
   @Transactional
   public void create(CreateRentalRequestRequest createRentalRequestRequest) {
@@ -155,6 +188,9 @@ public class RentalRequestServiceImpl implements RentalRequestService {
     rentalRequestRepository.save(rentalRequest);
   }
 
+  /**
+   * @param id of approved request.
+   */
   @Override
   @Transactional
   public void approveRequest(Long id) {
@@ -189,6 +225,10 @@ public class RentalRequestServiceImpl implements RentalRequestService {
     rentalRequestRepository.save(rentalRequest);
   }
 
+  /**
+   * @param id of rejected request.
+   * @param rentalRequestRejectRequest data for reject rental request.
+   */
   @Override
   @Transactional
   public void rejectRequest(Long id, RentalRequestRejectRequest rentalRequestRejectRequest) {
@@ -220,11 +260,17 @@ public class RentalRequestServiceImpl implements RentalRequestService {
     rentalRequestRepository.save(rentalRequest);
   }
 
+  /**
+   * @return amount of new user requests.
+   */
   @Override
   public int findNewRequestsAmount() {
     return rentalRequestRepository.countAllByConsideredFalse();
   }
 
+  /**
+   * @return amount of new user requests per day.
+   */
   @Override
   public int findNewRequestsAmountPerDay() {
     return   rentalRequestRepository

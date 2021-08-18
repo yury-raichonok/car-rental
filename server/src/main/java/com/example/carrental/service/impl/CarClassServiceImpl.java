@@ -25,6 +25,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The service for Car Classes.
+ * <p>
+ * This class performs the CRUD operations for Car Brands.
+ * </p>
+ * @author Yury Raichonak
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -34,6 +41,11 @@ public class CarClassServiceImpl implements CarClassService {
   private final CarClassRepository carClassRepository;
   private final CarClassTranslationService carClassTranslationService;
 
+  /**
+   * @param language selected language.
+   * @return list of car classes.
+   * @throws NoContentException if list of car classes if empty.
+   */
   @Override
   public List<CarClassNameResponse> findAll(String language) throws NoContentException {
     var classes = carClassRepository.findAll(Sort.by(SORT_BY_NAME));
@@ -48,6 +60,10 @@ public class CarClassServiceImpl implements CarClassService {
     return classesResponse;
   }
 
+  /**
+   * @param pageable data.
+   * @return page of car classes with translations.
+   */
   @Override
   public Page<CarClassNameWithTranslationsResponse> findAllPaged(Pageable pageable) {
     var classes = carClassRepository.findAll(pageable);
@@ -57,6 +73,11 @@ public class CarClassServiceImpl implements CarClassService {
     return new PageImpl<>(classesResponse, classes.getPageable(), classes.getTotalElements());
   }
 
+  /**
+   * @param id of car class.
+   * @return car class.
+   * @throws IllegalStateException if car class with such id does not exists.
+   */
   @Override
   public CarClass findById(Long id) {
     return carClassRepository.findById(id).orElseThrow(() -> {
@@ -65,6 +86,10 @@ public class CarClassServiceImpl implements CarClassService {
     });
   }
 
+  /**
+   * @param createCarClassRequest data.
+   * @throws EntityAlreadyExistsException if car class with such name already exists.
+   */
   @Override
   @Transactional
   public void create(CreateCarClassRequest createCarClassRequest)
@@ -80,6 +105,10 @@ public class CarClassServiceImpl implements CarClassService {
     carClassTranslationService.create(createCarClassRequest, carClassEn);
   }
 
+  /**
+   * @param id of updated car class.
+   * @param createCarClassRequest data for updating.
+   */
   @Override
   @Transactional
   public void update(Long id, CreateCarClassRequest createCarClassRequest) {
