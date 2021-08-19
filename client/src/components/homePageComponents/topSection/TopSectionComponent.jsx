@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import FastSearchFormComponent from './FastSearchFormComponent';
-import FastSearchBackgroundImg from '../../../images/3.jpg';
+import FastSearchBackgroundImg from '../../../images/4.jpg';
 
 const FastSearchContainer = styled.div`
   width: 100%;

@@ -207,7 +207,7 @@ const FilterComponent = (props) => {
             <Select placeholder={t('pick_location')} onChange={props.handleLocationChange}>
               <Option key="0" value="0">{t('any_location')}</Option>
               {locations && locations?.map((location) => (
-                <Option key={location.id} value={location.name}>{location.name}</Option>
+                <Option key={location.id} value={location.id}>{location.name}</Option>
               ))}
             </Select>
           )}

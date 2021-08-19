@@ -276,7 +276,7 @@ const fetchModels = async (value) => {
   }
 
   function handleCarClassChange(value) {
-    if (value == 0) {
+    if (value === 0) {
       setState(prevState => ({
         ...prevState,
         carClass: null
@@ -290,7 +290,7 @@ const fetchModels = async (value) => {
   }
 
   function handleModelChange(value) {
-    if (value == 0) {
+    if (value === "0") {
       setState(prevState => ({
         ...prevState,
         modelName: null
@@ -304,7 +304,7 @@ const fetchModels = async (value) => {
   }
 
   function handleLocationChange(value) {
-    if (value == 0) {
+    if (value === 0) {
       setState(prevState => ({
         ...prevState,
         locationName: null
@@ -319,7 +319,7 @@ const fetchModels = async (value) => {
 
   function handleBrandChange(value) {
     console.log(value);
-    if (value == 0) {
+    if (value === "0") {
       setState(prevState => ({
         ...prevState,
         brandName: null,
@@ -333,7 +333,7 @@ const fetchModels = async (value) => {
         modelName: null
       }))
     )
-    if (value != 0) {
+    if (value !== "0") {
       fetchModels(value)
     }
   }
@@ -367,7 +367,7 @@ const fetchModels = async (value) => {
   }
 
   function handleBodyType(value) {
-    if (value == 10) {
+    if (value === 10) {
       setState(prevState => ({
         ...prevState,
         bodyType: null
@@ -381,7 +381,7 @@ const fetchModels = async (value) => {
   }
 
   function handleEngineType(value) {
-    if (value == 10) {
+    if (value === 10) {
       setState(prevState => ({
         ...prevState,
         engineType: null
@@ -461,7 +461,7 @@ const fetchModels = async (value) => {
       ) : (
         <Select placeholder={t('car_model')} onChange={handleModelChange}>
           <Option key="0" value="0">{t('any_model')}</Option>
-          {models?.map((model) => (
+          {models && models?.map((model) => (
             <Option key={model.id} value={model.name}>{model.name}</Option>
           ))}
         </Select>
