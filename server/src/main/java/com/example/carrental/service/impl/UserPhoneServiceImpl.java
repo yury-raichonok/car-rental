@@ -114,12 +114,12 @@ public class UserPhoneServiceImpl implements UserPhoneService {
   @Override
   public void updatePhoneStatus(Long id) throws EntityAlreadyExistsException {
     var phone = findById(id);
-    if (phone.isActive()) {
-      phone.setActive(false);
-    } else if (userPhoneRepository.findByPhoneAndActiveTrue(phone.getPhone()).isPresent()) {
-      log.error("Phone with number {} already exists!", phone);
-      throw new EntityAlreadyExistsException(String.format("Phone with number %s already exists!",
-          phone));
+    if (!phone.isActive()) {
+      if (userPhoneRepository.findByPhoneAndActiveTrue(phone.getPhone()).isPresent()) {
+        log.error("Phone with number {} already exists!", phone);
+        throw new EntityAlreadyExistsException(String.format("Phone with number %s already exists!",
+            phone));
+      }
     }
     phone.setActive(!phone.isActive());
     userPhoneRepository.save(phone);

@@ -37,7 +37,7 @@ public class CarSearchRequest {
   private String sortBy = "costPerHour";
   private String brandName;
   private String modelName;
-  private Long location;
+  private Long locationName;
   private Long carClass;
   private String vin;
   private String costFrom;
